@@ -84,12 +84,18 @@ def upload(x, y, numpyArray):
 		}
 	)
  
-AllFlag = False
+AllFlag = True
 if AllFlag:
-    for i in range(0, 1024-127, 128):
+
+    imageData2 = imageData
+    for i in range(448, 800, 128):
+        upload(i, 0, imageData2)
+        upload(i, 256, imageData2)
+    for i in range(640, 1024-127, 128):
         upload(i, 0, imageData)
         upload(i, 256, imageData)
 else:
-    for i in range (640,1024-127,128):
+
+    for i in range(640, 1024-127, 128):
         upload(i, 0, imageData)
         upload(i, 256, imageData)
