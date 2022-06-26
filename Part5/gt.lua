@@ -17,11 +17,8 @@ local function doCheckbox(mem, address, name, value, original, type)
     end
 end
 
-local function doSimpleCheckbox(name)
-    changed, check = imgui.Checkbox(name, check)
-    if changed then
-        createClient(check)
-    end
+function DrawImguiFrame()
+
 end
 
 -- Declare a helper function with the following arguments:
@@ -50,7 +47,6 @@ function DrawImguiFrame()
     -- All for the PAL SCES-00984 version of the game.
     -- Now calling our helper function for each of our pointer.
     if hasPal then
-        doSimpleCheckbox('Change Value')
         doSliderInt(mem, 0x800b66ec, 'Speed1', 0, 5000, 'uint16_t*')
         doSliderInt(mem, 0x800b66ee, 'Engine Speed', 0, 12000, 'uint16_t*')
         doSliderInt(mem, 0x800b66e8, 'Gear', 0, 10, 'uint8_t*')
@@ -63,11 +59,13 @@ function DrawImguiFrame()
         doSliderInt(mem, 0x800b66d6, 'Steering', -580, 580, 'int16_t*')
         doSliderInt(mem, 0x800b6d69, 'Car Position', 1, 6, 'int16_t*')
         doCheckbox(mem, 0x800b6358, '(PAL SCES-00984) HUD', 0, 1, 'int16_t*')
+
     elseif hasUs then
         doCheckbox(mem, 0x800b6508, '(NTSC-U SCUS-94194) HUD', 0, 1, 'int16_t*')
 
     elseif hasJap then
         doCheckbox(mem, 0x800ad838, '(NTSC-J SCPS-10045) HUD', 0, 1, 'int16_t*')
+
     end
 
     -- Don't forget to close the ImGui window.
@@ -88,20 +86,3 @@ function myFunc()
 end
 
 PCSX.Events.createEventListener('ExecutionFlow::Run', myFunc)
-
-
-function createClient(value)
-    client = luv.new_tcp()
-    print("Server Started!")
-
-    luv.tcp_connect(client, "127.0.0.1", 9999, function(err)
-        local oldCleanup = AfterPollingCleanup
-        AfterPollingCleanup = function()
-            if oldCleanup then oldCleanup() end
-            assert(not err, err)
-
-            luv.write(client, tostring(value))
-        end
-    end)
-    luv.close(client)
-end
