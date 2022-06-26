@@ -20,7 +20,9 @@ end
 local function doSimpleCheckbox(name)
     changed, check = imgui.Checkbox(name, check)
     if changed then
-        createClient(check)
+        if check then
+            createClient("activate")
+        end
     end
 end
 
@@ -50,7 +52,7 @@ function DrawImguiFrame()
     -- All for the PAL SCES-00984 version of the game.
     -- Now calling our helper function for each of our pointer.
     if hasPal then
-        doSimpleCheckbox('Change Value')
+        doSimpleCheckbox('Texture Swap')
         doSliderInt(mem, 0x800b66ec, 'Speed1', 0, 5000, 'uint16_t*')
         doSliderInt(mem, 0x800b66ee, 'Engine Speed', 0, 12000, 'uint16_t*')
         doSliderInt(mem, 0x800b66e8, 'Gear', 0, 10, 'uint8_t*')
@@ -76,8 +78,8 @@ function DrawImguiFrame()
 end
 
 function myFunc()
-    local reader = PCSX.getCurrentIso():createReader()
     print("GT1 region detection started!")
+    local reader = PCSX.getCurrentIso():createReader()
     local pal = reader:open('SCES_009.84;1')
     local us = reader:open('SCUS_941.94;1')
     local jap = reader:open('SCPS_100.41;1')
@@ -87,21 +89,30 @@ function myFunc()
     hasJap = not jap:failed()
 end
 
-PCSX.Events.createEventListener('ExecutionFlow::Run', myFunc)
+-- if bob then
+--     bob:remove()
+-- end
+bob = PCSX.Events.createEventListener('ExecutionFlow::Run', myFunc)
 
 
-function createClient(value)
-    client = luv.new_tcp()
-    print("Server Started!")
+-- function createClient(check)
+--   client = luv.new_tcp()
 
-    luv.tcp_connect(client, "127.0.0.1", 9999, function(err)
-        local oldCleanup = AfterPollingCleanup
-        AfterPollingCleanup = function()
-            if oldCleanup then oldCleanup() end
-            assert(not err, err)
+--   luv.tcp_connect(client, "127.0.0.1", 9999, function (err)
+--     luv.read_start(client, function(err, chunk)
+--         assert(not err, err)
+--         if chunk then
+--             print(chunk)
+--         end
+--     end)
+--     luv.write(client, check)
+--   luv.close(client)
+--   end)
+-- end
 
-            luv.write(client, tostring(value))
-        end
-    end)
-    luv.close(client)
+
+function createClient(check)
+    client = Support.File.uvFifo("127.0.0.1", 9999)
+    client:write('bob')
+    client:close()
 end
