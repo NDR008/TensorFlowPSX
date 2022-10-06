@@ -5,18 +5,10 @@
 ## Background 
 There are 3 main motivational background factors to this project.
 
-### 1. Failed Interview 
-Unknown to my work colleauges (guess they might if they come across this page, but most of them are too non-geeky to look for it I guess), soon after starting my MSc in Computer Science and completing my HarvardX CS50 course, I applied for a racing simulation engineer role at Polyphony Digital (Japan). I felt qualified for the position due to the fact, that I met the requirements for:
-* Automotive industrial experience (I have 10 years)
-* Racing interest (personal experience)
-* Automotive degree (I have a BEng in Motorsports Engineering)
-* Driving licence (at the time I had a Japanese Gold driving licence and EU driving licence)
-* Coding experience preferred
+### 1. Closing the doubt
+Secret, I did once apply for a simulation engineer at a racing game company long agao. While I did not get the job for viased reasons. I always wonder "could I have made it in the racing game industry had I tried again?" Things did not go that way, and I am happy with my career choices, but never the less, wonder what if I had gone a different way? 
 
-Come interview day - most of my interview required live C++ coding (something I claimed to only have basic surface level experience) and a VERY cliche text-book physics question (the kind you only remember 3 months after you finish your degree).  
-
-I was grateful to have been interviewed, but rather frustrated at the way I was rejected...  
-This left me spending the rest of my duration of the MSc in Computer Science thinking of how to get back at them... so I kept targetting at doing something Gran Turismo related (and in all honesty, something  AI-related was on my mind).  
+This left me spending the rest of my duration of the MSc in Computer Science thinking of how to get back at question... so I kept targetting at doing something Gran Turismo related (and in all honesty, something  AI-related was on my mind).  
 Few months before starting final project, in early 2022, Sony/Polyphony Digital [published](https://www.nature.com/articles/s41586-021-04357-7) their on Sophy, their AI agent that out-raced most humans on Gran Turismo sport.
 
 ### 2. Childhood Love 
