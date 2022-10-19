@@ -1,3 +1,7 @@
+ffi.cdef [[
+void loadSaveStateFromFile(LuaFile*);
+]]
+
 --https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
 --https://github.com/grumpycoders/pcsx-redux/blob/main/src/gui/widgets/memcard_manager.cc#L122-L139
 --https://github.com/grumpycoders/pcsx-redux/blob/main/third_party/imgui_lua_bindings/imgui_iterator.inl#L576
@@ -15,7 +19,7 @@ local function checkValue(mem, address, value, type)
     local tempvalue = pointer[0]
     local check = false
     if tempvalue == value then
-        check = true
+       check = true
     end
     return check
 end
@@ -34,6 +38,8 @@ local function doCheckbox(mem, address, name, value, original, type)
         if check then pointer[0] = value else pointer[0] = original end
     end
 end
+
+
 
 local function createClient(name)
     changed, check = imgui.Checkbox(name, check)
@@ -66,10 +72,19 @@ local function doSliderInt(mem, address, name, min, max, type)
     if changed then pointer[0] = value end
 end
 
+local function readValue(mem, address, type)
+    address = bit.band(address, 0x1fffff)
+    local pointer = mem + address
+    pointer = ffi.cast(type, pointer)
+    local value = pointer[0]
+    return value
+end
+
 local function reload()
     PCSX.pauseEmulator()
     loadfile("gt.lua")()
 end
+
 
 -- Utilizing the DrawImguiFrame periodic function to draw our UI.
 -- We are declaring this function global so the emulator can
@@ -82,16 +97,27 @@ function DrawImguiFrame()
     -- All for the PAL SCES-00984 version of the game.
     -- Now calling our helper function for each of our pointer.
 
-    local racing = checkValue(mem, 0x8008df72, 58, "int8_t*") -- check if the time is displayed
+    local racing = checkValue(mem, 0x8008df72, 58, "int8_t*")  -- check if the time is displayed
 
     if hasPal then
-        imgui.BeginTable("GT", 2, ImGuiTableFlags_Resizable)
+        imgui.BeginTable("GT", 2, imgui.constant.TableFlags.Resizable)
 
         imgui.TableSetupColumn("test1")
         imgui.TableSetupColumn("test2")
         imgui.TableHeadersRow();
         imgui.TableNextRow()
         imgui.TableSetColumnIndex(0)
+        imgui.TextUnformatted("bla")
+        imgui.TableSetColumnIndex(1)
+        imgui.TextUnformatted("bla")
+        imgui.TableNextRow()
+        imgui.TableSetColumnIndex(0)
+        imgui.TextUnformatted("bla")
+        imgui.TableSetColumnIndex(1)
+        imgui.TextUnformatted("bla")
+        imgui.EndTable()
+
+
         if (imgui.Button("Reload")) then
             reload()
         end
@@ -99,7 +125,7 @@ function DrawImguiFrame()
         if (imgui.Button("Save state")) then
             local save = PCSX.createSaveState()
             local file = Support.File.open("savestate.slice", "TRUNCATE")
-            file:write(save)
+            file:writeMoveSlice(save)
             file:close()
         end
         imgui.SameLine(160)
@@ -108,40 +134,24 @@ function DrawImguiFrame()
             PCSX.loadSaveState(file)
             file:close()
         end
-        if racing then
-            imgui.TableNextRow()
-            imgui.TableSetColumnIndex(0)
-
-            --if forPlay then
-            --createClient('Texture Swap')
-            --debug('Turn on Debug')
-            if (imgui.CollapsingHeader("Header", ImGuiTreeNodeFlags_None)) then
-
-                doSliderInt(mem, 0x800b66ec, 'Speed1', 0, 5000, 'uint16_t*')
-                doSliderInt(mem, 0x800b66ee, 'Engine Speed', 0, 12000, 'uint16_t*')
-                doSliderInt(mem, 0x800bd990, 'Max Seen Speed', 0, 5000, 'uint16_t*')
-                doSliderInt(mem, 0x800b66e8, 'Gear', 0, 10, 'uint8_t*')
-                doSliderInt(mem, 0x800b66d6, 'Steering', -580, 580, 'int16_t*')
-                doSliderInt(mem, 0x800b6d69, 'Car Position', 1, 6, 'int16_t*')
-            end
-
-            imgui.TableSetColumnIndex(1)
-
-            doSliderInt(mem, 0x800b66fa, 'Accel0 (changes with X)', 65525, 0, 'uint16_t*')
-            doSliderInt(mem, 0x800b66d9, 'Accel1 (equal to button press)', 0, 16, 'uint16_t*')
-            doSliderInt(mem, 0x800b66db, 'Accel2 (blips on shift)', 0, 16, 'uint16_t*')
-            doSliderInt(mem, 0x800b66dd, 'Brake1', 0, 16, 'uint16_t*')
-            doSliderInt(mem, 0x8009b874, 'Credit (Simu)', -999999999, 999999999, 'int32_t*')
-            doSliderInt(mem, 0x800b626a, 'Camera Pitch', 104, 256, 'int16_t*')
-
-            imgui.TableNextRow()
-            imgui.TableSetColumnIndex(0)
-            --else
-            -- hunting model-view-controller
-            doSliderInt(mem, 0x800b6700, 'Hidden Current Lap', 0, 5000, 'int32_t*')
+        if (imgui.CollapsingHeader("Not clear", ImGuiTreeNodeFlags_None)) then
+            imgui.TextUnformatted("START-countdown")
+            imgui.SameLine()
+            imgui.TextUnformatted(readValue(mem, 0x800b6162, "int16_t*"))
+            imgui.TextUnformatted("frameRate?")
+            imgui.SameLine()
+            imgui.TextUnformatted(readValue(mem, 0x800bf368, "int16_t*"))
+            imgui.TextUnformatted("frameRate?")
+            imgui.SameLine()
+            imgui.TextUnformatted(readValue(mem, 0x800bf364, "int16_t*"))
+            doSliderInt(mem, 0x800b6226, 'raceMode', 0, 30, 'uint16_t*')
+            doSliderInt(mem, 0x800cb644, 'raceModeA', 0, 5, 'int8_t*')
+            doSliderInt(mem, 0x800cb645, 'raceModeB', 0, 5, 'int8_t*')
+            doSliderInt(mem, 0x800cb646, 'raceMode_Index', 0, 20, 'int8_t*')
+            doSliderInt(mem, 0x800cb649, 'raceModeC', 0, 6, 'int8_t*')
+            
             doSliderInt(mem, 0x800b619c, 'Displayed Max Laps', 0, 5000, 'int32_t*')
             doSliderInt(mem, 0x800b6356, 'Replay?', 00, 02, 'int16_t*')
-            doSliderInt(mem, 0x800b6226, 'DAT_800b6226', 0, 30, 'uint16_t*')
             doSliderInt(mem, 0x8009056a, 'DAT_8009056a', -2500, 2500, 'int16_t*')
             doSliderInt(mem, 0x8009056c, 'DAT_8009056c', -2500, 2500, 'int16_t*')
             doSliderInt(mem, 0x80093bc8, 'DAT_80093bc8', 0, 5000, 'uint16_t*')
@@ -150,11 +160,32 @@ function DrawImguiFrame()
             doSliderInt(mem, 0x800bd998, 'hiddenInRaceBestLap?', 0, 5000, 'uint16_t*')
             doSliderInt(mem, 0x800cac90, 'hiddenInGameBestLap?', 0, 5000, 'uint16_t*')
             doSliderInt(mem, 0x801d393c, 'DAT_801d393c', 0, 5000, 'uint16_t*')
-            --debug("Turn off Debug")
-            imgui.TableSetColumnIndex(1)
-            doCheckbox(mem, 0x800b6358, 'HUD', 0, 1, 'int16_t*') -- (PAL SCES-00984)
         end
-        imgui.EndTable()
+        if (imgui.CollapsingHeader("Racing Parameters", ImGuiTreeNodeFlags_None)) then
+            if racing then
+                doCheckbox(mem, 0x800b6358, 'HUD', 0, 1, 'int16_t*') -- (PAL SCES-00984)
+                doSliderInt(mem, 0x800b66ec, 'Speed1', 0, 5000, 'uint16_t*')
+                doSliderInt(mem, 0x800b66ee, 'Engine Speed', 0, 12000, 'uint16_t*')
+                doSliderInt(mem, 0x800bd990, 'Max Seen Speed', 0, 5000, 'uint16_t*')
+                doSliderInt(mem, 0x800b66e8, 'Gear', 0, 10, 'uint8_t*')
+                doSliderInt(mem, 0x800b66d6, 'Steering', -580, 580, 'int16_t*')
+                doSliderInt(mem, 0x800b6d69, 'Car Position', 1, 6, 'int16_t*') 
+                doSliderInt(mem, 0x800b66fa, 'Accel0 (changes with X)', 65525, 0, 'uint16_t*')
+                doSliderInt(mem, 0x800b66d9, 'Accel1 (equal to button press)', 0, 16, 'uint16_t*')
+                doSliderInt(mem, 0x800b66db, 'Accel2 (blips on shift)', 0, 16, 'uint16_t*')
+                doSliderInt(mem, 0x800b66dd, 'Brake1', 0, 16, 'uint16_t*')
+                doSliderInt(mem, 0x800b6268, 'Camera Yawn', -3600, 3600, 'int16_t*')
+                doSliderInt(mem, 0x800b626a, 'Camera Pitch', -3600, 3600, 'int16_t*')
+                doSliderInt(mem, 0x800b626c, 'Camera Zoom', -3600, 3600, 'int16_t*')
+            else
+                imgui.TextUnformatted("Will be available during a race")
+            end
+        end
+        if (imgui.CollapsingHeader("Simulation", ImGuiTreeNodeFlags_None)) then
+            doSliderInt(mem, 0x8009b874, 'Credit (Simu)', -999999999, 999999999, 'int32_t*')
+            
+        end
+
     elseif hasUs then
         doCheckbox(mem, 0x800b6508, '(NTSC-U SCUS-94194) HUD', 0, 1, 'int16_t*')
 
@@ -219,3 +250,4 @@ function createClient(check)
     client:write('bob')
     client:close()
 end
+
