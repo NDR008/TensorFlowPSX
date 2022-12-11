@@ -1,6 +1,6 @@
-ffi.cdef [[
-void loadSaveStateFromFile(LuaFile*);
-]]
+--ffi.cdef [[
+--void loadSaveStateFromFile(LuaFile*);
+--]]
 
 --https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
 --https://github.com/grumpycoders/pcsx-redux/blob/main/src/gui/widgets/memcard_manager.cc#L122-L139
@@ -19,7 +19,7 @@ local function checkValue(mem, address, value, type)
     local tempvalue = pointer[0]
     local check = false
     if tempvalue == value then
-       check = true
+        check = true
     end
     return check
 end
@@ -38,8 +38,6 @@ local function doCheckbox(mem, address, name, value, original, type)
         if check then pointer[0] = value else pointer[0] = original end
     end
 end
-
-
 
 local function createClient(name)
     changed, check = imgui.Checkbox(name, check)
@@ -85,11 +83,11 @@ local function reload()
     loadfile("gt.lua")()
 end
 
-
 -- Utilizing the DrawImguiFrame periodic function to draw our UI.
 -- We are declaring this function global so the emulator can
 -- properly call it periodically.
 function DrawImguiFrame()
+    -- print(PCSX.SIO0.slots[1].pads[1].getButton(PCSX.CONSTS.PAD.BUTTON.START))
     local show = imgui.Begin('GT Hacking', true)
     if not show then imgui.End() return end
     local mem = PCSX.getMemPtr()
@@ -97,24 +95,42 @@ function DrawImguiFrame()
     -- All for the PAL SCES-00984 version of the game.
     -- Now calling our helper function for each of our pointer.
 
-    local racing = checkValue(mem, 0x8008df72, 58, "int8_t*")  -- check if the time is displayed
+    local racing = checkValue(mem, 0x8008df72, 58, "int8_t*") -- check if the time is displayed
 
+    local list = {
+        { "Arcade Start", "arc1.slice" },
+        { "Arcade HS R34", "arc2.slice" },
+        { "Arcade HS Corv", "arc3.slice" },
+        { "Simulation Home", "sim1.slice" },
+        { "SARD Supra HS", "sim2.slice" },
+        { "0-400m Test MR2", "sim3.slice" }
+    }
     if hasPal then
         imgui.BeginTable("GT", 2, imgui.constant.TableFlags.Resizable)
 
-        imgui.TableSetupColumn("test1")
-        imgui.TableSetupColumn("test2")
+        imgui.TableSetupColumn("Load")
+        imgui.TableSetupColumn("Save")
         imgui.TableHeadersRow();
-        imgui.TableNextRow()
-        imgui.TableSetColumnIndex(0)
-        imgui.TextUnformatted("bla")
-        imgui.TableSetColumnIndex(1)
-        imgui.TextUnformatted("bla")
-        imgui.TableNextRow()
-        imgui.TableSetColumnIndex(0)
-        imgui.TextUnformatted("bla")
-        imgui.TableSetColumnIndex(1)
-        imgui.TextUnformatted("bla")
+        for i, f in pairs(list) do
+            imgui.TableNextRow()
+            local text = f[1]
+            local filename = f[2]
+            imgui.TableSetColumnIndex(0)
+            if (imgui.Button(text)) then
+                local file = Support.File.open(filename, "READ")
+                PCSX.loadSaveState(file)
+                file:close()
+            end
+            imgui.TableSetColumnIndex(1)
+            faketext = "Save/Update##" .. filename
+            if (imgui.Button(faketext)) then
+                local save = PCSX.createSaveState()
+                local file = Support.File.open(filename, "TRUNCATE")
+                file:writeMoveSlice(save)
+                file:close()
+                print(filename, "saved")
+            end
+        end
         imgui.EndTable()
 
 
@@ -149,7 +165,7 @@ function DrawImguiFrame()
             doSliderInt(mem, 0x800cb645, 'raceModeB', 0, 5, 'int8_t*')
             doSliderInt(mem, 0x800cb646, 'raceMode_Index', 0, 20, 'int8_t*')
             doSliderInt(mem, 0x800cb649, 'raceModeC', 0, 6, 'int8_t*')
-            
+
             doSliderInt(mem, 0x800b619c, 'Displayed Max Laps', 0, 5000, 'int32_t*')
             doSliderInt(mem, 0x800b6356, 'Replay?', 00, 02, 'int16_t*')
             doSliderInt(mem, 0x8009056a, 'DAT_8009056a', -2500, 2500, 'int16_t*')
@@ -163,16 +179,18 @@ function DrawImguiFrame()
         end
         if (imgui.CollapsingHeader("Racing Parameters", ImGuiTreeNodeFlags_None)) then
             if racing then
+                doSliderInt(mem, 0x800b66f0, 'Vector?', -500, 500, 'int16_t*')
                 doCheckbox(mem, 0x800b6358, 'HUD', 0, 1, 'int16_t*') -- (PAL SCES-00984)
                 doSliderInt(mem, 0x800b66ec, 'Speed1', 0, 5000, 'uint16_t*')
                 doSliderInt(mem, 0x800b66ee, 'Engine Speed', 0, 12000, 'uint16_t*')
+                doSliderInt(mem, 0x800b66f8, 'Boost', 0, 12000, 'uint16_t*')
                 doSliderInt(mem, 0x800bd990, 'Max Seen Speed', 0, 5000, 'uint16_t*')
                 doSliderInt(mem, 0x800b66e8, 'Gear', 0, 10, 'uint8_t*')
                 doSliderInt(mem, 0x800b66d6, 'Steering', -580, 580, 'int16_t*')
-                doSliderInt(mem, 0x800b6d69, 'Car Position', 1, 6, 'int16_t*') 
-                doSliderInt(mem, 0x800b66fa, 'Accel0 (changes with X)', 65525, 0, 'uint16_t*')
-                doSliderInt(mem, 0x800b66d9, 'Accel1 (equal to button press)', 0, 16, 'uint16_t*')
-                doSliderInt(mem, 0x800b66db, 'Accel2 (blips on shift)', 0, 16, 'uint16_t*')
+                doSliderInt(mem, 0x800b6d69, 'Car Position', 1, 6, 'int16_t*')
+                -- doSliderInt(mem, 0x800b66fa, 'Accel0 (changes with X)', 65525, 0, 'uint16_t*')
+                -- doSliderInt(mem, 0x800b66d9, 'Accel1 (equal to button press)', 0, 16, 'uint16_t*')
+                -- doSliderInt(mem, 0x800b66db, 'Accel2 (blips on shift)', 0, 16, 'uint16_t*')
                 doSliderInt(mem, 0x800b66dd, 'Brake1', 0, 16, 'uint16_t*')
                 doSliderInt(mem, 0x800b6268, 'Camera Yawn', -3600, 3600, 'int16_t*')
                 doSliderInt(mem, 0x800b626a, 'Camera Pitch', -3600, 3600, 'int16_t*')
@@ -183,7 +201,7 @@ function DrawImguiFrame()
         end
         if (imgui.CollapsingHeader("Simulation", ImGuiTreeNodeFlags_None)) then
             doSliderInt(mem, 0x8009b874, 'Credit (Simu)', -999999999, 999999999, 'int32_t*')
-            
+
         end
 
     elseif hasUs then
@@ -212,6 +230,8 @@ end
 
 function myFunc()
     print("GT1 region detection started!")
+    -- pprint(PCSX.CONSTS)
+
     local reader = PCSX.getCurrentIso():createReader()
     local pal = reader:open('SCES_009.84;1')
     local us = reader:open('SCUS_941.94;1')
@@ -250,4 +270,3 @@ function createClient(check)
     client:write('bob')
     client:close()
 end
-
