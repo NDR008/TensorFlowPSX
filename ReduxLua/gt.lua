@@ -39,19 +39,20 @@ local function doCheckbox(mem, address, name, value, original, type)
     end
 end
 
-local function createClient(name)
+local function startClient(name)
     changed, check = imgui.Checkbox(name, check)
     if changed then
         if check then
-            createClient("activate")
+            client = Support.File.uvFifo("127.0.0.1", 9999)
+            print(changed, check)
+        else
+            client:close()
+            print(changed, check)
         end
-    end
-end
-
-local function debug(name)
-    changed, check = imgui.Checkbox(name, forPlay)
-    if changed then
-        forPlay = not forPlay
+    elseif check then -- I want to check that the connection is still alive
+        ---
+        ---client:write("hello")
+        client:write(PCSX.SIO0.slots[1].pads[1].getButton(PCSX.CONSTS.PAD.BUTTON.CROSS))
     end
 end
 
@@ -87,7 +88,7 @@ end
 -- We are declaring this function global so the emulator can
 -- properly call it periodically.
 function DrawImguiFrame()
-    -- print(PCSX.SIO0.slots[1].pads[1].getButton(PCSX.CONSTS.PAD.BUTTON.START))
+    --print(PCSX.SIO0.slots[1].pads[1].getButton(PCSX.CONSTS.PAD.BUTTON.CROSS))
     local show = imgui.Begin('GT Hacking', true)
     if not show then imgui.End() return end
     local mem = PCSX.getMemPtr()
@@ -150,6 +151,8 @@ function DrawImguiFrame()
             PCSX.loadSaveState(file)
             file:close()
         end
+        imgui.SameLine(240)
+        startClient("Start Client")
         if (imgui.CollapsingHeader("Not clear", ImGuiTreeNodeFlags_None)) then
             imgui.TextUnformatted("START-countdown")
             imgui.SameLine()
@@ -228,7 +231,7 @@ function DrawImguiFrame()
 
 end
 
-function myFunc()
+function checkRegion()
     print("GT1 region detection started!")
     -- pprint(PCSX.CONSTS)
 
@@ -242,31 +245,6 @@ function myFunc()
     hasJap = not jap:failed()
 end
 
--- if bob then
---     bob:remove()
--- end
-if bob then bob:remove() end
-bob = PCSX.Events.createEventListener('ExecutionFlow::Run', myFunc)
+if checked then checked:remove() end
+checked = PCSX.Events.createEventListener('ExecutionFlow::Run', checkRegion)
 PCSX.resumeEmulator()
-
--- function createClient(check)
---   client = luv.new_tcp()
-
---   luv.tcp_connect(client, "127.0.0.1", 9999, function (err)
---     luv.read_start(client, function(err, chunk)
---         assert(not err, err)
---         if chunk then
---             print(chunk)
---         end
---     end)
---     luv.write(client, check)
---   luv.close(client)
---   end)
--- end
-
-
-function createClient(check)
-    client = Support.File.uvFifo("127.0.0.1", 9999)
-    client:write('bob')
-    client:close()
-end
