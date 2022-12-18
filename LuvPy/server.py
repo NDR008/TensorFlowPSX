@@ -22,6 +22,9 @@ while True:
         # Receive the data in small chunks and retransmit it
         while True:
             data = connection.recv(10)
+            sendData = 1
+            sendData = sendData.to_bytes(1, 'little')
+            connection.send(sendData)
             print('received {!r}'.format(data))
             if not data:
                 break

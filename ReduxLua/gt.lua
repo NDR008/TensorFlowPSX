@@ -9,8 +9,9 @@
 hasPal = false
 hasUs = false
 hasJap = false
-
 forPlay = true
+
+require "tcp"
 
 local function checkValue(mem, address, value, type)
     address = bit.band(address, 0x1fffff)
@@ -39,23 +40,6 @@ local function doCheckbox(mem, address, name, value, original, type)
     end
 end
 
-local function startClient(name)
-    changed, check = imgui.Checkbox(name, check)
-    if changed then
-        if check then
-            client = Support.File.uvFifo("127.0.0.1", 9999)
-            print(changed, check)
-        else
-            client:close()
-            print(changed, check)
-        end
-    elseif check then -- I want to check that the connection is still alive
-        ---
-        ---client:write("hello")
-        client:write(PCSX.SIO0.slots[1].pads[1].getButton(PCSX.CONSTS.PAD.BUTTON.CROSS))
-    end
-end
-
 -- Declare a helper function with the following arguments:
 --   mem: the ffi object representing the base pointer into the main RAM
 --   address: the address of the uint32_t to monitor and mutate
@@ -81,6 +65,7 @@ end
 
 local function reload()
     PCSX.pauseEmulator()
+    loadfile("tcp.lua")(0)
     loadfile("gt.lua")()
 end
 
@@ -99,6 +84,7 @@ function DrawImguiFrame()
     local racing = checkValue(mem, 0x8008df72, 58, "int8_t*") -- check if the time is displayed
 
     local list = {
+        { "Start", "start1.slice" },
         { "Arcade Start", "arc1.slice" },
         { "Arcade HS R34", "arc2.slice" },
         { "Arcade HS Corv", "arc3.slice" },
