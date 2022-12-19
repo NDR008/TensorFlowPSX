@@ -11,7 +11,7 @@ hasUs = false
 hasJap = false
 forPlay = true
 
-require "tcp"
+loadfile("tcp.lua")()
 
 local function checkValue(mem, address, value, type)
     address = bit.band(address, 0x1fffff)
@@ -65,7 +65,7 @@ end
 
 local function reload()
     PCSX.pauseEmulator()
-    loadfile("tcp.lua")(0)
+    loadfile("tcp.lua")()
     loadfile("gt.lua")()
 end
 
@@ -77,6 +77,9 @@ function DrawImguiFrame()
     local show = imgui.Begin('GT Hacking', true)
     if not show then imgui.End() return end
     local mem = PCSX.getMemPtr()
+
+    local race_started = readValue(mem, 0x800b6d60, 'uint8_t*')
+    overwriteFlag(race_started)
 
     -- All for the PAL SCES-00984 version of the game.
     -- Now calling our helper function for each of our pointer.
@@ -138,7 +141,8 @@ function DrawImguiFrame()
             file:close()
         end
         imgui.SameLine(240)
-        startClient("Start Client")
+        netChanged, netStatus = imgui.Checkbox("TCP", netStatus)
+        netTCP(netChanged, netStatus)
         if (imgui.CollapsingHeader("Not clear", ImGuiTreeNodeFlags_None)) then
             imgui.TextUnformatted("START-countdown")
             imgui.SameLine()
@@ -149,6 +153,8 @@ function DrawImguiFrame()
             imgui.TextUnformatted("frameRate?")
             imgui.SameLine()
             imgui.TextUnformatted(readValue(mem, 0x800bf364, "int16_t*"))
+            --doSliderInt(mem, 0x800b34a0, 'raceStart', 0, 1, 'uint8_t*') -- seems to be a couple of 100 ms ahead of time
+            doSliderInt(mem, 0x800b6d60, 'raceStart', 0, 1, 'uint8_t*')
             doSliderInt(mem, 0x800b6226, 'raceMode', 0, 30, 'uint16_t*')
             doSliderInt(mem, 0x800cb644, 'raceModeA', 0, 5, 'int8_t*')
             doSliderInt(mem, 0x800cb645, 'raceModeB', 0, 5, 'int8_t*')
