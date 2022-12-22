@@ -1,0 +1,30 @@
+// https://www.freecodecamp.org/news/googles-protocol-buffers-in-python/
+
+syntax = "proto3";
+
+// Not necessary for Python but should still be declared to avoid name collisions 
+// in the Protocol Buffers namespace and non-Python languages
+package protoblog;
+
+// Style guide prefers prefixing enum values instead of surrounding
+// with an enclosing message
+enum TaskState {
+    TASK_OPEN = 0;
+    TASK_IN_PROGRESS = 1;
+    TASK_POST_PONED = 2;
+    TASK_CLOSED = 3;
+    TASK_DONE = 4;
+}
+
+message TodoList {
+    int32 owner_id = 1;
+    string owner_name = 2;
+
+    message ListItems {
+        TaskState state = 1;
+        string task = 2;
+        string due_date = 3;
+    }
+
+    repeated ListItems todos = 3;
+}
