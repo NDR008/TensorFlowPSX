@@ -9,8 +9,9 @@
 hasPal = false
 hasUs = false
 hasJap = false
-
 forPlay = true
+
+loadfile("tcp.lua")()
 
 local function checkValue(mem, address, value, type)
     address = bit.band(address, 0x1fffff)
@@ -39,22 +40,6 @@ local function doCheckbox(mem, address, name, value, original, type)
     end
 end
 
-local function createClient(name)
-    changed, check = imgui.Checkbox(name, check)
-    if changed then
-        if check then
-            createClient("activate")
-        end
-    end
-end
-
-local function debug(name)
-    changed, check = imgui.Checkbox(name, forPlay)
-    if changed then
-        forPlay = not forPlay
-    end
-end
-
 -- Declare a helper function with the following arguments:
 --   mem: the ffi object representing the base pointer into the main RAM
 --   address: the address of the uint32_t to monitor and mutate
@@ -80,6 +65,7 @@ end
 
 local function reload()
     PCSX.pauseEmulator()
+    loadfile("tcp.lua")()
     loadfile("gt.lua")()
 end
 
@@ -87,10 +73,13 @@ end
 -- We are declaring this function global so the emulator can
 -- properly call it periodically.
 function DrawImguiFrame()
-    -- print(PCSX.SIO0.slots[1].pads[1].getButton(PCSX.CONSTS.PAD.BUTTON.START))
+    --print(PCSX.SIO0.slots[1].pads[1].getButton(PCSX.CONSTS.PAD.BUTTON.CROSS))
     local show = imgui.Begin('GT Hacking', true)
     if not show then imgui.End() return end
     local mem = PCSX.getMemPtr()
+
+    local race_started = readValue(mem, 0x800b6d60, 'uint8_t*')
+    overwriteFlag(race_started)
 
     -- All for the PAL SCES-00984 version of the game.
     -- Now calling our helper function for each of our pointer.
@@ -98,6 +87,7 @@ function DrawImguiFrame()
     local racing = checkValue(mem, 0x8008df72, 58, "int8_t*") -- check if the time is displayed
 
     local list = {
+        { "Start", "start1.slice" },
         { "Arcade Start", "arc1.slice" },
         { "Arcade HS R34", "arc2.slice" },
         { "Arcade HS Corv", "arc3.slice" },
@@ -150,6 +140,9 @@ function DrawImguiFrame()
             PCSX.loadSaveState(file)
             file:close()
         end
+        imgui.SameLine(240)
+        netChanged, netStatus = imgui.Checkbox("TCP", netStatus)
+        netTCP(netChanged, netStatus)
         if (imgui.CollapsingHeader("Not clear", ImGuiTreeNodeFlags_None)) then
             imgui.TextUnformatted("START-countdown")
             imgui.SameLine()
@@ -160,6 +153,8 @@ function DrawImguiFrame()
             imgui.TextUnformatted("frameRate?")
             imgui.SameLine()
             imgui.TextUnformatted(readValue(mem, 0x800bf364, "int16_t*"))
+            --doSliderInt(mem, 0x800b34a0, 'raceStart', 0, 1, 'uint8_t*') -- seems to be a couple of 100 ms ahead of time
+            doSliderInt(mem, 0x800b6d60, 'raceStart', 0, 1, 'uint8_t*')
             doSliderInt(mem, 0x800b6226, 'raceMode', 0, 30, 'uint16_t*')
             doSliderInt(mem, 0x800cb644, 'raceModeA', 0, 5, 'int8_t*')
             doSliderInt(mem, 0x800cb645, 'raceModeB', 0, 5, 'int8_t*')
@@ -228,7 +223,7 @@ function DrawImguiFrame()
 
 end
 
-function myFunc()
+function checkRegion()
     print("GT1 region detection started!")
     -- pprint(PCSX.CONSTS)
 
@@ -242,31 +237,6 @@ function myFunc()
     hasJap = not jap:failed()
 end
 
--- if bob then
---     bob:remove()
--- end
-if bob then bob:remove() end
-bob = PCSX.Events.createEventListener('ExecutionFlow::Run', myFunc)
+if checked then checked:remove() end
+checked = PCSX.Events.createEventListener('ExecutionFlow::Run', checkRegion)
 PCSX.resumeEmulator()
-
--- function createClient(check)
---   client = luv.new_tcp()
-
---   luv.tcp_connect(client, "127.0.0.1", 9999, function (err)
---     luv.read_start(client, function(err, chunk)
---         assert(not err, err)
---         if chunk then
---             print(chunk)
---         end
---     end)
---     luv.write(client, check)
---   luv.close(client)
---   end)
--- end
-
-
-function createClient(check)
-    client = Support.File.uvFifo("127.0.0.1", 9999)
-    client:write('bob')
-    client:close()
-end
