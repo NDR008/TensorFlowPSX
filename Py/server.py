@@ -1,6 +1,6 @@
 import socket
 
-
+counter = 0
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -45,10 +45,12 @@ while True:
                         #     recvDataHeight = recvDataHeight.decode()
                         #     recvDataHeight = int(recvDataHeight)
                         print("Array", recvDataTick, recvDataType, recvData)
-                    connection.send(sendData.to_bytes(1, 'little'))
+                connection.send(sendData.to_bytes(1, 'little'))
+                counter = counter + 1
             if not recvDataTick:
                 break
 
     finally:
         # Clean up the connection
+        print(counter)
         connection.close()
