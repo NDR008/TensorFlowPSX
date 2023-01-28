@@ -11,6 +11,8 @@ hasUs = false
 hasJap = false
 forPlay = true
 
+netStatus = false
+
 loadfile("tcp.lua")()
 
 local function checkValue(mem, address, value, type)
@@ -89,7 +91,7 @@ function DrawImguiFrame()
     local list = {
         { "Start", "start1.slice" },
         { "Arcade Start", "arc1.slice" },
-        { "Arcade HS R34", "arc2.slice" },
+        { "Arcade HS R33", "arc2.slice" },
         { "Arcade HS Corv", "arc3.slice" },
         { "Simulation Home", "sim1.slice" },
         { "SARD Supra HS", "sim2.slice" },
@@ -140,6 +142,11 @@ function DrawImguiFrame()
             PCSX.loadSaveState(file)
             file:close()
         end
+        if (imgui.Button("Funky HS")) then
+            local file = Support.File.open("funky.slice", "READ")
+            PCSX.loadSaveState(file)
+            file:close()
+        end
         imgui.SameLine(240)
         netChanged, netStatus = imgui.Checkbox("TCP", netStatus)
         netTCP(netChanged, netStatus)
@@ -153,6 +160,8 @@ function DrawImguiFrame()
             imgui.TextUnformatted("frameRate?")
             imgui.SameLine()
             imgui.TextUnformatted(readValue(mem, 0x800bf364, "int16_t*"))
+            doSliderInt(mem, 0x800b67d6, '800b67d6 tyre slip?', 0, 255, 'uint8_t*')
+            doSliderInt(mem, 0x800b67bc, '800b67bc bounce?', -255, 512, 'int16_t*')
             --doSliderInt(mem, 0x800b34a0, 'raceStart', 0, 1, 'uint8_t*') -- seems to be a couple of 100 ms ahead of time
             doSliderInt(mem, 0x800b6d60, 'raceStart', 0, 1, 'uint8_t*')
             doSliderInt(mem, 0x800b6226, 'raceMode', 0, 30, 'uint16_t*')
