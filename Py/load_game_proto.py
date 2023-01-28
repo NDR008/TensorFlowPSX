@@ -1,9 +1,5 @@
 import game_pb2 as Game
 
-myGame = Game.observation()
-myGame.test = "hey"
-myGame.vehicle.current_speed = 100
+myGame = Game.Observation()
 
-
-
-print(myGame.vehicle.current_speed)
+print(myGame.debug, myGame.vehicle.current_brake)

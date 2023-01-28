@@ -2,7 +2,7 @@ syntax = "proto3";
 
 // Not necessary for Python but should still be declared to avoid name collisions 
 // in the Protocol Buffers namespace and non-Python languages
-package protoblog;
+package GT;
 
 enum BPP {
     BPP_16 = 0;
@@ -16,18 +16,22 @@ enum gameState {
     race_finished =3;
 }
 
-message observation {
+message Vehicle {
+    int32 current_speed = 1;
+    int32 current_steering = 2;
+    int32 current_accel = 3;
+    int32 current_brake = 4;
+}
+
+message Screen {
+    bytes data = 1;
+    int32 width = 2;
+    int32 height = 3;
+    BPP bpp = 4;
+}
+
+message Observation {
     int32 debug = 1;
-    message vehicle {
-        int32 current_speed = 1;
-        int32 current_steering = 2;
-        int32 current_accel = 3;
-        int32 current_brake = 4;
-    }
-    message screen {
-        int32 width = 1;
-        int32 height = 2;
-        BPP bpp = 3;
-        bytes image_data = 4;
-    }
+    Vehicle vehicle = 2;
+    Screen screen = 3;
 }
