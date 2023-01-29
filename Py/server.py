@@ -26,13 +26,12 @@ while True:
         print('connection from', client_address)
         while True:
             dataPing = connection.recv(1).decode()
-            print(dataPing)
             if dataPing == "P" :
-                print("get")
-                dataSize = connection.recv(6).decode()
-                print("oh")
-                dataSize = int(dataSize)
-                print(dataSize)
+                print("pinged!")
+                dataSize = connection.recv(4)
+                #dataSize = int(dataSize)
+                dataSize = int.from_bytes(dataSize, 'little')
+                print("we will get data this size: ", dataSize)
                 data = connection.recv(dataSize)
             if not dataPing:
                 break
