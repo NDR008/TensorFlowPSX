@@ -1,6 +1,9 @@
 import socket
+import game_pb2 as Game
 
 counter = 0
+
+myData = Game.Screen()
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,35 +25,18 @@ while True:
     try:
         print('connection from', client_address)
         while True:
-            recvDataTick = connection.recv(2).decode()
-            if recvDataTick == "Ti":
-                recvChunks = int(connection.recv(1).decode())
-                print(recvChunks)
-                
-                for i in range(0,recvChunks):
-                    recvDataType = connection.recv(1).decode()
-                    if recvDataType == "I":
-                        recvDataSize = int(connection.recv(1).decode())
-                        recvData = connection.recv(recvDataSize)
-                        print("Int", recvDataTick, recvDataType, recvDataSize, recvData.decode())
-                    elif recvDataType == "A":
-                        recvDataSize = int(connection.recv(1).decode())
-                        recvData = connection.recv(recvDataSize)
-                        recvData = recvData.decode()
-
-                        print(recvData)
-                        # for row in range (0, recvDataHeight):
-                        #     recvDataSize = int(connection.recv(1).decode())
-                        #     recvDataHeight = connection.recv(recvDataSize)
-                        #     recvDataHeight = recvDataHeight.decode()
-                        #     recvDataHeight = int(recvDataHeight)
-                        print("Array", recvDataTick, recvDataType, recvData)
-                connection.send(sendData.to_bytes(1, 'little'))
-                counter = counter + 1
-            if not recvDataTick:
+            dataPing = connection.recv(1).decode()
+            print(dataPing)
+            if dataPing == "P" :
+                print("get")
+                dataSize = connection.recv(6).decode()
+                print("oh")
+                dataSize = int(dataSize)
+                print(dataSize)
+                data = connection.recv(dataSize)
+            if not dataPing:
                 break
 
     finally:
         # Clean up the connection
-        print(counter)
         connection.close()

@@ -1,54 +1,25 @@
--- protobuf
+local pb = require('pb')
+local protoc = require('protoc')
 
-local pb = require "pb"
-local protoc = require "protoc"
+local function read_file_as_string(filename)
+    local file = Support.File.open(filename)
+    local buffer = file:read(tonumber(file:size()))
+    file:close()
+    return tostring(buffer)
+end
 
--- load schema from text (just for demo, use protoc.new() in real world)
-assert(protoc:load [[
-    enum BPP {
-        BPP_16 = 0;
-        BPP_24 = 1;
-    }
+local function check_load(chunk)
+    local pbdata = protoc.new():compile(chunk)
+    local ret, offset = pb.load(pbdata)
+    if not ret then
+        error("load error at " .. offset ..
+            "\nproto: " .. chunk ..
+            "\ndata: " .. buffer(pbdata):tohex())
+    end
+end
 
-    enum gameState {
-        loading = 0;
-        pre_start = 1;
-        race = 2;
-        race_finished =3;
-    }
-
-    message observation {
-        int32 debug = 1;
-        message vehicle {
-            int32 current_speed = 1;
-            int32 current_steering = 2;
-            int32 current_accel = 3;
-            int32 current_brake = 4;
-        }
-        message screen {
-            int32 width = 1;
-            int32 height = 2;
-            BPP bpp = 3;
-            bytes image_data = 4;
-        }
-    }
-    ]])
-
--- lua table data
-local data = {
-    debug   = 99,
-    vehicle = {
-        current_speed = 100,
-        current_accel = 0
-    }
-}
-
-local bytes = assert(pb.encode("observation", data))
-print(pb.tohex(bytes))
-
-local data2 = assert(pb.decode("observation", bytes))
-print(require "serpent".block(data2))
-
+local proto_file = read_file_as_string('game.proto')
+check_load(proto_file)
 
 
 -- To clean later
@@ -66,25 +37,15 @@ function netTCP(netChanged, netCheck)
             client:close()
         end
     elseif netCheck then
-        --client:write("PCSX.SIO0.slots[1].pads[1].getButton(PCSX.CONSTS.PAD.BUTTON.CROSS)")
-        data = 0
-        client:write("A")
-        client:write(localRaceStart)
-        data = client:readU8()
-        print(counter, data)
-        if data == 1 then
-            PCSX.SIO0.slots[1].pads[1].setOverride(PCSX.CONSTS.PAD.BUTTON.CROSS)
-            PCSX.SIO0.slots[1].pads[1].setOverride(PCSX.CONSTS.PAD.BUTTON.CIRCLE)
-            counter = counter + 1
-        elseif data == 2 then
-            PCSX.SIO0.slots[1].pads[1].clearOverride(PCSX.CONSTS.PAD.BUTTON.CROSS)
-        end
-        a = PCSX.GPU.takeScreenShot()
-        -- print(a.width, a.height, a.bpp)
-        -- client:write(a.width)
+        client:write("P")
+        local screen = PCSX.GPU.takeScreenShot()
+        screen.data = tostring(screen.data)
+        screen.bpp = tonumber(screen.bpp)
+        local enc_bytes = assert(pb.encode("GT.Screen", screen))
+        client:write(#enc_bytes)
+        print(#enc_bytes)
+        client:write(enc_bytes)
     else
-        PCSX.SIO0.slots[1].pads[1].clearOverride(PCSX.CONSTS.PAD.BUTTON.CROSS)
-        PCSX.SIO0.slots[1].pads[1].clearOverride(PCSX.CONSTS.PAD.BUTTON.CIRCLE)
     end
 end
 

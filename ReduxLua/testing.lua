@@ -26,7 +26,7 @@ print(#screen.data)
 screen.data = tostring(screen.data)
 screen.bpp = tonumber(screen.bpp)
 enc_bytes = assert(pb.encode("GT.Screen", screen))
-print(#enc_bytes)
+
 dec_bytes = pb.decode("GT.Screen", enc_bytes)
 print(dec_bytes.bpp)
 print(#dec_bytes.data)
