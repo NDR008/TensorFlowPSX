@@ -11,6 +11,8 @@ hasUs = false
 hasJap = false
 forPlay = true
 
+netStatus = false
+
 loadfile("tcp.lua")()
 
 local function checkValue(mem, address, value, type)
@@ -78,9 +80,6 @@ function DrawImguiFrame()
     if not show then imgui.End() return end
     local mem = PCSX.getMemPtr()
 
-    local race_started = readValue(mem, 0x800b6d60, 'uint8_t*')
-    overwriteFlag(race_started)
-
     -- All for the PAL SCES-00984 version of the game.
     -- Now calling our helper function for each of our pointer.
 
@@ -89,7 +88,7 @@ function DrawImguiFrame()
     local list = {
         { "Start", "start1.slice" },
         { "Arcade Start", "arc1.slice" },
-        { "Arcade HS R34", "arc2.slice" },
+        { "Arcade HS R33", "arc2.slice" },
         { "Arcade HS Corv", "arc3.slice" },
         { "Simulation Home", "sim1.slice" },
         { "SARD Supra HS", "sim2.slice" },
@@ -140,6 +139,11 @@ function DrawImguiFrame()
             PCSX.loadSaveState(file)
             file:close()
         end
+        if (imgui.Button("Funky HS")) then
+            local file = Support.File.open("funky.slice", "READ")
+            PCSX.loadSaveState(file)
+            file:close()
+        end
         imgui.SameLine(240)
         netChanged, netStatus = imgui.Checkbox("TCP", netStatus)
         netTCP(netChanged, netStatus)
@@ -153,6 +157,8 @@ function DrawImguiFrame()
             imgui.TextUnformatted("frameRate?")
             imgui.SameLine()
             imgui.TextUnformatted(readValue(mem, 0x800bf364, "int16_t*"))
+            doSliderInt(mem, 0x800b67d6, '800b67d6 tyre slip?', 0, 255, 'uint8_t*')
+            doSliderInt(mem, 0x800b67bc, '800b67bc bounce?', -255, 512, 'int16_t*')
             --doSliderInt(mem, 0x800b34a0, 'raceStart', 0, 1, 'uint8_t*') -- seems to be a couple of 100 ms ahead of time
             doSliderInt(mem, 0x800b6d60, 'raceStart', 0, 1, 'uint8_t*')
             doSliderInt(mem, 0x800b6226, 'raceMode', 0, 30, 'uint16_t*')
@@ -165,18 +171,22 @@ function DrawImguiFrame()
             doSliderInt(mem, 0x800b6356, 'Replay?', 00, 02, 'int16_t*')
             doSliderInt(mem, 0x8009056a, 'DAT_8009056a', -2500, 2500, 'int16_t*')
             doSliderInt(mem, 0x8009056c, 'DAT_8009056c', -2500, 2500, 'int16_t*')
-            doSliderInt(mem, 0x80093bc8, 'DAT_80093bc8', 0, 5000, 'uint16_t*')
-            doSliderInt(mem, 0x800b66f4, 'DAT_800b66f4', 0, 5000, 'uint16_t*')
-            doSliderInt(mem, 0x800bdb54, 'DAT_800bdb54', 0, 5000, 'uint16_t*')
-            doSliderInt(mem, 0x800bd998, 'hiddenInRaceBestLap?', 0, 5000, 'uint16_t*')
-            doSliderInt(mem, 0x800cac90, 'hiddenInGameBestLap?', 0, 5000, 'uint16_t*')
+            -- doSliderInt(mem, 0x80093bc8, 'Total_race', 0, 500000, 'uint32_t*') -- mirror of 0x800bdb54?
+            doSliderInt(mem, 0x800bdb54, 'Total_race', 0, 500000, 'uint32_t*')
+            doSliderInt(mem, 0x800bd9c0, 'First_Lap(set)', 0, 500000, 'uint32_t*')
+            doSliderInt(mem, 0x800bd9c4, 'Second_Lap', 0, 500000, 'uint32_t*')
+
+            doSliderInt(mem, 0x800bd994, 'DisplayedBestTotal', 0, 500000, 'uint32_t*')
+            doSliderInt(mem, 0x800bd998, 'DisplayedBestLap', 0, 500000, 'uint32_t*')
+
+            doSliderInt(mem, 0x800cac90, 'hiddenInGameBestLap?', 0, 500000, 'uint32_t*')
             doSliderInt(mem, 0x801d393c, 'DAT_801d393c', 0, 5000, 'uint16_t*')
         end
         if (imgui.CollapsingHeader("Racing Parameters", ImGuiTreeNodeFlags_None)) then
             if racing then
                 doSliderInt(mem, 0x800b66f0, 'Vector?', -500, 500, 'int16_t*')
                 doCheckbox(mem, 0x800b6358, 'HUD', 0, 1, 'int16_t*') -- (PAL SCES-00984)
-                doSliderInt(mem, 0x800b66ec, 'Speed1', 0, 5000, 'uint16_t*')
+                doSliderInt(mem, 0x800b66ec, 'Speed', 0, 5000, 'uint16_t*')
                 doSliderInt(mem, 0x800b66ee, 'Engine Speed', 0, 12000, 'uint16_t*')
                 doSliderInt(mem, 0x800b66f8, 'Boost', 0, 12000, 'uint16_t*')
                 doSliderInt(mem, 0x800bd990, 'Max Seen Speed', 0, 5000, 'uint16_t*')

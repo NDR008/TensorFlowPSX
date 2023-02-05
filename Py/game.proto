@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+// Not necessary for Python but should still be declared to avoid name collisions 
+// in the Protocol Buffers namespace and non-Python languages
+package GT;
+
+enum BPP {
+    BPP_16 = 0;
+    BPP_24 = 1;
+}
+
+message GameState {
+    int32 raceState = 1;
+}
+
+message Vehicle {
+    int32 engSpeed = 1;
+    int32 engBoost = 2;
+    int32 engGear = 3;
+    int32 speed = 4;
+    sint32 steer = 5;
+    int32 pos = 6;
+}
+
+message Screen {
+    bytes data = 1;
+    int32 width = 2;
+    int32 height = 3;
+    BPP bpp = 4;
+}
