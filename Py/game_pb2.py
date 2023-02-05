@@ -16,16 +16,16 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='game.proto',
-  package='protoblog',
+  package='GT',
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\ngame.proto\x12\tprotoblog\"h\n\x07Vehicle\x12\x15\n\rcurrent_speed\x18\x01 \x01(\x05\x12\x18\n\x10\x63urrent_steering\x18\x02 \x01(\x05\x12\x15\n\rcurrent_accel\x18\x03 \x01(\x05\x12\x15\n\rcurrent_brake\x18\x04 \x01(\x05\"X\n\x06Screen\x12\r\n\x05width\x18\x01 \x01(\x05\x12\x0e\n\x06height\x18\x02 \x01(\x05\x12\x1b\n\x03\x62pp\x18\x03 \x01(\x0e\x32\x0e.protoblog.BPP\x12\x12\n\nimage_data\x18\x04 \x01(\x0c\"d\n\x0bObservation\x12\r\n\x05\x64\x65\x62ug\x18\x01 \x01(\x05\x12#\n\x07vehicle\x18\x02 \x01(\x0b\x32\x12.protoblog.Vehicle\x12!\n\x06screen\x18\x03 \x01(\x0b\x32\x11.protoblog.Screen*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01*D\n\tgameState\x12\x0b\n\x07loading\x10\x00\x12\r\n\tpre_start\x10\x01\x12\x08\n\x04race\x10\x02\x12\x11\n\rrace_finished\x10\x03\x62\x06proto3'
+  serialized_pb=b'\n\ngame.proto\x12\x02GT\"h\n\x07Vehicle\x12\x15\n\rcurrent_speed\x18\x01 \x01(\x05\x12\x18\n\x10\x63urrent_steering\x18\x02 \x01(\x05\x12\x15\n\rcurrent_accel\x18\x03 \x01(\x05\x12\x15\n\rcurrent_brake\x18\x04 \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"V\n\x0bObservation\x12\r\n\x05\x64\x65\x62ug\x18\x01 \x01(\x05\x12\x1c\n\x07vehicle\x18\x02 \x01(\x0b\x32\x0b.GT.Vehicle\x12\x1a\n\x06screen\x18\x03 \x01(\x0b\x32\n.GT.Screen*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01*D\n\tgameState\x12\x0b\n\x07loading\x10\x00\x12\r\n\tpre_start\x10\x01\x12\x08\n\x04race\x10\x02\x12\x11\n\rrace_finished\x10\x03\x62\x06proto3'
 )
 
 _BPP = _descriptor.EnumDescriptor(
   name='BPP',
-  full_name='protoblog.BPP',
+  full_name='GT.BPP',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -43,15 +43,15 @@ _BPP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=323,
-  serialized_end=352,
+  serialized_start=289,
+  serialized_end=318,
 )
 _sym_db.RegisterEnumDescriptor(_BPP)
 
 BPP = enum_type_wrapper.EnumTypeWrapper(_BPP)
 _GAMESTATE = _descriptor.EnumDescriptor(
   name='gameState',
-  full_name='protoblog.gameState',
+  full_name='GT.gameState',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -79,8 +79,8 @@ _GAMESTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=354,
-  serialized_end=422,
+  serialized_start=320,
+  serialized_end=388,
 )
 _sym_db.RegisterEnumDescriptor(_GAMESTATE)
 
@@ -96,35 +96,35 @@ race_finished = 3
 
 _VEHICLE = _descriptor.Descriptor(
   name='Vehicle',
-  full_name='protoblog.Vehicle',
+  full_name='GT.Vehicle',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='current_speed', full_name='protoblog.Vehicle.current_speed', index=0,
+      name='current_speed', full_name='GT.Vehicle.current_speed', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='current_steering', full_name='protoblog.Vehicle.current_steering', index=1,
+      name='current_steering', full_name='GT.Vehicle.current_steering', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='current_accel', full_name='protoblog.Vehicle.current_accel', index=2,
+      name='current_accel', full_name='GT.Vehicle.current_accel', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='current_brake', full_name='protoblog.Vehicle.current_brake', index=3,
+      name='current_brake', full_name='GT.Vehicle.current_brake', index=3,
       number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -142,44 +142,44 @@ _VEHICLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=25,
-  serialized_end=129,
+  serialized_start=18,
+  serialized_end=122,
 )
 
 
 _SCREEN = _descriptor.Descriptor(
   name='Screen',
-  full_name='protoblog.Screen',
+  full_name='GT.Screen',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='width', full_name='protoblog.Screen.width', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='data', full_name='GT.Screen.data', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='height', full_name='protoblog.Screen.height', index=1,
+      name='width', full_name='GT.Screen.width', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='bpp', full_name='protoblog.Screen.bpp', index=2,
-      number=3, type=14, cpp_type=8, label=1,
+      name='height', full_name='GT.Screen.height', index=2,
+      number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='image_data', full_name='protoblog.Screen.image_data', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
+      name='bpp', full_name='GT.Screen.bpp', index=3,
+      number=4, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -195,35 +195,35 @@ _SCREEN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=131,
-  serialized_end=219,
+  serialized_start=124,
+  serialized_end=199,
 )
 
 
 _OBSERVATION = _descriptor.Descriptor(
   name='Observation',
-  full_name='protoblog.Observation',
+  full_name='GT.Observation',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='debug', full_name='protoblog.Observation.debug', index=0,
+      name='debug', full_name='GT.Observation.debug', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='vehicle', full_name='protoblog.Observation.vehicle', index=1,
+      name='vehicle', full_name='GT.Observation.vehicle', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='screen', full_name='protoblog.Observation.screen', index=2,
+      name='screen', full_name='GT.Observation.screen', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -241,8 +241,8 @@ _OBSERVATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=221,
-  serialized_end=321,
+  serialized_start=201,
+  serialized_end=287,
 )
 
 _SCREEN.fields_by_name['bpp'].enum_type = _BPP
@@ -258,21 +258,21 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 Vehicle = _reflection.GeneratedProtocolMessageType('Vehicle', (_message.Message,), {
   'DESCRIPTOR' : _VEHICLE,
   '__module__' : 'game_pb2'
-  # @@protoc_insertion_point(class_scope:protoblog.Vehicle)
+  # @@protoc_insertion_point(class_scope:GT.Vehicle)
   })
 _sym_db.RegisterMessage(Vehicle)
 
 Screen = _reflection.GeneratedProtocolMessageType('Screen', (_message.Message,), {
   'DESCRIPTOR' : _SCREEN,
   '__module__' : 'game_pb2'
-  # @@protoc_insertion_point(class_scope:protoblog.Screen)
+  # @@protoc_insertion_point(class_scope:GT.Screen)
   })
 _sym_db.RegisterMessage(Screen)
 
 Observation = _reflection.GeneratedProtocolMessageType('Observation', (_message.Message,), {
   'DESCRIPTOR' : _OBSERVATION,
   '__module__' : 'game_pb2'
-  # @@protoc_insertion_point(class_scope:protoblog.Observation)
+  # @@protoc_insertion_point(class_scope:GT.Observation)
   })
 _sym_db.RegisterMessage(Observation)
 
