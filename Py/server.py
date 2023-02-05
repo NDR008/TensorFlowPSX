@@ -4,11 +4,13 @@ import numpy as np
 from PIL import Image
 import cv2
 from time import process_time_ns, time # for benchmarking
+import os
 
 counter = 0
 
 myScreen = Game.Screen()
 myGS = Game.GameState()
+myVS = Game.Vehicle()
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -98,18 +100,25 @@ while True:
                 gsData = recvall(connection, dataSize)
                 if screenData is not None:
                     myGS.ParseFromString(gsData)
-                    # print(myGS.raceState)
+
+                
+                ping = recvall(connection, 1)
+                if ping is not None:
+                    ping = ping.decode()
+                if ping == "R" :
+                    dataSize = recvall(connection, 4)
+                    dataSize = int.from_bytes(dataSize, 'little')
+                    myVS.Clear()
+                    vsData = recvall(connection, dataSize)
+                    if screenData is not None:
+                        myVS.ParseFromString(vsData)
+                        os.system('cls')
+                        print(myVS)
                 
                 if True and a == 500:
                     end_time = time()
                     print (500/(end_time - start_time))
-                    #print("pause")
-                    #print("pause")
                 a += 1    
-                # print(myData.bpp, myData.width, myData.height)
-                # debug for checking if packets got lost
-                # print(checkNumberMessages)
-                # checkNumberMessages = checkNumberMessages + 1
             if not ping:
                 break
 

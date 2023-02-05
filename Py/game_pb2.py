@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"h\n\x07Vehicle\x12\x15\n\rcurrent_speed\x18\x01 \x01(\x05\x12\x18\n\x10\x63urrent_steering\x18\x02 \x01(\x05\x12\x15\n\rcurrent_accel\x18\x03 \x01(\x05\x12\x15\n\rcurrent_brake\x18\x04 \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"V\n\x0bObservation\x12\r\n\x05\x64\x65\x62ug\x18\x01 \x01(\x05\x12\x1c\n\x07vehicle\x18\x02 \x01(\x0b\x32\x0b.GT.Vehicle\x12\x1a\n\x06screen\x18\x03 \x01(\x0b\x32\n.GT.Screen*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
+  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"i\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
 )
 
 _BPP = _descriptor.EnumDescriptor(
@@ -43,8 +43,8 @@ _BPP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=324,
-  serialized_end=353,
+  serialized_start=237,
+  serialized_end=266,
 )
 _sym_db.RegisterEnumDescriptor(_BPP)
 
@@ -95,29 +95,43 @@ _VEHICLE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='current_speed', full_name='GT.Vehicle.current_speed', index=0,
+      name='engSpeed', full_name='GT.Vehicle.engSpeed', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='current_steering', full_name='GT.Vehicle.current_steering', index=1,
+      name='engBoost', full_name='GT.Vehicle.engBoost', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='current_accel', full_name='GT.Vehicle.current_accel', index=2,
+      name='engGear', full_name='GT.Vehicle.engGear', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='current_brake', full_name='GT.Vehicle.current_brake', index=3,
+      name='speed', full_name='GT.Vehicle.speed', index=3,
       number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='steer', full_name='GT.Vehicle.steer', index=4,
+      number=5, type=17, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pos', full_name='GT.Vehicle.pos', index=5,
+      number=6, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -135,7 +149,7 @@ _VEHICLE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=53,
-  serialized_end=157,
+  serialized_end=158,
 )
 
 
@@ -187,63 +201,14 @@ _SCREEN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=159,
-  serialized_end=234,
-)
-
-
-_OBSERVATION = _descriptor.Descriptor(
-  name='Observation',
-  full_name='GT.Observation',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='debug', full_name='GT.Observation.debug', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='vehicle', full_name='GT.Observation.vehicle', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='screen', full_name='GT.Observation.screen', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=236,
-  serialized_end=322,
+  serialized_start=160,
+  serialized_end=235,
 )
 
 _SCREEN.fields_by_name['bpp'].enum_type = _BPP
-_OBSERVATION.fields_by_name['vehicle'].message_type = _VEHICLE
-_OBSERVATION.fields_by_name['screen'].message_type = _SCREEN
 DESCRIPTOR.message_types_by_name['GameState'] = _GAMESTATE
 DESCRIPTOR.message_types_by_name['Vehicle'] = _VEHICLE
 DESCRIPTOR.message_types_by_name['Screen'] = _SCREEN
-DESCRIPTOR.message_types_by_name['Observation'] = _OBSERVATION
 DESCRIPTOR.enum_types_by_name['BPP'] = _BPP
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -267,13 +232,6 @@ Screen = _reflection.GeneratedProtocolMessageType('Screen', (_message.Message,),
   # @@protoc_insertion_point(class_scope:GT.Screen)
   })
 _sym_db.RegisterMessage(Screen)
-
-Observation = _reflection.GeneratedProtocolMessageType('Observation', (_message.Message,), {
-  'DESCRIPTOR' : _OBSERVATION,
-  '__module__' : 'Py.game_pb2'
-  # @@protoc_insertion_point(class_scope:GT.Observation)
-  })
-_sym_db.RegisterMessage(Observation)
 
 
 # @@protoc_insertion_point(module_scope)

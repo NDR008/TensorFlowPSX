@@ -14,10 +14,12 @@ message GameState {
 }
 
 message Vehicle {
-    int32 current_speed = 1;
-    int32 current_steering = 2;
-    int32 current_accel = 3;
-    int32 current_brake = 4;
+    int32 engSpeed = 1;
+    int32 engBoost = 2;
+    int32 engGear = 3;
+    int32 speed = 4;
+    sint32 steer = 5;
+    int32 pos = 6;
 }
 
 message Screen {
@@ -25,10 +27,4 @@ message Screen {
     int32 width = 2;
     int32 height = 3;
     BPP bpp = 4;
-}
-
-message Observation {
-    int32 debug = 1;
-    Vehicle vehicle = 2;
-    Screen screen = 3;
 }

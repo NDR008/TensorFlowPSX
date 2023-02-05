@@ -186,7 +186,7 @@ function DrawImguiFrame()
             if racing then
                 doSliderInt(mem, 0x800b66f0, 'Vector?', -500, 500, 'int16_t*')
                 doCheckbox(mem, 0x800b6358, 'HUD', 0, 1, 'int16_t*') -- (PAL SCES-00984)
-                doSliderInt(mem, 0x800b66ec, 'Speed1', 0, 5000, 'uint16_t*')
+                doSliderInt(mem, 0x800b66ec, 'Speed', 0, 5000, 'uint16_t*')
                 doSliderInt(mem, 0x800b66ee, 'Engine Speed', 0, 12000, 'uint16_t*')
                 doSliderInt(mem, 0x800b66f8, 'Boost', 0, 12000, 'uint16_t*')
                 doSliderInt(mem, 0x800bd990, 'Max Seen Speed', 0, 5000, 'uint16_t*')
