@@ -80,9 +80,6 @@ function DrawImguiFrame()
     if not show then imgui.End() return end
     local mem = PCSX.getMemPtr()
 
-    local race_started = readValue(mem, 0x800b6d60, 'uint8_t*')
-    overwriteFlag(race_started)
-
     -- All for the PAL SCES-00984 version of the game.
     -- Now calling our helper function for each of our pointer.
 
@@ -174,11 +171,15 @@ function DrawImguiFrame()
             doSliderInt(mem, 0x800b6356, 'Replay?', 00, 02, 'int16_t*')
             doSliderInt(mem, 0x8009056a, 'DAT_8009056a', -2500, 2500, 'int16_t*')
             doSliderInt(mem, 0x8009056c, 'DAT_8009056c', -2500, 2500, 'int16_t*')
-            doSliderInt(mem, 0x80093bc8, 'DAT_80093bc8', 0, 5000, 'uint16_t*')
-            doSliderInt(mem, 0x800b66f4, 'DAT_800b66f4', 0, 5000, 'uint16_t*')
-            doSliderInt(mem, 0x800bdb54, 'DAT_800bdb54', 0, 5000, 'uint16_t*')
-            doSliderInt(mem, 0x800bd998, 'hiddenInRaceBestLap?', 0, 5000, 'uint16_t*')
-            doSliderInt(mem, 0x800cac90, 'hiddenInGameBestLap?', 0, 5000, 'uint16_t*')
+            -- doSliderInt(mem, 0x80093bc8, 'Total_race', 0, 500000, 'uint32_t*') -- mirror of 0x800bdb54?
+            doSliderInt(mem, 0x800bdb54, 'Total_race', 0, 500000, 'uint32_t*')
+            doSliderInt(mem, 0x800bd9c0, 'First_Lap(set)', 0, 500000, 'uint32_t*')
+            doSliderInt(mem, 0x800bd9c4, 'Second_Lap', 0, 500000, 'uint32_t*')
+
+            doSliderInt(mem, 0x800bd994, 'DisplayedBestTotal', 0, 500000, 'uint32_t*')
+            doSliderInt(mem, 0x800bd998, 'DisplayedBestLap', 0, 500000, 'uint32_t*')
+
+            doSliderInt(mem, 0x800cac90, 'hiddenInGameBestLap?', 0, 500000, 'uint32_t*')
             doSliderInt(mem, 0x801d393c, 'DAT_801d393c', 0, 5000, 'uint16_t*')
         end
         if (imgui.CollapsingHeader("Racing Parameters", ImGuiTreeNodeFlags_None)) then

@@ -3,10 +3,12 @@ import game_pb2 as Game
 import numpy as np
 from PIL import Image
 import cv2
+from time import process_time_ns, time # for benchmarking
 
 counter = 0
 
-myData = Game.Screen()
+myScreen = Game.Screen()
+myGS = Game.GameState()
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,17 +33,37 @@ def recvall(sock, expectedSize):
         data.extend(packet)
     return data
 
+def to_numpy(im):
+    im.load()
+    # unpack data
+    e = Image._getencoder(im.mode, 'raw', im.mode)
+    e.setimage(im.im)
+
+    # NumPy buffer for the result
+    shape, typestr = Image._conv_type_shape(im)
+    data = np.empty(shape, dtype=np.dtype(typestr))
+    mem = data.data.cast('B', (data.data.nbytes,))
+
+    bufsize, s, offset = 65536, 0, 0
+    while not s:
+        l, s, d = e.encode(bufsize)
+        mem[offset:offset + len(d)] = d
+        offset += len(d)
+    if s < 0:
+        raise RuntimeError("encoder error %d in tobytes" % s)
+    return data
+
 def decode_img(screenData):
     size = (screenData.width, screenData.height)
     if screenData.bpp == 0:
-        img = Image.frombuffer("RGB", size, screenData.data, 'raw', 'BGR;15', 0, 1)
-        b, g, r = img.split()
-        img = Image.merge("RGB", (r, g, b))
+        # not actually 16bpp... BGR555
+        # return np.asarray(Image.frombuffer("RGB", size, screenData.data, 'raw', 'BGR;15', 0, 1))
+        return to_numpy(Image.frombuffer("RGB", size, screenData.data, 'raw', 'BGR;15', 0, 1))
     elif screenData.bpp == 1:
-        img = Image.frombuffer("RGB", size, screenData.data, 'raw', 'BGR;15', 0, 1)
+        # return np.asarray(Image.frombuffer("RGB", size, screenData.data, 'raw', 'BGR', 0, 1)) 
+        return to_numpy(Image.frombuffer("RGB", size, screenData.data, 'raw', 'BGR', 0, 1))
     else:
-        img = None
-    return img
+        return None
 
 while True:
     # Wait for a connection
@@ -50,6 +72,8 @@ while True:
     connection, client_address = sock.accept()
     try:
         print('connection from', client_address)
+        start_time = time()
+        a = 0
         while True:
             ping = recvall(connection, 1)
             if ping is not None:
@@ -57,15 +81,31 @@ while True:
             if ping == "P" :
                 dataSize = recvall(connection, 4)
                 dataSize = int.from_bytes(dataSize, 'little')
-                myData.Clear()
-                data = recvall(connection, dataSize)
-                if data is not None:
-                    myData.ParseFromString(data)
-                    pic = decode_img(myData)
+                myScreen.Clear()
+                screenData = recvall(connection, dataSize)
+                if screenData is not None:
+                    myScreen.ParseFromString(screenData)
+                    pic = decode_img(myScreen)
+                    if True:
+                        cv2.imshow('window', pic)
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            cv2.destroyAllWindows()
+                            break
+                
+                dataSize = recvall(connection, 4)
+                dataSize = int.from_bytes(dataSize, 'little')
+                myGS.Clear()
+                gsData = recvall(connection, dataSize)
+                if screenData is not None:
+                    myGS.ParseFromString(gsData)
+                    # print(myGS.raceState)
+                
+                if True and a == 500:
+                    end_time = time()
+                    print (500/(end_time - start_time))
                     #print("pause")
-                    #pic.show()
                     #print("pause")
-                    
+                a += 1    
                 # print(myData.bpp, myData.width, myData.height)
                 # debug for checking if packets got lost
                 # print(checkNumberMessages)

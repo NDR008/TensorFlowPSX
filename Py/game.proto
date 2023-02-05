@@ -9,11 +9,8 @@ enum BPP {
     BPP_24 = 1;
 }
 
-enum gameState {
-    loading = 0;
-    pre_start = 1;
-    race = 2;
-    race_finished =3;
+message GameState {
+    int32 raceState = 1;
 }
 
 message Vehicle {
