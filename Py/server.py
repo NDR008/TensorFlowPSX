@@ -6,25 +6,6 @@ import cv2
 from time import process_time_ns, time # for benchmarking
 import os
 
-counter = 0
-
-myScreen = Game.Screen()
-myGS = Game.GameState()
-myVS = Game.Vehicle()
-
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Bind the socket to the port
-server_address = ('localhost', 9999)
-print('starting up on {} port {}'.format(*server_address))
-sock.bind(server_address)
-
-# Listen for incoming connections
-sock.listen(1)
-print('Gran Turismo AI TCP Server')
-checkNumberMessages = 0
-
 def recvall(sock, expectedSize):
     # Helper function to recv expectedSize bytes or return None if EOF is hit
     data = bytearray()
@@ -67,6 +48,32 @@ def decode_img(screenData):
     else:
         return None
 
+counter = 0
+
+myScreen = Game.Screen()
+myGS = Game.GameState()
+myVS = Game.Vehicle()
+
+# Create a TCP/IP socket
+#sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock = socket.socket()
+
+# Bind the socket to the port
+server_address = ('localhost', 9999)
+print('starting up on {} port {}'.format(*server_address))
+
+
+# Listen for incoming connections
+sock.setblocking(0)
+sock.settimeout(5) 
+sock.bind(server_address)
+
+sock.listen(1)
+
+print('Gran Turismo AI TCP Server')
+checkNumberMessages = 0
+
+    
 while True:
     # Wait for a connection
     print('waiting for a connection')
@@ -121,7 +128,9 @@ while True:
                 a += 1    
             if not ping:
                 break
-
+    except socket.timeout:
+        print("ha")
+        
     finally:
         # Clean up the connection
         connection.close()
