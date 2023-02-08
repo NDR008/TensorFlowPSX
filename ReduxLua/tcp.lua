@@ -3,9 +3,10 @@
 local pb = require('pb')
 local protoc = require('protoc')
 local frames = 0
-local frames_needed = 2
+local frames_needed = 1
 local gameState = {}
 local vehicleState = {}
+local obs = {}
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -81,24 +82,22 @@ function netTCP(netChanged, netCheck)
             local screen = PCSX.GPU.takeScreenShot()
             screen.data = tostring(screen.data)
             screen.bpp = tonumber(screen.bpp)
-            local enc_Screenbytes = assert(pb.encode("GT.Screen", screen))
-            client:writeU32(#enc_Screenbytes)
-            client:write(enc_Screenbytes)
 
             gameState['raceState'] = readGameState()
-            local enc_GSbytes = assert(pb.encode("GT.GameState", gameState))
-            client:writeU32(#enc_GSbytes)
-            client:write(enc_GSbytes)
 
             if gameState['raceState'] < 6 then
-                client:write("R")
                 vehicleState = readVehicleState()
-                local enc_VSbytes = assert(pb.encode("GT.Vehicle", vehicleState))
-                client:writeU32(#enc_VSbytes)
-                client:write(enc_VSbytes)
-            else
-                client:write("N")
             end
+
+
+
+            obs['SS'] = screen
+            obs['GS'] = gameState
+            obs['VS'] = vehicleState
+
+            local test = assert(pb.encode("GT.Observation", obs))
+            client:writeU32(#test)
+            client:write(test)
         end
     end
 
