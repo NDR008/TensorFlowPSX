@@ -46,7 +46,7 @@ def recv_partial(sock, ReceiveState, Header, MessageSize, Message):
         else:
             ReceiveState = 3
             
-    return sock, ReceiveState, Header, MessageSize, Message
+    return ReceiveState, Header, MessageSize, Message
             
     # Helper function to recv expectedSize bytes or return None if EOF is hit
 
@@ -123,7 +123,7 @@ while True:
             start_time = time()
             a = 0
             while True:
-                sock, ReceiveState, Header, MessageSize, Message = recv_partial(connection, ReceiveState, Header, MessageSize, Message)
+                ReceiveState, Header, MessageSize, Message = recv_partial(connection, ReceiveState, Header, MessageSize, Message)
                 if ReceiveState == 3:
                     myData.ParseFromString(Message)
                     pic = decode_img(myData.SS)
