@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 import cv2
 from time import time # for benchmarking
-import os
+
 
 
 def recvall(sock, expectedSize):
@@ -17,19 +17,17 @@ def recvall(sock, expectedSize):
         data.extend(packet)
     return data
 
-global ReceiveState # 0 = init, 1 = receiving header, 2 = receiving data, 3 = all data is there
-global Header
-global MessageSize
-global Message
+ReceiveState = 0 # 0 = init, 1 = receiving header, 2 = receiving data, 3 = all data is there
 
 def recv_partial(sock, ReceiveState, Header, MessageSize, Message):
+    global CompletedMessage
     if ReceiveState == 0:
         ping = recvall(sock, 1) # can be removed later
         ReceiveState = 1
         Header = bytearray()
         Message = bytearray()
 
-    elif ReceiveState == 1:
+    if ReceiveState == 1:
         stream = bytearray()
         if len(Header) < 4:
             stream = sock.recv(4 - len(Header))
@@ -38,13 +36,15 @@ def recv_partial(sock, ReceiveState, Header, MessageSize, Message):
             MessageSize = int.from_bytes(Header, 'little')
             Header = bytearray()
             ReceiveState = 2
-    elif ReceiveState == 2:
+            
+    if ReceiveState == 2:
         stream = bytearray()
         if len(Message) < MessageSize:
             stream = sock.recv(MessageSize - len(Message))
             Message.extend(stream)
         else:
-            ReceiveState = 3
+            ReceiveState = 0
+            CompletedMessage = Message
             
     return ReceiveState, Header, MessageSize, Message
             
@@ -81,17 +81,6 @@ def decode_img(screenData):
     else:
         return None
 
-def sock_init():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_address = ('localhost', 9999)
-    print('starting up on {} port {}'.format(*server_address))
-    # Listen for incoming connections
-    sock.setblocking(0)
-    sock.settimeout(5) 
-    sock.bind(server_address)
-    sock.listen(1)
-    return sock
-
 counter = 0
 
 myScreen = Game.Screen()
@@ -104,38 +93,43 @@ pic = None
 # Create a TCP/IP socket
 
 print('Gran Turismo AI TCP Server')
-sock = sock_init()
+
 checkNumberMessages = 0
 
 ReceiveState = 0 # 1: receiving size, 2: receiving data
 Header = bytearray()
 MessageSize = 0
 Message = bytearray()
-    
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_address = ('localhost', 9999)
+sock.bind(server_address)
+sock.setblocking(False)
+sock.listen(1)
+print('starting up on {} port {}'.format(*server_address))
+print('waiting for a connection for 5s') 
+
+global CompletedMessage
+CompletedMessage = None
+
 while True:
-    # Wait for a connection
-    print('waiting for a connection for 5s')
-    sendData = 1
     try:
         connection, client_address = sock.accept()
-        try:
-            print('connection from', client_address)
-            start_time = time()
-            a = 0
-            while True:
-                ReceiveState, Header, MessageSize, Message = recv_partial(connection, ReceiveState, Header, MessageSize, Message)
-                if ReceiveState == 3:
-                    myData.ParseFromString(Message)
-                    pic = decode_img(myData.SS)
-                    ReceiveState = 0
-                if pic is not None: 
-                    cv2.imshow('window', pic)
-                    if cv2.waitKey(1) & 0xFF == ord('q'):
-                        cv2.destroyAllWindows()
+        print('connection from', client_address)
+        start_time = time()
+        a = 0
+        while True:
+            ReceiveState, Header, MessageSize, Message = recv_partial(connection, ReceiveState, Header, MessageSize, Message)
 
-        finally:
-            # Clean up the connection
-            connection.close()
-    except socket.timeout:
-        print("Nobody loves me")
-        break
+    except socket.error as e:
+
+        print('GRRRRRRRRRR')
+        myData.ParseFromString(CompletedMessage)
+        try:
+            pic = decode_img(myData.SS)
+            cv2.imshow('window', pic)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
+        except:
+            print("oops")
+
