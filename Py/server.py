@@ -154,13 +154,16 @@ while True:
             if serverSession.excpt and serverSession.fullData:
                 serverSession.excpt = False
                 serverSession.decodeImg()
-                cv2.imshow('window', serverSession.pic)
+                size = serverSession.pic.shape
+                cv2.imshow('window', cv2.resize(serverSession.pic, (size[1]*3,size[0]*3)))
                 if serverSession.lastFrame != serverSession.myData.frame:
                     serverSession.lastFrame = serverSession.myData.frame
                     if serverSession.benchmark:
                         a = a + 1
-                        if a == 500:
+                        if a == 500:          
                             print("500 frames at ", 500/(time()-timeStart))
+                            timeStart = time()
+                            a = 0
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         cv2.destroyAllWindows()
                         print('Forced Exit')

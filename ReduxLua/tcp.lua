@@ -67,6 +67,7 @@ function netTCP(netChanged, netStatus)
             frames = 0
         else
             client:close()
+            dieing = 0
         end
     elseif netStatus then
         frames = frames + 1
