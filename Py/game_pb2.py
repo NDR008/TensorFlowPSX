@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"i\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"Y\n\x0bObservation\x12\x16\n\x02SS\x18\x01 \x01(\x0b\x32\n.GT.Screen\x12\x19\n\x02GS\x18\x02 \x01(\x0b\x32\r.GT.GameState\x12\x17\n\x02VS\x18\x03 \x01(\x0b\x32\x0b.GT.Vehicle*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
+  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"i\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"h\n\x0bObservation\x12\x16\n\x02SS\x18\x01 \x01(\x0b\x32\n.GT.Screen\x12\x19\n\x02GS\x18\x02 \x01(\x0b\x32\r.GT.GameState\x12\x17\n\x02VS\x18\x03 \x01(\x0b\x32\x0b.GT.Vehicle\x12\r\n\x05\x66rame\x18\x04 \x01(\x05*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
 )
 
 _BPP = _descriptor.EnumDescriptor(
@@ -43,8 +43,8 @@ _BPP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=328,
-  serialized_end=357,
+  serialized_start=343,
+  serialized_end=372,
 )
 _sym_db.RegisterEnumDescriptor(_BPP)
 
@@ -235,6 +235,13 @@ _OBSERVATION = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='frame', full_name='GT.Observation.frame', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -248,7 +255,7 @@ _OBSERVATION = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=237,
-  serialized_end=326,
+  serialized_end=341,
 )
 
 _SCREEN.fields_by_name['bpp'].enum_type = _BPP

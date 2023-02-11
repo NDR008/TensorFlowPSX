@@ -35,6 +35,7 @@ class server:
         self.lostComms = 0
         self.buffer = None
         self.benchmark = benchmark
+        self.lastFrame = 0
         print("GT AI Server instantiated")
 
     def connect(self):
@@ -154,15 +155,17 @@ while True:
                 serverSession.excpt = False
                 serverSession.decodeImg()
                 cv2.imshow('window', serverSession.pic)
-                if serverSession.benchmark:
-                    a = a + 1
-                    if a == 500:
-                        print("500 frames at ", 500/(time()-timeStart))
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    cv2.destroyAllWindows()
-                    print('Forced Exit')
-                    serverSession.connection.close()  
-                    break
+                if serverSession.lastFrame != serverSession.myData.frame:
+                    serverSession.lastFrame = serverSession.myData.frame
+                    if serverSession.benchmark:
+                        a = a + 1
+                        if a == 500:
+                            print("500 frames at ", 500/(time()-timeStart))
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        cv2.destroyAllWindows()
+                        print('Forced Exit')
+                        serverSession.connection.close()  
+                        break
     finally:
         # Clean up the connection
         print('Connection closed')
