@@ -155,7 +155,8 @@ while True:
                 serverSession.excpt = False
                 serverSession.decodeImg()
                 size = serverSession.pic.shape
-                cv2.imshow('window', cv2.resize(serverSession.pic, (size[1]*3,size[0]*3)))
+                serverSession.pic = cv2.resize(serverSession.pic, (size[1]*2,size[0]*2))
+                cv2.imshow('window', serverSession.pic)
                 if serverSession.lastFrame != serverSession.myData.frame:
                     serverSession.lastFrame = serverSession.myData.frame
                     if serverSession.benchmark:
