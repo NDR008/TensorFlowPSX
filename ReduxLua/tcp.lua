@@ -63,6 +63,8 @@ function netTCP(netChanged, netStatus)
     if netChanged then
         if netStatus then
             client = Support.File.uvFifo("127.0.0.1", 9999)
+            dieing = 0
+            frames = 0
         else
             client:close()
         end
@@ -82,6 +84,7 @@ function netTCP(netChanged, netStatus)
             obs['SS'] = screen
             obs['GS'] = gameState
             obs['VS'] = vehicleState
+            obs['frame'] = frames
 
             local test = assert(pb.encode("GT.Observation", obs))
             client:writeU32(#test)
@@ -93,11 +96,12 @@ function netTCP(netChanged, netStatus)
             end
         end
     end
-    if dieing > 30 then
-        print("could not find a server")
+    if dieing == 30 then
+        print("Could not find a server")
         client:close()
         dieing = 0
-        return false
+        netStatus = false
+        return netStatus
     else
         return netStatus
     end
