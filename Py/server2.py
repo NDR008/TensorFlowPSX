@@ -21,6 +21,7 @@ class server:
         self.mSize = bytearray()
         self.message = bytearray()
         self.part = bytearray()
+        self.pic = None
         self.myData = Game.Observation()
         self.fullData = False
         self.connection = None
@@ -57,7 +58,7 @@ class server:
         mem = data.data.cast('B', (data.data.nbytes,))
         bufsize, s, offset = 65536, 0, 0
         while not s:
-            l, s, d = e.encode(bufsize)
+            l, s, d = tmpImage.encode(bufsize)
             mem[offset:offset + len(d)] = d
             offset += len(d)
         if s < 0:
@@ -69,10 +70,10 @@ class server:
         if self.myData.SS.bpp == 0:
             # not actually 16bpp... BGR555
             self.pic = self.toNumpy(Image.frombuffer("RGB", size, self.myData.SS.data, 'raw', 'BGR;15', 0, 1))
-        elif self.myData.screenData.bpp == 1:
+        elif self.myData.SS.bpp == 1:
             self.pic = self.toNumpy(Image.frombuffer("RGB", size, self.myData.SS.data, 'raw', 'BGR', 0, 1))
         else:
-            self.pic = None
+            print("no clue")
         
     def receive(self):
         #print((self.mState == messageState.mPing.name))
@@ -99,6 +100,9 @@ class server:
                     self.fullData = True
                     self.mState = messageState.mPing.name
                     self.myData.ParseFromString(self.message)
+                    self.header = bytearray()
+                    self.mSize = bytearray()
+                    self.message = bytearray()
         except socket.error as e:
             self.excpt = True            
 
@@ -112,12 +116,11 @@ while True:
     print('connection from', serverSession.clientAddress)
     while True:
         serverSession.receive()
-        print(serverSession.mState)
         #print('GRRRRRRRRRR', self.mState, e)
-        if serverSession.excpt and serverSession.fullData is not None:
+        if serverSession.excpt and serverSession.fullData:
             serverSession.excpt = False
-            serverSession.pic = serverSession.decodeImg()
+            serverSession.decodeImg()
             cv2.imshow('window', serverSession.pic)
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
+               cv2.destroyAllWindows()
                 
