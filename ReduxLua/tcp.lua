@@ -1,5 +1,4 @@
 -- Protobuf related
-
 local pb = require('pb')
 local protoc = require('protoc')
 local frames = 0

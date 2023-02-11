@@ -33,5 +33,4 @@ message Observation {
     Screen SS = 1;
     GameState GS = 2;
     Vehicle VS = 3;
-
 }
