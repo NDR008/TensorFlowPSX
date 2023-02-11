@@ -1,11 +1,12 @@
 -- Protobuf related
-
 local pb = require('pb')
 local protoc = require('protoc')
 local frames = 0
-local frames_needed = 2
+local frames_needed = 1
 local gameState = {}
 local vehicleState = {}
+local obs = {}
+local dieing = 0
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -29,14 +30,6 @@ check_load(proto_file)
 
 -- REDUX related
 local mem = PCSX.getMemPtr()
-
-local function readValue(mem, address, type)
-    address = bit.band(address, 0x1fffff)
-    local pointer = mem + address
-    pointer = ffi.cast(type, pointer)
-    local value = pointer[0]
-    return value
-end
 
 local function readGameState()
     local raceStart = readValue(mem, 0x800b6d60, 'uint8_t*')
@@ -66,44 +59,46 @@ end
 
 -- TCP related
 
-function netTCP(netChanged, netCheck)
-    
+function netTCP(netChanged, netStatus)
     if netChanged then
-        if netCheck then
+        if netStatus then
             client = Support.File.uvFifo("127.0.0.1", 9999)
         else
             client:close()
         end
-    elseif netCheck then
+    elseif netStatus then
         frames = frames + 1
         if (frames % frames_needed) == 0 then
             client:write("P")
             local screen = PCSX.GPU.takeScreenShot()
             screen.data = tostring(screen.data)
             screen.bpp = tonumber(screen.bpp)
-            local enc_Screenbytes = assert(pb.encode("GT.Screen", screen))
-            client:writeU32(#enc_Screenbytes)
-            client:write(enc_Screenbytes)
-
             gameState['raceState'] = readGameState()
-            local enc_GSbytes = assert(pb.encode("GT.GameState", gameState))
-            client:writeU32(#enc_GSbytes)
-            client:write(enc_GSbytes)
 
             if gameState['raceState'] < 6 then
-                client:write("R")
                 vehicleState = readVehicleState()
-                local enc_VSbytes = assert(pb.encode("GT.Vehicle", vehicleState))
-                client:writeU32(#enc_VSbytes)
-                client:write(enc_VSbytes)
+            end
+
+            obs['SS'] = screen
+            obs['GS'] = gameState
+            obs['VS'] = vehicleState
+
+            local test = assert(pb.encode("GT.Observation", obs))
+            client:writeU32(#test)
+            client:write(test)
+            if client:readU16() == 1 then
+                dieing = math.max(0, (dieing - 2))
             else
-                client:write("N")
+                dieing = dieing + 1
             end
         end
     end
-
-end
-
-function overwriteFlag(giveMeData)
-    localRaceStart = giveMeData
+    if dieing > 30 then
+        print("could not find a server")
+        client:close()
+        dieing = 0
+        return false
+    else
+        return netStatus
+    end
 end

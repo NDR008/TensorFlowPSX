@@ -28,3 +28,9 @@ message Screen {
     int32 height = 3;
     BPP bpp = 4;
 }
+
+message Observation {
+    Screen SS = 1;
+    GameState GS = 2;
+    Vehicle VS = 3;
+}
