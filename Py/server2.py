@@ -3,7 +3,7 @@ import game_pb2 as Game
 import numpy as np
 from PIL import Image
 import cv2
-from time import time # for benchmarking
+from time import sleep # for benchmarking
 from enum import Enum
 
 class messageState(Enum):
@@ -20,13 +20,15 @@ class server:
         self.header = bytearray()
         self.mSize = bytearray()
         self.message = bytearray()
-        self.part = bytearray()
         self.pic = None
         self.myData = Game.Observation()
         self.fullData = False
         self.connection = None
         self.clientAddress =  None
         self.excpt = False
+        self.lostComms = 0
+        self.buffer = None
+        print("GT AI Server instantiated")
 
     def connect(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -79,8 +81,12 @@ class server:
         #print((self.mState == messageState.mPing.name))
         try:
             if self.mState == messageState.mPing.name:
-                self.buffer = self.recvall(1) # can be removed later
-                self.mState = messageState.mRecvHeader.name     
+                self.buffer = self.recvall(1) # can be removed later           
+                if self.buffer is not None and self.buffer.decode() == 'P':
+                    self.lostComms = False
+                    self.mState = messageState.mRecvHeader.name
+                else:
+                    self.lostComms = True
 
             if self.mState == messageState.mRecvHeader.name:
                 self.part = bytearray()
@@ -109,18 +115,27 @@ class server:
 
 serverSession = server()
 serverSession.connect()
-print("wait for connection")
+
 while True:
+    print("Waiting for a connection")
     serverSession.connection, serverSession.clientAddress = serverSession.sock.accept()
     serverSession.connection.setblocking(False)
-    print('connection from', serverSession.clientAddress)
-    while True:
-        serverSession.receive()
-        #print('GRRRRRRRRRR', self.mState, e)
-        if serverSession.excpt and serverSession.fullData:
-            serverSession.excpt = False
-            serverSession.decodeImg()
-            cv2.imshow('window', serverSession.pic)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-               cv2.destroyAllWindows()
-                
+   
+    try:
+        print('Connection from', serverSession.clientAddress)
+        while True:
+            serverSession.receive()
+            if serverSession.lostComms:
+                break
+            #print('GRRRRRRRRRR', self.mState, e)
+            if serverSession.excpt and serverSession.fullData:
+                serverSession.excpt = False
+                serverSession.decodeImg()
+                cv2.imshow('window', serverSession.pic)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    cv2.destroyAllWindows()
+    finally:
+        # Clean up the connection
+        print('Connection closed')
+        serverSession.connection.close()            
+        serverSession.lostComms = False
