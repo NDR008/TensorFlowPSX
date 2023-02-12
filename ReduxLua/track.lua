@@ -10,7 +10,7 @@ function openTrack()
 end
 
 function writeTrack()
-    
+    print("hehe")
 end
 
 function closeTrack()

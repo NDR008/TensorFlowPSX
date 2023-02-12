@@ -1,15 +1,3 @@
-function checkValue(mem, address, value, type)
-    address = bit.band(address, 0x1fffff)
-    local pointer = mem + address
-    pointer = ffi.cast(type, pointer)
-    local tempvalue = pointer[0]
-    local check = false
-    if tempvalue == value then
-        check = true
-    end
-    return check
-end
-
 function doCheckbox(mem, address, name, value, original, type)
     address = bit.band(address, 0x1fffff)
     local pointer = mem + address
@@ -53,4 +41,12 @@ function setValue(mem, address, value, type)
     local pointer = mem + address
     pointer = ffi.cast(type, pointer)
     pointer[0] = value
+end
+
+function checkValue(mem, address, value, type)
+    local tempvalue = readValue(mem, address, type)
+    if tempvalue == value then
+        check = true
+    end
+    return check
 end
