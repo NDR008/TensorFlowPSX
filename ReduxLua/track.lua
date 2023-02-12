@@ -1,26 +1,24 @@
-local coord = {}
+coord = ''
 
 function openTrack()
     print("open")
-    local file = Support.File.open("track.txt", "CREATE")
-    file:close()
-    file = Support.File.open("track.txt", "READWRITE")
-    file:write("BOO")
+    local file = Support.File.open("track.csv", "CREATE")
     file:close()
 end
 
 function writeTrack()
-    print("hehe")
+    local y = readValue(mem, 0x800b6708, 'int32_t*')
+    local x = readValue(mem, 0x800b6704, 'int32_t*')
+    str = tostring(x) .. ',' .. tostring(y) .. '\n'
+    coord = coord .. str
 end
 
 function closeTrack()
-    print("closed")
+    appendCoord()
 end
 
-local function appendCoord()
-    local file = Support.File.open("track.txt", "CREATE")
-    file:close()
-    file = Support.File.open("track.txt", "READWRITE")
-    file:write("BOO")
+function appendCoord()
+    file = Support.File.open("track.csv", "READWRITE")
+    file:write(coord)
     file:close()
 end
