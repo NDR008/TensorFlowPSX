@@ -150,7 +150,6 @@ while True:
             if serverSession.lostComms:
                 break
 
-            #print('GRRRRRRRRRR', self.mState, e)
             if serverSession.excpt and serverSession.fullData:
                 serverSession.excpt = False
                 serverSession.decodeImg()

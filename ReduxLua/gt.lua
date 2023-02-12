@@ -13,6 +13,8 @@ forPlay = true
 
 netStatus = false
 
+dumpTrack = false
+
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
 
@@ -41,6 +43,7 @@ function DrawImguiFrame()
         { "Start", "start1.slice" },
         { "Arcade Start", "arc1.slice" },
         { "Arcade HS R33", "arc2.slice" },
+        { "Arcade HS R33 mid-lap",   "arc4.slice" },
         { "Arcade HS Corv", "arc3.slice" },
         { "Simulation Home", "sim1.slice" },
         { "SARD Supra HS", "sim2.slice" },
@@ -99,6 +102,20 @@ function DrawImguiFrame()
         imgui.SameLine(240)
         netChanged, netStatus = imgui.Checkbox("TCP", netStatus)
         netStatus = netTCP(netChanged, netStatus)
+        
+        trackChange, dumpTrack = imgui.Checkbox("dumpTrack", dumpTrack)
+        if trackChange then
+            if dumpTrack then
+                openTrack()
+            else
+                closeTrack()
+            end
+        else
+            if dumpTrack then
+                writeTrack()
+            end
+        end
+
         if (imgui.CollapsingHeader("Not clear", ImGuiTreeNodeFlags_None)) then
             imgui.TextUnformatted("START-countdown")
             imgui.SameLine()
@@ -109,6 +126,23 @@ function DrawImguiFrame()
             imgui.TextUnformatted("frameRate?")
             imgui.SameLine()
             imgui.TextUnformatted(readValue(mem, 0x800bf364, "int16_t*"))
+            doSliderInt(mem, 0x800b6708, 'Map Y', -3000000, 3000000, 'int32_t*')
+            doSliderInt(mem, 0x800b6704, 'Map X', -3000000, 3000000, 'int32_t*')
+            doSliderInt(mem, 0x800b670c, 'Map Z', -3000000, 3000000, 'int32_t*')
+            doSliderInt(mem, 0x800b6716, 'hmmm', -300000, 300000, 'int16_t*')
+            -- doSliderInt(mem, 0x800b672e, 'Map X', -30, 30, 'int16_t*')
+            -- doSliderInt(mem, 0x800b6dea, 'FL Y', -30, 30, 'int16_t*')
+            -- doSliderInt(mem, 0x800b6e0a, 'FL2 Y', -30, 30, 'int16_t*')
+            -- doSliderInt(mem, 0x800b6dfa, 'RL X', -30, 30, 'int16_t*')
+            -- doSliderInt(mem, 0x800b6706, 'RR X', -30, 30, 'int16_t*')
+            -- doSliderInt(mem, 0x800b34f8, 'Global X?', -30, 30, 'int16_t*')
+
+            doSliderInt(mem, 0x800b6778, 'FL off', 0, 15, 'int8_t*')
+            doSliderInt(mem, 0x800b67bc, 'FR off', 0, 15, 'int8_t*')
+            doSliderInt(mem, 0x800b67bd, 'FR bounce', 0, 15, 'int8_t*')
+            doSliderInt(mem, 0x800b6800, 'RL off', 0, 15, 'int8_t*')
+            doSliderInt(mem, 0x800b6844, 'RR off', 0, 15, 'int8_t*')
+
             doSliderInt(mem, 0x800b67d6, '800b67d6 tyre slip?', 0, 255, 'uint8_t*')
             doSliderInt(mem, 0x800b67bc, '800b67bc bounce?', -255, 512, 'int16_t*')
             --doSliderInt(mem, 0x800b34a0, 'raceStart', 0, 1, 'uint8_t*') -- seems to be a couple of 100 ms ahead of time
@@ -123,8 +157,8 @@ function DrawImguiFrame()
             doSliderInt(mem, 0x800b6356, 'Replay?', 00, 02, 'int16_t*')
             doSliderInt(mem, 0x8009056a, 'DAT_8009056a', -2500, 2500, 'int16_t*')
             doSliderInt(mem, 0x8009056c, 'DAT_8009056c', -2500, 2500, 'int16_t*')
-            -- doSliderInt(mem, 0x80093bc8, 'Total_race', 0, 500000, 'uint32_t*') -- mirror of 0x800bdb54?
-            doSliderInt(mem, 0x800bdb54, 'Total_race', 0, 500000, 'uint32_t*')
+            doSliderInt(mem, 0x80093bc8, 'Total_race1', 0, 500000, 'uint32_t*') -- mirror of 0x800bdb54?
+            doSliderInt(mem, 0x800bdb54, 'Total_race2', 0, 500000, 'uint32_t*')
             doSliderInt(mem, 0x800bd9c0, 'First_Lap(set)', 0, 500000, 'uint32_t*')
             doSliderInt(mem, 0x800bd9c4, 'Second_Lap', 0, 500000, 'uint32_t*')
 
@@ -138,6 +172,7 @@ function DrawImguiFrame()
             if racing then
                 doSliderInt(mem, 0x800b66f0, 'Vector?', -500, 500, 'int16_t*')
                 doCheckbox(mem, 0x800b6358, 'HUD', 0, 1, 'int16_t*') -- (PAL SCES-00984)
+                doCheckbox(mem, 0x800b615c, 'Not Replay', 0, 1, 'int32_t*') -- (PAL SCES-00984)
                 doSliderInt(mem, 0x800b66ec, 'Speed', 0, 5000, 'uint16_t*')
                 doSliderInt(mem, 0x800b66ee, 'Engine Speed', 0, 12000, 'uint16_t*')
                 doSliderInt(mem, 0x800b66f8, 'Boost', 0, 12000, 'uint16_t*')
