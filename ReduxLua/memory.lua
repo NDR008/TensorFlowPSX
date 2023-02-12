@@ -47,3 +47,10 @@ function readValue(mem, address, type)
     local value = pointer[0]
     return value
 end
+
+function setValue(mem, address, value, type)
+    address = bit.band(address, 0x1fffff)
+    local pointer = mem + address
+    pointer = ffi.cast(type, pointer)
+    pointer[0] = value
+end

@@ -45,6 +45,7 @@ function DrawImguiFrame()
         { "Arcade HS R33", "arc2.slice" },
         { "Arcade HS R33 mid-lap",   "arc4.slice" },
         { "Arcade HS Corv", "arc3.slice" },
+        { "Sim Endurance Race",       "sim3.slice" },
         { "Simulation Home", "sim1.slice" },
         { "SARD Supra HS", "sim2.slice" },
         { "0-400m Test MR2", "sim3.slice" }
@@ -115,17 +116,30 @@ function DrawImguiFrame()
                 writeTrack()
             end
         end
+        doCheckbox(mem, 0x800b6168, 'HighFrameRate', 0, 1, 'int8_t*')
 
         if (imgui.CollapsingHeader("Not clear", ImGuiTreeNodeFlags_None)) then
-            imgui.TextUnformatted("START-countdown")
+            --imgui.TextUnformatted("START-countdown")
+            --imgui.SameLine()
+            --imgui.TextUnformatted(readValue(mem, 0x800b6162, "int16_t*"))
+
+            imgui.TextUnformatted("PhysicsTimeStep0")
             imgui.SameLine()
-            imgui.TextUnformatted(readValue(mem, 0x800b6162, "int16_t*"))
-            imgui.TextUnformatted("frameRate?")
+            imgui.TextUnformatted(readValue(mem, 0x800bf364, "int8_t*"))
+
+            imgui.TextUnformatted("PhysicsTimeStep2")
+            imgui.SameLine()
+            imgui.TextUnformatted(readValue(mem, 0x800bf365, "int8_t*"))
+
+            imgui.TextUnformatted("PhysicsTimeStep1")
             imgui.SameLine()
             imgui.TextUnformatted(readValue(mem, 0x800bf368, "int16_t*"))
-            imgui.TextUnformatted("frameRate?")
-            imgui.SameLine()
-            imgui.TextUnformatted(readValue(mem, 0x800bf364, "int16_t*"))
+
+            doSliderInt(mem, 0x800b6702, 'Wrong Way', 0, 1, 'int8_t*')
+            if (imgui.Button("Start Pits")) then
+                setValue(mem, 0x800b66d4, 127, 'int16_t*')
+            end
+            doSliderInt(mem, 0x800b6160, 'Pit Related', 0, 127, 'int8_t*')
             doSliderInt(mem, 0x800b6708, 'Map Y', -3000000, 3000000, 'int32_t*')
             doSliderInt(mem, 0x800b6704, 'Map X', -3000000, 3000000, 'int32_t*')
             doSliderInt(mem, 0x800b670c, 'Map Z', -3000000, 3000000, 'int32_t*')
@@ -137,14 +151,15 @@ function DrawImguiFrame()
             -- doSliderInt(mem, 0x800b6706, 'RR X', -30, 30, 'int16_t*')
             -- doSliderInt(mem, 0x800b34f8, 'Global X?', -30, 30, 'int16_t*')
 
-            doSliderInt(mem, 0x800b6778, 'FL off', 0, 15, 'int8_t*')
-            doSliderInt(mem, 0x800b67bc, 'FR off', 0, 15, 'int8_t*')
-            doSliderInt(mem, 0x800b67bd, 'FR bounce', 0, 15, 'int8_t*')
-            doSliderInt(mem, 0x800b6800, 'RL off', 0, 15, 'int8_t*')
-            doSliderInt(mem, 0x800b6844, 'RR off', 0, 15, 'int8_t*')
+            doSliderInt(mem, 0x800b6778, 'FL off', 0, 2, 'int8_t*')
+            doSliderInt(mem, 0x800b67bc, 'FR off', 0, 2, 'int8_t*')
+            
+            doSliderInt(mem, 0x800b6800, 'RL off', 0, 2, 'int8_t*')
+            doSliderInt(mem, 0x800b6844, 'RR off', 0, 2, 'int8_t*')
+            doSliderInt(mem, 0x800b67bd, 'Car in shadow', 0, 2, 'int8_t*')
 
             doSliderInt(mem, 0x800b67d6, '800b67d6 tyre slip?', 0, 255, 'uint8_t*')
-            doSliderInt(mem, 0x800b67bc, '800b67bc bounce?', -255, 512, 'int16_t*')
+            -- doSliderInt(mem, 0x800b67bc, '800b67bc bounce?', -255, 512, 'int16_t*')
             --doSliderInt(mem, 0x800b34a0, 'raceStart', 0, 1, 'uint8_t*') -- seems to be a couple of 100 ms ahead of time
             doSliderInt(mem, 0x800b6d60, 'raceStart', 0, 1, 'uint8_t*')
             doSliderInt(mem, 0x800b6226, 'raceMode', 0, 30, 'uint16_t*')
