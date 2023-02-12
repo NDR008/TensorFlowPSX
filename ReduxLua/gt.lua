@@ -112,9 +112,13 @@ function DrawImguiFrame()
             imgui.TableSetColumnIndex(0)
             doSliderInt(mem, 0x800b6778, 'Fr Left off', 0, 2, 'int8_t*')
             doSliderInt(mem, 0x800b6800, 'Re Left off', 0, 2, 'int8_t*')
+            doSliderInt(mem, 0x800b67d6, 'Left tyre slip', 0, 255, 'uint8_t*')
             imgui.TableSetColumnIndex(1)
             doSliderInt(mem, 0x800b67bc, 'Fr Right off', 0, 2, 'int8_t*')
             doSliderInt(mem, 0x800b6844, 'Re Right off', 0, 2, 'int8_t*')
+            doSliderInt(mem, 0x800b681a, 'Right tyre slip', 0, 255, 'uint8_t*')
+            --imgui.TableNextRow()
+            --imgui.TableSetColumnIndex(0)
             imgui.EndTable()
         end
         if (imgui.CollapsingHeader("Race Condition", ImGuiTreeNodeFlags_None)) then
