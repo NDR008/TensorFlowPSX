@@ -3,8 +3,6 @@ local pb = require('pb')
 local protoc = require('protoc')
 local frames = 0
 local frames_needed = 1
-local gameState = {}
-local vehicleState = {}
 local obs = {}
 local dieing = 0
 
@@ -32,22 +30,24 @@ check_load(proto_file)
 local mem = PCSX.getMemPtr()
 
 local function readGameState()
+    local gameState = {}
     local raceStart = readValue(mem, 0x800b6d60, 'uint8_t*')
     local raceMode = readValue(mem, 0x800b6226, 'uint8_t*')
     local racing = readValue(mem, 0x8008df72, "int8_t*")
     if racing ~= 58 then
-        return 6 -- not in race
+        gameState['raceState'] = 6 -- not in race
     elseif raceStart == 1 then
-        return 1 -- race finished
+        gameState['raceState'] = 1 -- race finished
     elseif raceMode == 0 then
-        return 2 -- racing
+        gameState['raceState'] = 2 -- racing
     else
-        return 3 -- race finished
+        gameState['raceState'] = 3 -- race finished
     end
+    return gameState
 end
 
 local function readVehicleState()
-    vehicleState = {}
+    local vehicleState = {}
     vehicleState['engSpeed'] = readValue(mem, 0x800b66ee, 'uint16_t*')
     vehicleState['engBoost'] = readValue(mem, 0x800b66f8, "uint16_t*")
     vehicleState['engGear'] = readValue(mem, 0x800b66e8, "uint8_t*")
@@ -57,6 +57,13 @@ local function readVehicleState()
     return vehicleState
 end
 
+local function readVehiclePositon()
+    local pos = {}
+    pos['x'] = readValue(mem, 0x800b6704, 'int32_t*')
+    pos['y'] = readValue(mem, 0x800b6708, 'int32_t*')
+    pos['z'] = readValue(mem, 0x800b670c, 'int32_t*')
+    return pos
+end
 -- TCP related
 
 function netTCP(netChanged, netStatus)
@@ -76,8 +83,9 @@ function netTCP(netChanged, netStatus)
             local screen = PCSX.GPU.takeScreenShot()
             screen.data = tostring(screen.data)
             screen.bpp = tonumber(screen.bpp)
-            gameState['raceState'] = readGameState()
-
+            local gameState = readGameState()
+            local vehicleState
+            local pos = readVehiclePositon()
             if gameState['raceState'] < 6 then
                 vehicleState = readVehicleState()
             end
@@ -86,6 +94,7 @@ function netTCP(netChanged, netStatus)
             obs['GS'] = gameState
             obs['VS'] = vehicleState
             obs['frame'] = frames
+            obs['pos'] = pos
 
             local test = assert(pb.encode("GT.Observation", obs))
             client:writeU32(#test)

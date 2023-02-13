@@ -5,6 +5,9 @@ from PIL import Image
 import cv2
 from time import sleep, time # for benchmarking
 from enum import Enum
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib import style
 
 class messageState(Enum):
     mPing = 1 # expect a simple "P"
@@ -91,7 +94,7 @@ class server:
         elif self.myData.SS.bpp == 1:
             self.pic = self.toNumpy(Image.frombuffer("RGB", size, self.myData.SS.data, 'raw', 'BGR', 0, 1))
         else:
-            print("no clue")
+            print("no clue what to do with this image")
         
     def receive(self):
         """this function will receive as much data as possible

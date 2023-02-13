@@ -214,7 +214,6 @@ function DrawImguiFrame()
         end
         if (imgui.CollapsingHeader("Simulation", ImGuiTreeNodeFlags_None)) then
             doSliderInt(mem, 0x8009b874, 'Credit (Simu)', -999999999, 999999999, 'int32_t*')
-
         end
 
     elseif hasUs then
