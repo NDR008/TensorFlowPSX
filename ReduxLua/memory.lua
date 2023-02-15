@@ -13,6 +13,17 @@ function doCheckbox(mem, address, name, value, original, type)
     end
 end
 
+function forceCheckbox(mem, address, name, off, on, check, type)
+    address = bit.band(address, 0x1fffff)
+    local pointer = mem + address
+    pointer = ffi.cast(type, pointer)
+    local changed
+    changed, check = imgui.Checkbox(name, check)
+    --if changed then
+    if check then pointer[0] = on else pointer[0] = off end
+    return check
+end
+
 -- Declare a helper function with the following arguments:
 --   mem: the ffi object representing the base pointer into the main RAM
 --   address: the address of the uint32_t to monitor and mutate
