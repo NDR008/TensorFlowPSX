@@ -1,9 +1,9 @@
 from rtgym import RealTimeGymInterface
-import server
+from serverClass import server
 from pygamepad import controlGamepad
 
 class MyRealTimeInterface(RealTimeGymInterface):
-    
+    from serverClass import server 
     def __init__(self, img_hist_len: int = 4,
                  gamepad: bool = False,
                  min_nb_steps_before_failure: int = int(3.5 * 20),
@@ -17,7 +17,7 @@ class MyRealTimeInterface(RealTimeGymInterface):
         self.img_hist = None
         self.img = None
         self.reward_function = None
-        self.server = None
+        self.server = server()
         self.display = display
         self.gamepad = gamepad
         self.j = None
@@ -29,13 +29,14 @@ class MyRealTimeInterface(RealTimeGymInterface):
         self.finish_reward = finish_reward
         self.constant_penalty = constant_penalty
 
-    def startSession(self, server):
-        self.server = server
+    def startSession(self):
         self.server.connect()
     
     def send_control(self, control):
         controlGamepad(control)
         
 agent = MyRealTimeInterface()
-thisServer = server()
-agent.startSession(server)
+print("agent instantiated")
+agent.startSession()
+print("woop")
+agent.server.startReceiving()

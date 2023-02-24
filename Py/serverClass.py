@@ -136,10 +136,10 @@ class server:
         self.connect()
         while True:
             print("Waiting for a connection")
-            self.connection, serverSession.clientAddress = serverSession.sock.accept()
+            self.connection, self.clientAddress = self.sock.accept()
             self.connection.setblocking(False)
             try:
-                print('Connection from', serverSession.clientAddress)
+                print('Connection from', self.clientAddress)
                 while True:
                     self.receive()
                     if self.lostComms:
