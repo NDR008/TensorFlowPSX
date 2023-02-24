@@ -5,9 +5,6 @@ from PIL import Image
 import cv2
 from time import sleep, time # for benchmarking
 from enum import Enum
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib import style
 
 class messageState(Enum):
     mPing = 1 # expect a simple "P"
@@ -37,9 +34,8 @@ class server:
         self.excpt = False
         self.lostComms = 0
         self.buffer = None
-        self.benchmark = benchmark
         self.lastFrame = 0
-        print("GT AI Server instantiated")
+        print("GT AI Server instantiated for rtgym")
 
     def connect(self):
         """Starts up the server ready for a single connection
@@ -136,47 +132,38 @@ class server:
             self.excpt = True            
 
 
-serverSession = server(benchmark=True)
-serverSession.connect()
-a=0
-while True:
-    print("Waiting for a connection")
-    serverSession.connection, serverSession.clientAddress = serverSession.sock.accept()
-    serverSession.connection.setblocking(False)
-    if serverSession.benchmark:
-        timeStart = time()
-   
-    try:
-        print('Connection from', serverSession.clientAddress)
+    def startReceiving(self):
+        self.connect()
         while True:
-            serverSession.receive()
-            if serverSession.lostComms:
-                break
-
-            if serverSession.excpt and serverSession.fullData:
-                serverSession.excpt = False
-                serverSession.decodeImg()
-                size = serverSession.pic.shape
-                serverSession.pic = cv2.resize(serverSession.pic, (size[1]*2,size[0]*2))
-                cv2.imshow('window', serverSession.pic)
-                if serverSession.lastFrame != serverSession.myData.frame:
-                    serverSession.lastFrame = serverSession.myData.frame
-                    if serverSession.benchmark:
-                        a = a + 1
-                        if a == 500:          
-                            print("500 frames at ", 500/(time()-timeStart))
-                            timeStart = time()
-                            a = 0
-                    if cv2.waitKey(1) & 0xFF == ord('q'):
-                        cv2.destroyAllWindows()
-                        print('Forced Exit')
-                        serverSession.connection.close()  
+            print("Waiting for a connection")
+            self.connection, serverSession.clientAddress = serverSession.sock.accept()
+            self.connection.setblocking(False)
+            try:
+                print('Connection from', serverSession.clientAddress)
+                while True:
+                    self.receive()
+                    if self.lostComms:
                         break
-    finally:
-        # Clean up the connection
-        print('Connection closed')
-        cv2.destroyAllWindows()
-        serverSession.connection.close()            
-        serverSession.lostComms = False
-        if serverSession.benchmark:
-            a=0
+
+                    if self.excpt and self.fullData:
+                        self.excpt = False
+                        self.decodeImg()
+                        size = self.pic.shape
+                        self.pic = cv2.resize(self.pic, (size[1]*2,size[0]*2))
+                        cv2.imshow('window', self.pic)
+                        if self.lastFrame != self.myData.frame:
+                            self.lastFrame = self.myData.frame
+                            if cv2.waitKey(1) & 0xFF == ord('q'):
+                                cv2.destroyAllWindows()
+                                print('Forced Exit')
+                                self.connection.close()  
+                                break
+            finally:
+                # Clean up the connection
+                print('Connection closed')
+                cv2.destroyAllWindows()
+                self.connection.close()            
+                self.lostComms = False
+
+#serverSession = server(benchmark=True)
+#serverSession.startReceiving()
