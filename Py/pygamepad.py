@@ -1,23 +1,14 @@
-# standard library imports
-import platform
-
-if platform.system() == "Windows":
-
-    import time
-
-    def controlGamepad(gamepad, control):
-        assert all(-1.0 <= c <= 1.0 for c in control), "This function accepts only controls between -1.0 and 1.0"
-        if control[0] > 0:  # gas
-            gamepad.right_trigger_float(value_float=control[0])
-        else:
-            gamepad.right_trigger_float(value_float=0.0)
-        if control[1] > 0:  # brake
-            gamepad.left_trigger_float(value_float=control[1])
-        else:
-            gamepad.left_trigger_float(value_float=0.0)
-        gamepad.left_joystick_float(control[2], 0.0)  # turn
-        gamepad.update()
-else:
-
-    def controlGamepad(gamepad, control):
-        pass
+def controlGamepad(gamepad, control):
+    # This function accepts only controls between -1.0 and 1.0
+    assert all(-1.0 <= c <= 1.0 for c in control)
+    if control[0] > 0:  # gas
+        gamepad.right_trigger_float(value_float=control[0])
+    else:
+        gamepad.right_trigger_float(value_float=0.0)
+    if control[1] > 0:  # brake
+        gamepad.left_trigger_float(value_float=control[1])
+    else:
+        gamepad.left_trigger_float(value_float=0.0)
+        
+    gamepad.left_joystick_float(control[2], 0.0)  # turn
+    gamepad.update()
