@@ -1,5 +1,4 @@
 from rtgym import RealTimeGymInterface
-from serverClass import server
 from pygamepad import controlGamepad
 
 class MyRealTimeInterface(RealTimeGymInterface):
@@ -8,7 +7,6 @@ class MyRealTimeInterface(RealTimeGymInterface):
         self.server = server()
         self.display = None
         self.gamepad = None
-        self.server = server()
 
     def startSession(self):
         self.server.connect()
@@ -22,10 +20,13 @@ class MyRealTimeInterface(RealTimeGymInterface):
         
 agent = MyRealTimeInterface()
 agent.init_control()
-agent.startSession()
+
 print("woop")
+
 # agent.server.startReceiving()
-agent.send_control([1,0,1])
-import time
-time.sleep(0.15)
+import time, random
+from serverClass import server 
+while True:
+    agent.send_control([random.randint(0,5),random.randint(-5,1),random.randint(-1,1)])
+    time.sleep(0.005)
 agent.send_control([1,0,1])

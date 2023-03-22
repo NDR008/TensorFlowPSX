@@ -1,14 +1,22 @@
+# https://github.com/yannbouteiller/vgamepad/blob/main/vgamepad/win/vigem_commons.py
+
 def controlGamepad(gamepad, control):
     # This function accepts only controls between -1.0 and 1.0
-    assert all(-1.0 <= c <= 1.0 for c in control)
+    # assert all(-1.0 <= c <= 1.0 for c in control)
     if control[0] > 0:  # gas
-        gamepad.right_trigger_float(value_float=control[0])
+        gamepad.press_button(button = 1 << 5) # X
     else:
-        gamepad.right_trigger_float(value_float=0.0)
+        gamepad.release_button(button = 1 << 5) # release X
     if control[1] > 0:  # brake
-        gamepad.left_trigger_float(value_float=control[1])
+        gamepad.press_button(button = 1 << 4) # O
     else:
-        gamepad.left_trigger_float(value_float=0.0)
+        gamepad.release_button(button = 1 << 4) # release O
         
-    gamepad.left_joystick_float(control[2], 0.0)  # turn
+    if control[2] > 0:  # right
+        gamepad.directional_pad(direction = 0x2) # press right 
+    elif control[2] < 0: #left
+        gamepad.directional_pad(direction = 0x6) # press left
+    else:
+        gamepad.directional_pad(direction = 0x8) # nothing
+        
     gamepad.update()
