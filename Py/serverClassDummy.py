@@ -39,12 +39,7 @@ class server(Thread):
         self.lastFrame = 0
         print("GT AI Server instantiated for rtgym")
 
-    def receiveClient(self):
-        print("Waiting for a connection")
-        self.connection, self.clientAddress = self.sock.accept()
-        self.connection.setblocking(False)
-
-    def startServer(self):
+    def connect(self):
         """Starts up the server ready for a single connection
         """
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -53,7 +48,6 @@ class server(Thread):
         self.sock.bind(serverAddress)
         self.sock.listen(1)
         print('starting up on {} port {}'.format(*serverAddress))
-
     
     def recvall(self, expectedSize):
         """Returns an expected number of bytes from the socket connection
@@ -141,18 +135,20 @@ class server(Thread):
 
     # rename startReceiving to run for threading
     def run(self):
-        self.startServer()
-        self.receiveClient()
-        # while True:
-        if not (self.excpt and self.fullData):
+        self.connect()
+        while True:
+            print("Waiting for a connection")
+            self.connection, self.clientAddress = self.sock.accept()
+            self.connection.setblocking(False)
             try:
                 print('Connection from', self.clientAddress)
-                while not self.fullData:
+                while True:
                     self.receive()
                     if self.lostComms:
                         break
 
                     if self.excpt and self.fullData:
+                        self.excpt = False
                         self.decodeImg()
                         size = self.pic.shape
                         self.pic = cv2.resize(self.pic, (size[1]*2,size[0]*2))
@@ -166,9 +162,8 @@ class server(Thread):
                                 break
             finally:
                 # Clean up the connection
-                self.excpt = False
-                #print('Connection closed')
-                #cv2.destroyAllWindows()
+                print('Connection closed')
+                cv2.destroyAllWindows()
                 self.connection.close()            
                 self.lostComms = False
                 

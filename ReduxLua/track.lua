@@ -7,8 +7,10 @@ function openTrack()
 end
 
 function writeTrack()
-    local y = readValue(mem, 0x800b6708, 'int32_t*')
+    -- Front Left
     local x = readValue(mem, 0x800b6704, 'int32_t*')
+    local y = readValue(mem, 0x800b6708, 'int32_t*')
+    local z = readValue(mem, 0x800b670c, 'int32_t*')
     str = tostring(x) .. ',' .. tostring(y) .. '\n'
     if str ~= lastStr then
         coord = coord .. str

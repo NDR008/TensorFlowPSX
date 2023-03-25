@@ -4,6 +4,8 @@ hasJap = false
 forPlay = true
 netStatus = false
 dumpTrack = false
+hi_res = false
+smoke = false
 
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
@@ -23,10 +25,13 @@ saveList = {
     { "Arcade HS R33",         "arc2.slice" },
     { "Arcade HS R33 mid-lap", "arc4.slice" },
     { "Arcade HS Corv",        "arc3.slice" },
+    { "Arcade MR2 HS",         "arc5.slice" },
+    { "Hi-Def",                "arc6.slice" },
     { "Sim Endurance Race",    "sim4.slice" },
     { "Simulation Home",       "sim1.slice" },
     { "SARD Supra HS",         "sim2.slice" },
     { "0-400m Test MR2",       "sim3.slice" }
+
 }
 
 
@@ -142,11 +147,11 @@ function simulation()
         imgui.SameLine()
         if (imgui.Button("No licence")) then
             setValue(mem, 0x8009e3c4, 0, 'int32_t*')
-            setValue(mem, 0x8009e3c8, 50529027, 'int32_t*')
+            setValue(mem, 0x8009e3c8, 0, 'int32_t*')
             setValue(mem, 0x8009e3cc, 0, 'int32_t*')
-            setValue(mem, 0x8009e3d0, 50529027, 'int32_t*')
+            setValue(mem, 0x8009e3d0, 0, 'int32_t*')
             setValue(mem, 0x8009e3d4, 0, 'int32_t*')
-            setValue(mem, 0x8009e3d8, 50529027, 'int32_t*')
+            setValue(mem, 0x8009e3d8, 0, 'int32_t*')
         end
     end
 end
@@ -157,7 +162,33 @@ function funkyStuff()
         imgui.TableNextRow()
         imgui.TableSetColumnIndex(0)
         --imgui.TextUnformatted(readValue(mem, 0x800b6162, "int16_t*"))
-        doCheckbox(mem, 0x800b6168, 'HighFrameRate', 0, 1, 'int8_t*')
+        a, hi_res = imgui.Checkbox("Hi Res", hi_res)
+        if hi_res then
+            if readValue(mem, 0x800B6168, 'int16_t*') == 2 then
+                setValue(mem, 0x800B6168, 1, 'int16_t*')
+            end
+            b, smoke = imgui.Checkbox("Tyre smoke", smoke)
+            if smoke then
+                if readValue(mem, 0x8002E560, 'int16_t*') == 2 then
+                    setValue(mem, 0x8002E560, 1, 'int16_t*')
+                end
+            else
+                if readValue(mem, 0x8002E560, 'int16_t*') == 1 then
+                    setValue(mem, 0x8002E560, 2, 'int16_t*')
+                end
+            end
+            c, mirror = imgui.Checkbox("Mirror", mirror)
+            if mirror then
+                if readValue(mem, 0x8002AA7C, 'int16_t*') == 2 then
+                    setValue(mem, 0x8002AA7C, 1, 'int16_t*')
+                end
+            else
+                if readValue(mem, 0x8002AA7C, 'int16_t*') == 1 then
+                    setValue(mem, 0x8002AA7C, 2, 'int16_t*')
+                end
+            end
+        end
+
 
         imgui.TextUnformatted("PhysicsTimeStep0")
         imgui.SameLine()
@@ -192,8 +223,30 @@ function funkyStuff()
         doSliderInt(mem, 0x800b635e, 'Rear', 0, 1, 'int8_t*')
         
         -- doSliderInt(mem, 0x800b626c, 'Camera Zoom', -3600, 3600, 'int16_t*')
-
+        
         imgui.EndTable()
+        if (imgui.Button("All Unlocked")) then
+            setValue(mem, 0x80081b48, 67372036, 'int32_t*')
+            setValue(mem, 0x80081b4c, 67372036, 'int32_t*')
+            setValue(mem, 0x80081b50, 67372036, 'int32_t*')
+            setValue(mem, 0x80081b54, 67372036, 'int32_t*')
+            setValue(mem, 0x80081b58, 67372036, 'int32_t*')
+            setValue(mem, 0x80081b5c, 67372036, 'int32_t*')
+            setValue(mem, 0x80081b60, 67372036, 'int32_t*')
+            setValue(mem, 0x80081b64, 263172, 'int32_t*')
+        end
+        imgui.SameLine()
+        if (imgui.Button("All Locked")) then
+            setValue(mem, 0x80081b48, 0, 'int32_t*')
+            setValue(mem, 0x80081b4c, 0, 'int32_t*')
+            setValue(mem, 0x80081b50, 0, 'int32_t*')
+            setValue(mem, 0x80081b54, 0, 'int32_t*')
+            setValue(mem, 0x80081b58, 0, 'int32_t*')
+            setValue(mem, 0x80081b5c, 0, 'int32_t*')
+            setValue(mem, 0x80081b60, 0, 'int32_t*')
+            setValue(mem, 0x80081b64, 0, 'int32_t*')
+        end
+
     end
 end
 
@@ -201,7 +254,10 @@ function position()
     if (imgui.CollapsingHeader("Position", ImGuiTreeNodeFlags_None)) then
         doSliderInt(mem, 0x800b6708, 'Map Y', -3000000, 3000000, 'int32_t*')
         doSliderInt(mem, 0x800b6704, 'Map X', -3000000, 3000000, 'int32_t*')
-        doSliderInt(mem, 0x800b670c, 'Map Z', -300000, 300000, 'int32_t*')
+        doSliderInt(mem, 0x800b670c, 'Map Z', -300000, 300000, 'int16_t*')
+        -- doSliderInt(mem, 0x800b6728, 'Map X2', -3000000, 3000000, 'int32_t*')
+        -- doSliderInt(mem, 0x800b6724, 'Map Z2', -3000000, 300000, 'int16_t*')
+        -- doSliderInt(mem, 0x800b672c, 'Map Y2', -3000000, 3000000, 'int32_t*')
     end
 end
 
@@ -308,3 +364,9 @@ end
 if checked then checked:remove() end
 checked = PCSX.Events.createEventListener('ExecutionFlow::Run', checkRegion)
 PCSX.resumeEmulator()
+
+-- to check https://www.mogelpower.de/cheats/Gran-Turismo-PAL_XP-PSX_4107.html
+-- to check https://www.gtplanet.net/forum/threads/xenns-cheat-device-codes-includes-demo-codes.187354/
+-- A6 is an if/set
+-- if address equals 0002, set to 0001
+-- A7 is an if/set with a restore option, so if you disable cheats as the game is running, it reverses the operation
