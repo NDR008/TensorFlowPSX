@@ -158,8 +158,8 @@ class server(Thread):
                         self.fullData = False
                         self.decodeImg()
                         size = self.pic.shape
-                        self.pic = cv2.resize(self.pic, (size[1]*2,size[0]*2))
-                        cv2.imshow('window', self.pic)
+                        self.pic = cv2.resize(self.pic, (size[1]*2,size[0]*2), interpolation=cv2.INTER_NEAREST )
+                        cv2.imshow('Preview Display', self.pic)
                         if self.lastFrame != self.myData.frame:
                             self.lastFrame = self.myData.frame
                             if cv2.waitKey(1) & 0xFF == ord('q'):
