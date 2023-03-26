@@ -34,7 +34,7 @@ class server(Thread):
         self.connection = None
         self.clientAddress =  None
         self.excpt = False
-        self.lostComms = 0
+        self.lostComms = None
         self.buffer = None
         self.lastFrame = 0
         print("GT AI Server instantiated for rtgym")
@@ -170,7 +170,7 @@ class server(Thread):
                 #print('Connection closed')
                 #cv2.destroyAllWindows()
                 self.connection.close()            
-                self.lostComms = False
+                self.lostComms = True
                 
 
 #serverSession = server(benchmark=True)

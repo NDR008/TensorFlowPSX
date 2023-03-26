@@ -6,6 +6,7 @@ import cv2
 from time import sleep, time # for benchmarking
 from enum import Enum
 from threading import Thread
+import subprocess
 
 class messageState(Enum):
     mPing = 1 # expect a simple "P"
@@ -128,26 +129,30 @@ class server(Thread):
                     self.header = bytearray()
                     self.mSize = bytearray()
                     self.message = bytearray()
-                    pong = 1
-                    self.connection.send(pong.to_bytes(4,'little'))
         except socket.error as e:
             self.excpt = True            
 
+    def sendPong(self, pong):
+        self.connection.send(pong.to_bytes(4,'little'))
+        
+    def receiveClient(self):
+        print("Waiting for a connection")
+        self.connection, self.clientAddress = self.sock.accept()
+        self.connection.setblocking(False)
+    
     # rename startReceiving to run for threading
-    def run(self):
+    def bla(self):
         self.connect()
         while True:
-            print("Waiting for a connection")
-            self.connection, self.clientAddress = self.sock.accept()
-            self.connection.setblocking(False)
+            self.receiveClient()
             try:
-                print('Connection from', self.clientAddress)
                 while True:
                     self.receive()
                     if self.lostComms:
-                        break
-
+                        break 
+                    
                     if self.excpt and self.fullData:
+                        self.sendPong(1)
                         self.excpt = False
                         self.decodeImg()
                         size = self.pic.shape
@@ -158,8 +163,8 @@ class server(Thread):
                             if cv2.waitKey(1) & 0xFF == ord('q'):
                                 cv2.destroyAllWindows()
                                 print('Forced Exit')
-                                self.connection.close()  
                                 break
+
             finally:
                 # Clean up the connection
                 print('Connection closed')
@@ -171,4 +176,7 @@ class server(Thread):
 #serverSession = server(benchmark=True)
 #serverSession.startReceiving()
 serverSession = server()
-serverSession.run()
+#serverSession.connect()
+#serverSession.receiveClient()
+#serverSession.sendPong(2)
+serverSession.bla()

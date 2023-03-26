@@ -2,7 +2,7 @@ hasPal = false
 hasUs = false
 hasJap = false
 forPlay = true
-netStatus = false
+setTCP = false
 dumpTrack = false
 hi_res = false
 smoke = false
@@ -25,7 +25,7 @@ saveList = {
     { "Arcade HS R33",         "arc2.slice" },
     { "Arcade HS R33 mid-lap", "arc4.slice" },
     { "Arcade HS Corv",        "arc3.slice" },
-    { "Arcade MR2 HS",         "arc5.slice" },
+    { "Arcade MR2 TT HS",      "arc5.slice" },
     { "Hi-Def",                "arc6.slice" },
     { "Sim Endurance Race",    "sim4.slice" },
     { "Simulation Home",       "sim1.slice" },
@@ -84,9 +84,9 @@ function raceCondition()
         imgui.BeginTable("Tyre", 2, imgui.constant.TableFlags.Resizable)
         imgui.TableNextRow()
         imgui.TableSetColumnIndex(0)
-        
+
         doSliderInt(mem, 0x800b6d69, 'Car Position', 1, 6, 'uint8_t*')
-        
+
         doSliderInt(mem, 0x800b6700, 'Lap', -5, 100, 'int8_t*')
         doSliderInt(mem, 0x800b619c, 'Max Laps', 0, 100, 'int32_t*')
 
@@ -96,7 +96,7 @@ function raceCondition()
         local pitTime = readValue(mem, 0x800b66d4, 'int16_t*')
         imgui.SameLine()
         imgui.TextUnformatted(pitTime)
-        
+
         imgui.TableSetColumnIndex(1)
         doSliderInt(mem, 0x800b6d60, 'raceStart', 0, 1, 'uint8_t*')
         local way = readValue(mem, 0x800b6702, 'int16_t*')
@@ -111,7 +111,7 @@ function raceCondition()
             str = 'Direction: Right -ve laps ['
         end
         str = str .. tostring(way) .. ']'
-        doCheckbox(mem, 0x800b6358, 'HUD On', 0, 1, 'int16_t*') -- (PAL SCES-00984)
+        doCheckbox(mem, 0x800b6358, 'HUD On', 0, 1, 'int16_t*')     -- (PAL SCES-00984)
         doCheckbox(mem, 0x800b615c, 'Not Replay', 0, 1, 'int32_t*') -- (PAL SCES-00984)
         doCheckbox(mem, 0x800b6d61, 'AI mode', 2, 0, 'int16_t*')
         imgui.TextUnformatted(str)
@@ -204,7 +204,7 @@ function funkyStuff()
 
         doSliderInt(mem, 0x8009056a, 'DAT_8009056a', -2500, 2500, 'int16_t*')
         doSliderInt(mem, 0x8009056c, 'DAT_8009056c', -2500, 2500, 'int16_t*')
-        
+
         imgui.TableSetColumnIndex(1)
         doSliderInt(mem, 0x800cb646, 'raceModeIndex', 0, 20, 'int8_t*')
         doSliderInt(mem, 0x800b6226, 'raceMode', 0, 30, 'uint16_t*')
@@ -221,9 +221,9 @@ function funkyStuff()
         doSliderInt(mem, 0x800b6363, 'Camera Related', 0, 512, 'int8_t*')
         -- rearViewMirror = forceCheckbox(mem, 0x800b635e, 'Rear View Mirror', 0, 1, rearViewMirror , 'int8_t*')
         doSliderInt(mem, 0x800b635e, 'Rear', 0, 1, 'int8_t*')
-        
+
         -- doSliderInt(mem, 0x800b626c, 'Camera Zoom', -3600, 3600, 'int16_t*')
-        
+
         imgui.EndTable()
         if (imgui.Button("All Unlocked")) then
             setValue(mem, 0x80081b48, 67372036, 'int32_t*')
@@ -246,7 +246,6 @@ function funkyStuff()
             setValue(mem, 0x80081b60, 0, 'int32_t*')
             setValue(mem, 0x80081b64, 0, 'int32_t*')
         end
-
     end
 end
 
@@ -293,8 +292,8 @@ end
 
 function pythonStuff()
     if (imgui.CollapsingHeader("Python", ImGuiTreeNodeFlags_None)) then
-        netChanged, netStatus = imgui.Checkbox("TCP", netStatus)
-        netStatus = netTCP(netChanged, netStatus)
+        toggledTCP, setTCP = imgui.Checkbox("TCP", setTCP)
+        netTCP(toggledTCP, setTCP)
 
         trackChanged, dumpTrack = imgui.Checkbox("Dump Track X-Y", dumpTrack)
         if trackChanged then
@@ -314,7 +313,10 @@ function DrawImguiFrame()
     -- We are declaring this function global so the emulator can
     -- properly call it periodically.
     local show = imgui.Begin('GT Panel', true)
-    if not show then imgui.End() return end
+    if not show then
+        imgui.End()
+        return
+    end
     -- local racing = checkValue(mem, 0x8008df72, 58, "int8_t*") -- check if the time is displayed
     if hasPal then
         if (imgui.Button("Reload")) then
@@ -328,8 +330,8 @@ function DrawImguiFrame()
         saveMenu()
         imgui.TableSetColumnIndex(1)
         pythonStuff()
-        imgui.EndTable() 
-        
+        imgui.EndTable()
+
         imgui.BeginTable("VehicleTable", 2, imgui.constant.TableFlags.Resizable)
         imgui.TableNextRow()
         imgui.TableSetColumnIndex(0)
@@ -344,8 +346,6 @@ function DrawImguiFrame()
         funkyStuff()
         imgui.End()
     end
-    
-
 end
 
 function checkRegion()

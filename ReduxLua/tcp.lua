@@ -5,6 +5,9 @@ local frames = 0
 local frames_needed = 1
 local obs = {}
 local dieing = 0
+local client = nil
+local reconnect = false
+GlobalData = nil
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -65,6 +68,25 @@ local function readVehiclePositon()
     return pos
 end
 -- TCP related
+
+function grabGameData()
+    local screen = PCSX.GPU.takeScreenShot()
+    screen.data = tostring(screen.data)
+    screen.bpp = tonumber(screen.bpp)
+    local gameState = readGameState()
+    local vehicleState
+    local pos = readVehiclePositon()
+    if gameState['raceState'] < 6 then
+        vehicleState = readVehicleState()
+    end
+    obs['SS'] = screen
+    obs['GS'] = gameState
+    obs['VS'] = vehicleState
+    obs['frame'] = frames
+    obs['pos'] = pos
+
+    GlobalData = assert(pb.encode("GT.Observation", obs))
+end
 
 function netTCP(netChanged, netStatus)
     if netChanged then
