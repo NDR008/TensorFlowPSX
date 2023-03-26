@@ -27,7 +27,7 @@ class server(Thread):
         self.port = port
         self.mState = messageState.mPing.name
         self.header = bytearray()
-        self.mSize = bytearray()
+        self.mSize = 0
         self.message = bytearray()
         self.pic = None
         self.myData = Game.Observation()
@@ -128,9 +128,8 @@ class server(Thread):
                     self.fullData = True
                     self.mState = messageState.mPing.name
                     self.myData.ParseFromString(self.message)
-                    self.header = bytearray()
-                    self.mSize = bytearray()
-                    self.message = bytearray()
+                    self.header.clear()
+                    self.message.clear()
         except socket.error as e:
             self.excpt = True
 
