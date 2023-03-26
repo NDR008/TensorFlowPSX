@@ -99,6 +99,7 @@ class server(Thread):
         """this function will receive as much data as possible
         and if possible decode it
         """
+        self.part = bytearray()
         try:
             if self.mState == messageState.mPing.name:
                 self.buffer = self.recvall(1) # can be removed later           
@@ -110,7 +111,7 @@ class server(Thread):
                     self.lostPing = True
 
             if self.mState == messageState.mRecvHeader.name:
-                self.part = bytearray()
+                self.part.clear()
                 if len(self.header) < 4:
                     self.part = self.connection.recv(4 - len(self.header))
                     self.header.extend(self.part)
@@ -119,7 +120,7 @@ class server(Thread):
                     self.mState = messageState.mRecvData.name
                     
             if self.mState == messageState.mRecvData.name:
-                self.part = bytearray()
+                self.part.clear()
                 if len(self.message) < self.mSize:
                     self.part = self.connection.recv(self.mSize - len(self.message))
                     self.message.extend(self.part)
