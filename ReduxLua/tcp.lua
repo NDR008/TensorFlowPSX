@@ -6,8 +6,7 @@ local frames_needed = 1
 local obs = {}
 local dieing = 0
 local client = nil
-local reconnect = false
-GlobalData = nil
+local reconnectTry = false
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -89,11 +88,14 @@ function grabGameData()
 end
 
 function netTCP(netChanged, netStatus)
-    if netChanged then
+    local turnOn = (reconnectTry or netChanged)
+    if turnOn then
         if netStatus then
+            print("trying to reacher server")
             client = Support.File.uvFifo("127.0.0.1", 9999)
-            dieing = 0
             frames = 0
+            dieing = 0
+            reconnectTry = false
         else
             client:close()
             dieing = 0
@@ -121,20 +123,24 @@ function netTCP(netChanged, netStatus)
             local test = assert(pb.encode("GT.Observation", obs))
             client:writeU32(#test)
             client:write(test)
-            if client:readU16() == 1 then
-                dieing = math.max(0, (dieing - 2))
+            local readVal = client:readU16()
+            if readVal==1 then
+                dieing = 0
+            elseif readVal == 2 then
+                dieing = 0
+                local file = Support.File.open("arc5.slice", "READ")
+                PCSX.loadSaveState(file)
+                file:close()
             else
                 dieing = dieing + 1
             end
         end
     end
-    if dieing == 30 then
+    -- print(dieing)
+    if dieing == 20 then
         print("Could not find a server")
-        client:close()
         dieing = 0
-        netStatus = false
-        return netStatus
-    else
-        return netStatus
+        client:close()
+        reconnectTry = true
     end
 end

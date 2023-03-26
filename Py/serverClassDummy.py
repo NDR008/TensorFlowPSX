@@ -35,7 +35,7 @@ class server(Thread):
         self.connection = None
         self.clientAddress =  None
         self.excpt = False
-        self.lostComms = 0
+        self.lostPing = 0
         self.buffer = None
         self.lastFrame = 0
         print("GT AI Server instantiated for rtgym")
@@ -103,10 +103,11 @@ class server(Thread):
             if self.mState == messageState.mPing.name:
                 self.buffer = self.recvall(1) # can be removed later           
                 if self.buffer is not None and self.buffer.decode() == 'P':
-                    self.lostComms = False
+                    self.sendPong(1)
+                    self.lostPing = False
                     self.mState = messageState.mRecvHeader.name
                 else:
-                    self.lostComms = True
+                    self.lostPing = True
 
             if self.mState == messageState.mRecvHeader.name:
                 self.part = bytearray()
@@ -130,7 +131,7 @@ class server(Thread):
                     self.mSize = bytearray()
                     self.message = bytearray()
         except socket.error as e:
-            self.excpt = True            
+            self.excpt = True
 
     def sendPong(self, pong):
         self.connection.send(pong.to_bytes(4,'little'))
@@ -139,21 +140,22 @@ class server(Thread):
         print("Waiting for a connection")
         self.connection, self.clientAddress = self.sock.accept()
         self.connection.setblocking(False)
+        print('Connection from', serverSession.clientAddress)
     
     # rename startReceiving to run for threading
     def bla(self):
         self.connect()
         while True:
             self.receiveClient()
+            self.lostPing = False
             try:
                 while True:
                     self.receive()
-                    if self.lostComms:
-                        break 
-                    
+                    if self.lostPing:
+                        break
                     if self.excpt and self.fullData:
-                        self.sendPong(1)
                         self.excpt = False
+                        self.fullData = False
                         self.decodeImg()
                         size = self.pic.shape
                         self.pic = cv2.resize(self.pic, (size[1]*2,size[0]*2))
@@ -168,15 +170,14 @@ class server(Thread):
             finally:
                 # Clean up the connection
                 print('Connection closed')
-                cv2.destroyAllWindows()
-                self.connection.close()            
-                self.lostComms = False
+                self.connection.close()
+                cv2.destroyAllWindows()        
                 
 
 #serverSession = server(benchmark=True)
 #serverSession.startReceiving()
 serverSession = server()
-#serverSession.connect()
-#serverSession.receiveClient()
-#serverSession.sendPong(2)
+serverSession.connect()
+serverSession.receiveClient()
+serverSession.sendPong(2)
 serverSession.bla()

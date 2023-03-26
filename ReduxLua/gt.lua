@@ -10,6 +10,7 @@ smoke = false
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
 loadfile("track.lua")()
+loadfile("track_prog.lua")()
 
 local function reload()
     PCSX.pauseEmulator()
@@ -17,6 +18,7 @@ local function reload()
     loadfile("gt.lua")()
     loadfile("tcp.lua")()
     loadfile("track.lua")()
+    loadfile("track_prog.lua")()
 end
 
 saveList = {
@@ -251,9 +253,14 @@ end
 
 function position()
     if (imgui.CollapsingHeader("Position", ImGuiTreeNodeFlags_None)) then
-        doSliderInt(mem, 0x800b6708, 'Map Y', -3000000, 3000000, 'int32_t*')
+        local x = readValue(mem, 0x800b6704, 'int32_t*')
+        local y = readValue(mem, 0x800b6708, 'int32_t*')
+        local ind = closestpoints(Xc, Yc, x, y)
         doSliderInt(mem, 0x800b6704, 'Map X', -3000000, 3000000, 'int32_t*')
+        doSliderInt(mem, 0x800b6708, 'Map Y', -2000000, 2000000, 'int32_t*')
         doSliderInt(mem, 0x800b670c, 'Map Z', -300000, 300000, 'int16_t*')
+
+        imgui.TextUnformatted(Pp[ind])
         -- doSliderInt(mem, 0x800b6728, 'Map X2', -3000000, 3000000, 'int32_t*')
         -- doSliderInt(mem, 0x800b6724, 'Map Z2', -3000000, 300000, 'int16_t*')
         -- doSliderInt(mem, 0x800b672c, 'Map Y2', -3000000, 3000000, 'int32_t*')
