@@ -19,7 +19,7 @@ function writeTrack()
         if str ~= lastStr then
             index = index + 1
         end
-        if index % 10 == 0 then
+        if index % 5 == 0 then
             coord = coord .. str
         end
         lastStr = str

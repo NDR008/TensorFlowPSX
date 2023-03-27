@@ -3,16 +3,18 @@ import game_pb2 as Game
 import numpy as np
 from PIL import Image
 import cv2
-from time import sleep, time # for benchmarking
+from time import sleep, time  # for benchmarking
 from enum import Enum
 from threading import Thread
 import subprocess
 
+
 class messageState(Enum):
-    mPing = 1 # expect a simple "P"
-    mRecvHeader = 2 # header (which contains the size)
-    mRecvSize = 3 # size of the data
-    mRecvData = 4 # actual raw data
+    mPing = 1  # expect a simple "P"
+    mRecvHeader = 2  # header (which contains the size)
+    mRecvSize = 3  # size of the data
+    mRecvData = 4  # actual raw data
+
 
 class server(Thread):
     def __init__(self, ip='localhost', port=9999):
@@ -22,7 +24,6 @@ class server(Thread):
         port as int (default 9999)
         benchmark true / false (default false) * checks fps
         """
-        Thread.__init__(self)
         self.ip = ip
         self.port = port
         self.mState = messageState.mPing.name
@@ -33,23 +34,24 @@ class server(Thread):
         self.myData = Game.Observation()
         self.fullData = False
         self.connection = None
-        self.clientAddress =  None
+        self.clientAddress = None
         self.excpt = False
         self.lostPing = 0
         self.buffer = None
         self.lastFrame = 0
+        self.sock = None
         print("GT AI Server instantiated for rtgym")
 
     def connect(self):
         """Starts up the server ready for a single connection
         """
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serverAddress =(self.ip, self.port)
+        serverAddress = (self.ip, self.port)
         # self.sock.setblocking(False)
         self.sock.bind(serverAddress)
         self.sock.listen(1)
         print('starting up on {} port {}'.format(*serverAddress))
-    
+
     def recvall(self, expectedSize):
         """Returns an expected number of bytes from the socket connection
         This function will not return until all the data has been received
@@ -61,7 +63,7 @@ class server(Thread):
                 return None
             data.extend(packet)
         return data
-    
+
     def toNumpy(self, im):
         """This function converts a PIL image into a a numpy array
         """
@@ -74,17 +76,17 @@ class server(Thread):
         shape, typestr = Image._conv_type_shape(im)
         data = np.empty(shape, dtype=np.dtype(typestr))
         mem = data.data.cast('B', (data.data.nbytes,))
-        bufsize, s, offset = 65536, 0, 0
+        buffSize, s, offset = 65536, 0, 0
         while not s:
-            l, s, d = tmpImage.encode(bufsize)
+            l, s, d = tmpImage.encode(buffSize)
             mem[offset:offset + len(d)] = d
             offset += len(d)
         if s < 0:
             raise RuntimeError("encoder error %d in tobytes" % s)
         return data
-    
+
     def decodeImg(self):
-        """Protobuf decoding of the screen shot and converts into an numpy array
+        """Protobuf decoding of the screenshot and converts into an numpy array
         """
         size = (self.myData.SS.width, self.myData.SS.height)
         if self.myData.SS.bpp == 0:
@@ -94,7 +96,7 @@ class server(Thread):
             self.pic = self.toNumpy(Image.frombuffer("RGB", size, self.myData.SS.data, 'raw', 'BGR', 0, 1))
         else:
             print("no clue what to do with this image")
-        
+
     def receive(self):
         """this function will receive as much data as possible
         and if possible decode it
@@ -102,7 +104,7 @@ class server(Thread):
         self.part = bytearray()
         try:
             if self.mState == messageState.mPing.name:
-                self.buffer = self.recvall(1) # can be removed later           
+                self.buffer = self.recvall(1)  # can be removed later
                 if self.buffer is not None and self.buffer.decode() == 'P':
                     self.sendPong(1)
                     self.lostPing = False
@@ -118,7 +120,7 @@ class server(Thread):
                 else:
                     self.mSize = int.from_bytes(self.header, 'little')
                     self.mState = messageState.mRecvData.name
-                    
+
             if self.mState == messageState.mRecvData.name:
                 self.part.clear()
                 if len(self.message) < self.mSize:
@@ -134,14 +136,14 @@ class server(Thread):
             self.excpt = True
 
     def sendPong(self, pong):
-        self.connection.send(pong.to_bytes(4,'little'))
-        
+        self.connection.send(pong.to_bytes(4, 'little'))
+
     def receiveClient(self):
         print("Waiting for a connection")
         self.connection, self.clientAddress = self.sock.accept()
         self.connection.setblocking(False)
         print('Connection from', serverSession.clientAddress)
-    
+
     # rename startReceiving to run for threading
     def bla(self):
         self.connect()
@@ -158,24 +160,26 @@ class server(Thread):
                         self.fullData = False
                         self.decodeImg()
                         size = self.pic.shape
-                        self.pic = cv2.resize(self.pic, (size[1]*2,size[0]*2), interpolation=cv2.INTER_NEAREST )
+                        self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
                         cv2.imshow('Preview Display', self.pic)
                         if self.lastFrame != self.myData.frame:
                             self.lastFrame = self.myData.frame
                             if cv2.waitKey(1) & 0xFF == ord('q'):
                                 cv2.destroyAllWindows()
                                 print('Forced Exit')
-                                break
+                                # break
+                                return
 
             finally:
                 # Clean up the connection
                 print('Connection closed')
                 self.connection.close()
-                cv2.destroyAllWindows()        
-                
+                cv2.destroyAllWindows()
 
-#serverSession = server(benchmark=True)
-#serverSession.startReceiving()
+            # serverSession = server(benchmark=True)
+
+
+# serverSession.startReceiving()
 serverSession = server()
 serverSession.connect()
 serverSession.receiveClient()
