@@ -6,6 +6,7 @@ setTCP = false
 dumpTrack = false
 hi_res = false
 smoke = false
+HeldCollState = 0
 
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
@@ -113,6 +114,20 @@ function raceCondition()
             str = 'Direction: Right -ve laps ['
         end
         str = str .. tostring(way) .. ']'
+
+        local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
+        local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')
+        
+        print("pre", HeldCollState, collisionState, collisionValue)
+        if collisionValue > 0 and collisionState > 0 then
+            HeldCollState = collisionState
+        elseif collisionValue == 0 then
+            HeldCollState = 0
+        end
+        print("pos", HeldCollState, collisionState, collisionValue)
+        local collisionText = getCollision(HeldCollState)
+
+        imgui.TextUnformatted(collisionText)
         doCheckbox(mem, 0x800b6358, 'HUD On', 0, 1, 'int16_t*')     -- (PAL SCES-00984)
         doCheckbox(mem, 0x800b615c, 'Not Replay', 0, 1, 'int32_t*') -- (PAL SCES-00984)
         doCheckbox(mem, 0x800b6d61, 'AI mode', 2, 0, 'int16_t*')
@@ -367,6 +382,32 @@ function checkRegion()
     hasUs = not us:failed()
     hasJap = not jap:failed()
 end
+
+function getCollision(state)
+
+    if state == 1 then
+        return "front left"
+    elseif state == 2 then
+        return "front right"
+    elseif state == 3 then
+        return "front"
+    elseif state == 4 then
+        return "rear left"
+    elseif state == 5 then
+        return "unknown 1"
+    elseif state == 6 then
+        return "unknown 2"
+    elseif state == 7 then
+        return "unknown 3"
+    elseif state == 8 then
+        return "rear right"
+    elseif state == 12 then
+        return "rear"
+    else 
+        return "no collision"
+    end
+end
+
 
 if checked then checked:remove() end
 checked = PCSX.Events.createEventListener('ExecutionFlow::Run', checkRegion)
