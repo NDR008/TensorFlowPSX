@@ -133,14 +133,7 @@ function netTCP(netChanged, netStatus)
             local chunk = assert(pb.encode("GT.Observation", obs))
             client:writeU32(#chunk)
             client:write(chunk)
-
         end
     end
     -- print(dieing)
-    if dieing == 20 then
-        print("Could not find a server")
-        dieing = 0
-        client:close()
-        reconnectTry = true
-    end
 end
