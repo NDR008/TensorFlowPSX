@@ -28,13 +28,16 @@ saveList = {
     { "Arcade HS R33",         "arc2.slice" },
     { "Arcade HS R33 mid-lap", "arc4.slice" },
     { "Arcade HS Corv",        "arc3.slice" },
-    { "Arcade MR2 TT HS",      "arc5.slice" },
-    { "Hi-Def",                "arc6.slice" },
-    { "Sim Endurance Race",    "sim4.slice" },
-    { "Simulation Home",       "sim1.slice" },
-    { "SARD Supra HS",         "sim2.slice" },
-    { "0-400m Test MR2",       "sim3.slice" }
+    { "Arcade MR2 TT HS",      "arc5.slice" }
+}
 
+saveList2 = {
+    { "Hi-Def MR2 TT HS",   "arc7.slice" },
+    { "Hi-Def MR2 Night",   "arc6.slice" },
+    { "Sim Endurance Race", "sim4.slice" },
+    { "Simulation Home",    "sim1.slice" },
+    { "SARD Supra HS",      "sim2.slice" },
+    { "0-400m Test MR2",    "sim3.slice" }
 }
 
 
@@ -117,7 +120,7 @@ function raceCondition()
 
         local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
         local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')
-        
+
         print("pre", HeldCollState, collisionState, collisionValue)
         if collisionValue > 0 and collisionState > 0 then
             HeldCollState = collisionState
@@ -282,33 +285,40 @@ function position()
     end
 end
 
-function saveMenu()
-    if (imgui.CollapsingHeader("Saves", ImGuiTreeNodeFlags_None)) then
-        imgui.BeginTable("SaveTable", 2, imgui.constant.TableFlags.Resizable)
-        imgui.TableSetupColumn("Load")
-        imgui.TableSetupColumn("Save")
-        imgui.TableHeadersRow();
-        for i, f in pairs(saveList) do
-            imgui.TableNextRow()
-            local text = f[1]
-            local filename = f[2]
-            imgui.TableSetColumnIndex(0)
-            if (imgui.Button(text)) then
-                local file = Support.File.open(filename, "READ")
-                PCSX.loadSaveState(file)
-                file:close()
-            end
-            imgui.TableSetColumnIndex(1)
-            faketext = "Save/Update##" .. filename
-            if (imgui.Button(faketext)) then
-                local save = PCSX.createSaveState()
-                local file = Support.File.open(filename, "TRUNCATE")
-                file:writeMoveSlice(save)
-                file:close()
-                print(filename, "saved")
-            end
+function drawTable(listOfSaves)
+    imgui.BeginTable("SaveTable", 2, imgui.constant.TableFlags.Resizable)
+    imgui.TableSetupColumn("Load")
+    imgui.TableSetupColumn("Save")
+    imgui.TableHeadersRow();
+    for i, f in pairs(listOfSaves) do
+        imgui.TableNextRow()
+        local text = f[1]
+        local filename = f[2]
+        imgui.TableSetColumnIndex(0)
+        if (imgui.Button(text)) then
+            local file = Support.File.open(filename, "READ")
+            PCSX.loadSaveState(file)
+            file:close()
         end
-        imgui.EndTable()
+        imgui.TableSetColumnIndex(1)
+        faketext = "Save/Update##" .. filename
+        if (imgui.Button(faketext)) then
+            local save = PCSX.createSaveState()
+            local file = Support.File.open(filename, "TRUNCATE")
+            file:writeMoveSlice(save)
+            file:close()
+            print(filename, "saved")
+        end
+    end
+    imgui.EndTable()
+end
+
+function saveMenu()
+    if (imgui.CollapsingHeader("Saves1", ImGuiTreeNodeFlags_None)) then
+        drawTable(saveList)
+    end
+    if (imgui.CollapsingHeader("Saves2", ImGuiTreeNodeFlags_None)) then
+        drawTable(saveList2)
     end
 end
 
@@ -402,11 +412,10 @@ function getCollision(state)
         return "rear right"
     elseif state == 12 then
         return "rear"
-    else 
+    else
         return "unknown"
     end
 end
-
 
 if checked then checked:remove() end
 checked = PCSX.Events.createEventListener('ExecutionFlow::Run', checkRegion)

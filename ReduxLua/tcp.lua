@@ -101,9 +101,18 @@ function netTCP(netChanged, netStatus)
             dieing = 0
         end
     elseif netStatus then
+        local readVal = client:readU16()
+        local ready = false
+        if readVal == 1 then
+            ready = true
+        elseif readVal == 2 then
+            local file = Support.File.open("arc5.slice", "READ")
+            PCSX.loadSaveState(file)
+            file:close()
+            ready = true
+        end
         frames = frames + 1
-        if (frames % frames_needed) == 0 then
-            client:write("P")
+        if (frames % frames_needed) == 0 and ready then
             local screen = PCSX.GPU.takeScreenShot()
             screen.data = tostring(screen.data)
             screen.bpp = tonumber(screen.bpp)
@@ -119,28 +128,12 @@ function netTCP(netChanged, netStatus)
             obs['VS'] = vehicleState
             obs['frame'] = frames
             obs['pos'] = pos
-
-            local test = assert(pb.encode("GT.Observation", obs))
-            client:writeU32(#test)
-            client:write(test)
-            local readVal = client:readU16()
-            if readVal==1 then
-                dieing = 0
-            elseif readVal == 2 then
-                dieing = 0
-                local file = Support.File.open("arc5.slice", "READ")
-                PCSX.loadSaveState(file)
-                file:close()
-            else
-                dieing = dieing + 1
-            end
+            
+            client:write("P")
+            local chunk = assert(pb.encode("GT.Observation", obs))
+            client:writeU32(#chunk)
+            client:write(chunk)
         end
     end
     -- print(dieing)
-    if dieing == 20 then
-        print("Could not find a server")
-        dieing = 0
-        client:close()
-        reconnectTry = true
-    end
 end
