@@ -120,7 +120,7 @@ function raceCondition()
 
         local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
         local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')
-        
+
         print("pre", HeldCollState, collisionState, collisionValue)
         if collisionValue > 0 and collisionState > 0 then
             HeldCollState = collisionState
@@ -412,11 +412,10 @@ function getCollision(state)
         return "rear right"
     elseif state == 12 then
         return "rear"
-    else 
+    else
         return "unknown"
     end
 end
-
 
 if checked then checked:remove() end
 checked = PCSX.Events.createEventListener('ExecutionFlow::Run', checkRegion)
