@@ -51,6 +51,8 @@ class server(Thread):
         self.sock.bind(serverAddress)
         self.sock.listen(1)
         print('starting up on {} port {}'.format(*serverAddress))
+        self.receiveClient()
+        #self.lostPing = False
 
     def recvall(self, expectedSize):
         """Returns an expected number of bytes from the socket connection
@@ -106,7 +108,6 @@ class server(Thread):
             if self.mState == messageState.mPing.name:
                 self.buffer = self.recvall(1)  # can be removed later
                 if self.buffer is not None and self.buffer.decode() == 'P':
-                    self.sendPong(1)
                     self.lostPing = False
                     self.mState = messageState.mRecvHeader.name
                 else:
@@ -136,6 +137,7 @@ class server(Thread):
             self.excpt = True
 
     def sendPong(self, pong):
+        self.fullData = False
         self.connection.send(pong.to_bytes(4, 'little'))
 
     def receiveClient(self):
@@ -145,43 +147,57 @@ class server(Thread):
         print('Connection from', serverSession.clientAddress)
 
     # rename startReceiving to run for threading
-    def bla(self):
-        self.connect()
+    def receiveAllAlways(self):
         while True:
-            self.receiveClient()
-            self.lostPing = False
             try:
-                while True:
-                    self.receive()
-                    if self.lostPing:
+                self.sendPong(1)
+                self.receive()
+                if self.excpt and self.fullData:
+                    self.excpt = False
+                    self.fullData = False
+                    self.decodeImg()
+                    size = self.pic.shape
+                    self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
+                    cv2.imshow('Preview Display', self.pic)
+                    self.lastFrame = self.myData.frame
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        cv2.destroyAllWindows()
+                        print('Forced Exit')
+                        return
+            except:
+                print("lost")
+            
+    def receiveOneFrame(self):
+        while not self.fullData:
+            try:
+                self.sendPong(1)
+                self.receive()
+                if self.excpt and self.fullData:
+
+                    self.decodeImg()
+                    size = self.pic.shape
+                    self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
+                    cv2.imshow('Preview Display', self.pic)
+                    self.lastFrame = self.myData.frame
+                    if cv2.waitKey(0) & 0xFF == ord('q'):
+                        cv2.destroyAllWindows()
+                        print('New Frame')
                         break
-                    if self.excpt and self.fullData:
-                        self.excpt = False
-                        self.fullData = False
-                        self.decodeImg()
-                        size = self.pic.shape
-                        self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
-                        cv2.imshow('Preview Display', self.pic)
-                        if self.lastFrame != self.myData.frame:
-                            self.lastFrame = self.myData.frame
-                            if cv2.waitKey(1) & 0xFF == ord('q'):
-                                cv2.destroyAllWindows()
-                                print('Forced Exit')
-                                # break
-                                return
-
-            finally:
-                # Clean up the connection
-                print('Connection closed')
-                self.connection.close()
-                cv2.destroyAllWindows()
-
+            except:
+                print("lost")
+                return
             # serverSession = server(benchmark=True)
+        self.excpt = False
+        self.fullData = False            
+    
 
 
 # serverSession.startReceiving()
 serverSession = server()
 serverSession.connect()
-serverSession.receiveClient()
 serverSession.sendPong(2)
-serverSession.bla()
+serverSession.receiveAllAlways()
+while True:
+    serverSession.receiveOneFrame()
+#serverSession.receiveAllAlways()
+
