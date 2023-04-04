@@ -1,5 +1,7 @@
 coord = ''
 lastStr = ''
+index = 0
+
 function openTrack()
     print("open")
     local file = Support.File.open("track.csv", "CREATE")
@@ -7,13 +9,21 @@ function openTrack()
 end
 
 function writeTrack()
-    local y = readValue(mem, 0x800b6708, 'int32_t*')
+    -- Front Left
+    local lap = readValue(mem, 0x800b6700, 'int32_t*')
     local x = readValue(mem, 0x800b6704, 'int32_t*')
-    str = tostring(x) .. ',' .. tostring(y) .. '\n'
-    if str ~= lastStr then
-        coord = coord .. str
+    local y = readValue(mem, 0x800b6708, 'int32_t*')
+    local z = readValue(mem, 0x800b670c, 'int32_t*')
+    if lap == 1 then
+        str = tostring(x) .. ',' .. tostring(y) .. '\n'
+        if str ~= lastStr then
+            index = index + 1
+        end
+        if index % 5 == 0 then
+            coord = coord .. str
+        end
+        lastStr = str
     end
-    lastStr = str
 end
 
 function closeTrack()

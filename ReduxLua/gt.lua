@@ -2,14 +2,16 @@ hasPal = false
 hasUs = false
 hasJap = false
 forPlay = true
-netStatus = false
+setTCP = false
 dumpTrack = false
 hi_res = false
 smoke = false
+HeldCollState = 0
 
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
 loadfile("track.lua")()
+loadfile("track_prog.lua")()
 
 local function reload()
     PCSX.pauseEmulator()
@@ -17,6 +19,7 @@ local function reload()
     loadfile("gt.lua")()
     loadfile("tcp.lua")()
     loadfile("track.lua")()
+    loadfile("track_prog.lua")()
 end
 
 saveList = {
@@ -25,13 +28,16 @@ saveList = {
     { "Arcade HS R33",         "arc2.slice" },
     { "Arcade HS R33 mid-lap", "arc4.slice" },
     { "Arcade HS Corv",        "arc3.slice" },
-    { "Arcade MR2 HS",         "arc5.slice" },
-    { "Hi-Def",                "arc6.slice" },
+    { "Arcade MR2 TT HS",      "arc5.slice" }
+}
+
+saveList2 = {
+    { "Hi-Def MR2 TT HS",      "arc7.slice" },
+    { "Hi-Def MR2 Night",      "arc6.slice" },
     { "Sim Endurance Race",    "sim4.slice" },
     { "Simulation Home",       "sim1.slice" },
     { "SARD Supra HS",         "sim2.slice" },
     { "0-400m Test MR2",       "sim3.slice" }
-
 }
 
 
@@ -111,6 +117,20 @@ function raceCondition()
             str = 'Direction: Right -ve laps ['
         end
         str = str .. tostring(way) .. ']'
+
+        local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
+        local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')
+        
+        print("pre", HeldCollState, collisionState, collisionValue)
+        if collisionValue > 0 and collisionState > 0 then
+            HeldCollState = collisionState
+        elseif collisionValue == 0 then
+            HeldCollState = 0
+        end
+        print("pos", HeldCollState, collisionState, collisionValue)
+        local collisionText = getCollision(HeldCollState)
+
+        imgui.TextUnformatted(collisionText)
         doCheckbox(mem, 0x800b6358, 'HUD On', 0, 1, 'int16_t*')     -- (PAL SCES-00984)
         doCheckbox(mem, 0x800b615c, 'Not Replay', 0, 1, 'int32_t*') -- (PAL SCES-00984)
         doCheckbox(mem, 0x800b6d61, 'AI mode', 2, 0, 'int16_t*')
@@ -251,49 +271,61 @@ end
 
 function position()
     if (imgui.CollapsingHeader("Position", ImGuiTreeNodeFlags_None)) then
-        doSliderInt(mem, 0x800b6708, 'Map Y', -3000000, 3000000, 'int32_t*')
+        local x = readValue(mem, 0x800b6704, 'int32_t*')
+        local y = readValue(mem, 0x800b6708, 'int32_t*')
+        local ind = closestPoints(Xc, Yc, x, y)
         doSliderInt(mem, 0x800b6704, 'Map X', -3000000, 3000000, 'int32_t*')
+        doSliderInt(mem, 0x800b6708, 'Map Y', -2000000, 2000000, 'int32_t*')
         doSliderInt(mem, 0x800b670c, 'Map Z', -300000, 300000, 'int16_t*')
+
+        imgui.TextUnformatted(Pp[ind])
         -- doSliderInt(mem, 0x800b6728, 'Map X2', -3000000, 3000000, 'int32_t*')
         -- doSliderInt(mem, 0x800b6724, 'Map Z2', -3000000, 300000, 'int16_t*')
         -- doSliderInt(mem, 0x800b672c, 'Map Y2', -3000000, 3000000, 'int32_t*')
     end
 end
 
-function saveMenu()
-    if (imgui.CollapsingHeader("Saves", ImGuiTreeNodeFlags_None)) then
-        imgui.BeginTable("SaveTable", 2, imgui.constant.TableFlags.Resizable)
-        imgui.TableSetupColumn("Load")
-        imgui.TableSetupColumn("Save")
-        imgui.TableHeadersRow();
-        for i, f in pairs(saveList) do
-            imgui.TableNextRow()
-            local text = f[1]
-            local filename = f[2]
-            imgui.TableSetColumnIndex(0)
-            if (imgui.Button(text)) then
-                local file = Support.File.open(filename, "READ")
-                PCSX.loadSaveState(file)
-                file:close()
-            end
-            imgui.TableSetColumnIndex(1)
-            faketext = "Save/Update##" .. filename
-            if (imgui.Button(faketext)) then
-                local save = PCSX.createSaveState()
-                local file = Support.File.open(filename, "TRUNCATE")
-                file:writeMoveSlice(save)
-                file:close()
-                print(filename, "saved")
-            end
+function drawTable(listOfSaves)
+    imgui.BeginTable("SaveTable", 2, imgui.constant.TableFlags.Resizable)
+    imgui.TableSetupColumn("Load")
+    imgui.TableSetupColumn("Save")
+    imgui.TableHeadersRow();
+    for i, f in pairs(listOfSaves) do
+        imgui.TableNextRow()
+        local text = f[1]
+        local filename = f[2]
+        imgui.TableSetColumnIndex(0)
+        if (imgui.Button(text)) then
+            local file = Support.File.open(filename, "READ")
+            PCSX.loadSaveState(file)
+            file:close()
         end
-        imgui.EndTable()
+        imgui.TableSetColumnIndex(1)
+        faketext = "Save/Update##" .. filename
+        if (imgui.Button(faketext)) then
+            local save = PCSX.createSaveState()
+            local file = Support.File.open(filename, "TRUNCATE")
+            file:writeMoveSlice(save)
+            file:close()
+            print(filename, "saved")
+        end
+    end
+    imgui.EndTable()
+end
+
+function saveMenu()
+    if (imgui.CollapsingHeader("Saves1", ImGuiTreeNodeFlags_None)) then
+        drawTable(saveList)
+    end
+    if (imgui.CollapsingHeader("Saves2", ImGuiTreeNodeFlags_None)) then
+        drawTable(saveList2)
     end
 end
 
 function pythonStuff()
     if (imgui.CollapsingHeader("Python", ImGuiTreeNodeFlags_None)) then
-        netChanged, netStatus = imgui.Checkbox("TCP", netStatus)
-        netStatus = netTCP(netChanged, netStatus)
+        toggledTCP, setTCP = imgui.Checkbox("TCP", setTCP)
+        netTCP(toggledTCP, setTCP)
 
         trackChanged, dumpTrack = imgui.Checkbox("Dump Track X-Y", dumpTrack)
         if trackChanged then
@@ -360,6 +392,31 @@ function checkRegion()
     hasUs = not us:failed()
     hasJap = not jap:failed()
 end
+
+function getCollision(state)
+    if state == 0 then
+        return "no collision"
+    elseif state == 1 then
+        return "front left"
+    elseif state == 2 then
+        return "front right"
+    elseif state == 3 then
+        return "front"
+    elseif state == 4 then
+        return "rear left"
+    elseif state == 5 then
+        return "left"
+    elseif state == 6 then
+        return "right"
+    elseif state == 8 then
+        return "rear right"
+    elseif state == 12 then
+        return "rear"
+    else 
+        return "unknown"
+    end
+end
+
 
 if checked then checked:remove() end
 checked = PCSX.Events.createEventListener('ExecutionFlow::Run', checkRegion)
