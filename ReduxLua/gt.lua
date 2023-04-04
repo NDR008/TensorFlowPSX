@@ -32,12 +32,12 @@ saveList = {
 }
 
 saveList2 = {
-    { "Hi-Def MR2 TT HS",   "arc7.slice" },
-    { "Hi-Def MR2 Night",   "arc6.slice" },
-    { "Sim Endurance Race", "sim4.slice" },
-    { "Simulation Home",    "sim1.slice" },
-    { "SARD Supra HS",      "sim2.slice" },
-    { "0-400m Test MR2",    "sim3.slice" }
+    { "Hi-Def MR2 TT HS",      "arc7.slice" },
+    { "Hi-Def MR2 Night",      "arc6.slice" },
+    { "Sim Endurance Race",    "sim4.slice" },
+    { "Simulation Home",       "sim1.slice" },
+    { "SARD Supra HS",         "sim2.slice" },
+    { "0-400m Test MR2",       "sim3.slice" }
 }
 
 
