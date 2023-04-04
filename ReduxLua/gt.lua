@@ -384,8 +384,9 @@ function checkRegion()
 end
 
 function getCollision(state)
-
-    if state == 1 then
+    if state == 0 then
+        return "no collision"
+    elseif state == 1 then
         return "front left"
     elseif state == 2 then
         return "front right"
@@ -394,17 +395,15 @@ function getCollision(state)
     elseif state == 4 then
         return "rear left"
     elseif state == 5 then
-        return "unknown 1"
+        return "left"
     elseif state == 6 then
-        return "unknown 2"
-    elseif state == 7 then
-        return "unknown 3"
+        return "right"
     elseif state == 8 then
         return "rear right"
     elseif state == 12 then
         return "rear"
     else 
-        return "no collision"
+        return "unknown"
     end
 end
 
