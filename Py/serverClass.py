@@ -3,10 +3,10 @@ import game_pb2 as Game
 import numpy as np
 from PIL import Image
 import cv2
-from time import sleep, time  # for benchmarking
+# from time import sleep, time  # for benchmarking
 from enum import Enum
 from threading import Thread
-import subprocess
+# import subprocess
 
 
 class messageState(Enum):
@@ -52,7 +52,7 @@ class server(Thread):
         self.sock.listen(1)
         print('starting up on {} port {}'.format(*serverAddress))
         self.receiveClient()
-        #self.lostPing = False
+        # self.lostPing = False
 
     def recvall(self, expectedSize):
         """Returns an expected number of bytes from the socket connection

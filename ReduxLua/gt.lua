@@ -32,15 +32,12 @@ saveList = {
 }
 
 saveList2 = {
-    { "Hi-Def MR2 TT HS",      "arc7.slice" },
-    { "Hi-Def MR2 Night",      "arc6.slice" },
-    { "Arcade MR2 HS",         "arc5.slice" },
-    { "Hi-Def",                "arc6.slice" },
-    { "Sim Endurance Race",    "sim4.slice" },
-    { "Simulation Home",       "sim1.slice" },
-    { "SARD Supra HS",         "sim2.slice" },
-    { "0-400m Test MR2",       "sim3.slice" }
-
+    { "Hi-Def MR2 TT HS",   "arc7.slice" },
+    { "Hi-Def MR2 Night",   "arc6.slice" },
+    { "Sim Endurance Race", "sim4.slice" },
+    { "Simulation Home",    "sim1.slice" },
+    { "SARD Supra HS",      "sim2.slice" },
+    { "0-400m Test MR2",    "sim3.slice" }
 }
 
 
@@ -123,7 +120,7 @@ function raceCondition()
 
         local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
         local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')
-        
+
         print("pre", HeldCollState, collisionState, collisionValue)
         if collisionValue > 0 and collisionState > 0 then
             HeldCollState = collisionState
@@ -134,7 +131,6 @@ function raceCondition()
         local collisionText = getCollision(HeldCollState)
 
         imgui.TextUnformatted(collisionText)
-
         doCheckbox(mem, 0x800b6358, 'HUD On', 0, 1, 'int16_t*')     -- (PAL SCES-00984)
         doCheckbox(mem, 0x800b615c, 'Not Replay', 0, 1, 'int32_t*') -- (PAL SCES-00984)
         doCheckbox(mem, 0x800b6d61, 'AI mode', 2, 0, 'int16_t*')
@@ -279,12 +275,10 @@ function position()
         local y = readValue(mem, 0x800b6708, 'int32_t*')
         local ind = closestPoints(Xc, Yc, x, y)
         doSliderInt(mem, 0x800b6704, 'Map X', -3000000, 3000000, 'int32_t*')
-
         doSliderInt(mem, 0x800b6708, 'Map Y', -2000000, 2000000, 'int32_t*')
         doSliderInt(mem, 0x800b670c, 'Map Z', -300000, 300000, 'int16_t*')
 
         imgui.TextUnformatted(Pp[ind])
-        doSliderInt(mem, 0x800b670c, 'Map Z', -300000, 300000, 'int16_t*')
         -- doSliderInt(mem, 0x800b6728, 'Map X2', -3000000, 3000000, 'int32_t*')
         -- doSliderInt(mem, 0x800b6724, 'Map Z2', -3000000, 300000, 'int16_t*')
         -- doSliderInt(mem, 0x800b672c, 'Map Y2', -3000000, 3000000, 'int32_t*')
@@ -418,11 +412,10 @@ function getCollision(state)
         return "rear right"
     elseif state == 12 then
         return "rear"
-    else 
+    else
         return "unknown"
     end
 end
-
 
 if checked then checked:remove() end
 checked = PCSX.Events.createEventListener('ExecutionFlow::Run', checkRegion)
