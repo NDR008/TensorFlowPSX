@@ -47,7 +47,7 @@ class server(Thread):
         """
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         serverAddress = (self.ip, self.port)
-        # self.sock.setblocking(False)
+        self.sock.setblocking(True)
         self.sock.bind(serverAddress)
         self.sock.listen(1)
         print('starting up on {} port {}'.format(*serverAddress))
@@ -137,7 +137,6 @@ class server(Thread):
             self.excpt = True
 
     def sendPong(self, pong):
-        self.fullData = False
         self.connection.send(pong.to_bytes(4, 'little'))
 
     def receiveClient(self):
@@ -168,11 +167,13 @@ class server(Thread):
                 print("lost")
             
     def receiveOneFrame(self):
-        while not self.fullData:
+        while True:
             try:
                 self.sendPong(1)
                 self.receive()
                 if self.excpt and self.fullData:
+                    self.excpt = False
+                    self.fullData = False
                     self.decodeImg()
                     size = self.pic.shape
                     self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
@@ -180,11 +181,8 @@ class server(Thread):
                     self.lastFrame = self.myData.frame
                     if cv2.waitKey(0) & 0xFF == ord('q'):
                         cv2.destroyAllWindows()
-                        print('New Frame')
-                        break
+                        print('Forced Exit')
+                        return
             except:
                 print("lost")
-                return
-            # serverSession = server(benchmark=True)
-        self.excpt = False
-        self.fullData = False           
+        

@@ -112,8 +112,8 @@ function netTCP(netChanged, netStatus)
             ready = true
         end
         frames = frames + 1
+        local screen = PCSX.GPU.takeScreenShot()
         if (frames % frames_needed) == 0 and ready then
-            local screen = PCSX.GPU.takeScreenShot()
             screen.data = tostring(screen.data)
             screen.bpp = tonumber(screen.bpp)
             local gameState = readGameState()
@@ -128,9 +128,8 @@ function netTCP(netChanged, netStatus)
             obs['VS'] = vehicleState
             obs['frame'] = frames
             obs['pos'] = pos
-            
-            client:write("P")
             local chunk = assert(pb.encode("GT.Observation", obs))
+            client:write("P")
             client:writeU32(#chunk)
             client:write(chunk)
         end
