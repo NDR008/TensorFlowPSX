@@ -124,6 +124,7 @@ function netTCP(netChanged, netStatus)
             client:write("P") -- send "P" for the python server to know we are ready
             client:writeU32(#GlobalData) -- send the size of the chunk of data
             client:write(GlobalData) -- send the actual chunk of data
+            client:write("D")            -- send "P" for the python server to know we are ready
         end
     end
 end

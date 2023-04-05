@@ -17,13 +17,14 @@ class messageState(Enum):
 
 
 class server(Thread):
-    def __init__(self, ip='localhost', port=9999):
+    def __init__(self, ip='localhost', port=9999, debug=False):
         """Returns a GT AI server object
         Parameters:
         ip is a hostname as string (default localhost)
         port as int (default 9999)
         benchmark true / false (default false) * checks fps
         """
+        self.debug = debug
         self.ip = ip
         self.port = port
         self.mState = messageState.mPing.name
@@ -128,11 +129,13 @@ class server(Thread):
                     self.part = self.connection.recv(self.mSize - len(self.message))
                     self.message.extend(self.part)
                 else:
-                    self.fullData = True
-                    self.mState = messageState.mPing.name
-                    self.myData.ParseFromString(self.message)
-                    self.header.clear()
-                    self.message.clear()
+                    self.buffer = self.recvall(1)  # can be removed later
+                    if self.buffer is not None and self.buffer.decode() == 'D':
+                        self.fullData = True
+                        self.mState = messageState.mPing.name
+                        self.myData.ParseFromString(self.message)
+                        self.header.clear()
+                        self.message.clear()
         except socket.error as e:
             self.excpt = True
 
@@ -155,14 +158,15 @@ class server(Thread):
                     self.excpt = False
                     self.fullData = False
                     self.decodeImg()
-                    size = self.pic.shape
-                    #self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
-                    cv2.imshow('Preview Display', self.pic)
-                    self.lastFrame = self.myData.frame
-                    if cv2.waitKey(1) & 0xFF == ord('q'):
-                        cv2.destroyAllWindows()
-                        print('Forced Exit')
-                        return
+                    if self.debug:
+                        #size = self.pic.shape
+                        #self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
+                        cv2.imshow('Preview Display', self.pic)
+                        self.lastFrame = self.myData.frame
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            cv2.destroyAllWindows()
+                            print('Forced Exit')
+                            return
             except:
                 print("lost")
             
@@ -175,10 +179,16 @@ class server(Thread):
                     self.excpt = False
                     self.fullData = False
                     self.decodeImg()
-                    size = self.pic.shape
-                    #self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
-                    cv2.imshow('Preview Display', self.pic)
+                    
                     self.lastFrame = self.myData.frame
+                    #size = self.pic.shape
+                    #self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
+                    if self.debug:
+                        cv2.imshow('Preview Display', self.pic)
+                        print(self.myData.GS)
+                        print(self.myData.VS)
+                        print(self.myData.pos)
+                    
                     if cv2.waitKey(0) & 0xFF == ord('q'):
                         cv2.destroyAllWindows()
                         print('Forced Exit')
