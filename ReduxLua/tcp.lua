@@ -94,7 +94,6 @@ function netTCP(netChanged, netStatus)
             print("trying to reacher server")
             client = Support.File.uvFifo("127.0.0.1", 9999)
             frames = 0
-            dieing = 0
             reconnectTry = false
         else
             client:close()
@@ -112,26 +111,11 @@ function netTCP(netChanged, netStatus)
             ready = true
         end
         frames = frames + 1
-        local screen = PCSX.GPU.takeScreenShot()
         if (frames % frames_needed) == 0 and ready then
-            screen.data = tostring(screen.data)
-            screen.bpp = tonumber(screen.bpp)
-            local gameState = readGameState()
-            local vehicleState
-            local pos = readVehiclePositon()
-            if gameState['raceState'] < 6 then
-                vehicleState = readVehicleState()
-            end
-
-            obs['SS'] = screen
-            obs['GS'] = gameState
-            obs['VS'] = vehicleState
-            obs['frame'] = frames
-            obs['pos'] = pos
-            local chunk = assert(pb.encode("GT.Observation", obs))
+            grabGameData()
             client:write("P")
-            client:writeU32(#chunk)
-            client:write(chunk)
+            client:writeU32(#GlobalData)
+            client:write(GlobalData)
         end
     end
     -- print(dieing)

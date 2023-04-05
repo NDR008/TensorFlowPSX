@@ -184,5 +184,5 @@ class server(Thread):
                         print('Forced Exit')
                         return
             except:
-                print("lost")
+                print("Exception on single frame")
         
