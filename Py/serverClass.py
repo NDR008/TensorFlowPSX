@@ -167,9 +167,9 @@ class server(Thread):
                 print("lost")
             
     def receiveOneFrame(self):
+        self.sendPong(1)
         while True:
             try:
-                self.sendPong(1)
                 self.receive()
                 if self.excpt and self.fullData:
                     self.excpt = False

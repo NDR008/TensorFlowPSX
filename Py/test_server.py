@@ -8,3 +8,4 @@ serverS.receiveOneFrame() #Display first screenshot
 serverS.receiveOneFrame() #Display second screenshot
 serverS.receiveOneFrame()
 serverS.receiveOneFrame() #Display fourth screenshot
+serverS.receiveAllAlways()
