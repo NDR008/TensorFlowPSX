@@ -4,9 +4,6 @@ from threading import Thread
 agent = MyRealTimeInterface()
 agent.init_control()
 
-print("woop")
-
-
 import time, random
 
 while False:

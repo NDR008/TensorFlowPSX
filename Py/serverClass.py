@@ -144,7 +144,7 @@ class server(Thread):
         print("Waiting for a connection")
         self.connection, self.clientAddress = self.sock.accept()
         self.connection.setblocking(False)
-        print('Connection from', serverSession.clientAddress)
+        print('Connection from', self.clientAddress)
 
     # rename startReceiving to run for threading
     def receiveAllAlways(self):
@@ -187,15 +187,4 @@ class server(Thread):
                 return
             # serverSession = server(benchmark=True)
         self.excpt = False
-        self.fullData = False            
-
-
-# serverSession.startReceiving()
-serverSession = server()
-serverSession.connect()
-serverSession.sendPong(2)
-serverSession.receiveAllAlways()
-while True:
-    serverSession.receiveOneFrame()
-#serverSession.receiveAllAlways()
-
+        self.fullData = False           
