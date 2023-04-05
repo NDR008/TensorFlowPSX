@@ -4,6 +4,7 @@ from serverClass import server
 
 class MyRealTimeInterface(RealTimeGymInterface):
     def __init__(self):
+        print("GT Real Time instantiated")
         self.server = server()
         self.display = None
         self.gamepad = None
@@ -17,3 +18,7 @@ class MyRealTimeInterface(RealTimeGymInterface):
     
     def send_control(self, control):
         controlGamepad(self.gamepad, control)
+        
+    def get_observation_space(self):
+        self.serverSession.receiveOneFrame()
+        return super().get_observation_space()
