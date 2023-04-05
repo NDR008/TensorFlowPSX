@@ -88,6 +88,7 @@ function grabGameData()
 end
 
 function netTCP(netChanged, netStatus)
+    -- this seciton is messy
     local turnOn = (reconnectTry or netChanged)
     if turnOn then
         if netStatus then
@@ -97,26 +98,32 @@ function netTCP(netChanged, netStatus)
             reconnectTry = false
         else
             client:close()
-            dieing = 0
         end
+    -- main loop    
     elseif netStatus then
-        local readVal = client:readU16()
+        local readVal = client:readU16() -- receive a 1 or 2
         local ready = false
+        
+        -- 1 is the main loop for frame capture
         if readVal == 1 then
             ready = true
+
+        -- 2 is for loading a savestate    
         elseif readVal == 2 then
             local file = Support.File.open("arc5.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-            ready = true
         end
+
+        -- keep track of the number of frames rendered
         frames = frames + 1
+
+        -- if this is the nth frame and we have previously received a 1
         if (frames % frames_needed) == 0 and ready then
-            grabGameData()
-            client:write("P")
-            client:writeU32(#GlobalData)
-            client:write(GlobalData)
+            grabGameData() -- take screenshot, encode it with protobuf and get ready to send it
+            client:write("P") -- send "P" for the python server to know we are ready
+            client:writeU32(#GlobalData) -- send the size of the chunk of data
+            client:write(GlobalData) -- send the actual chunk of data
         end
     end
-    -- print(dieing)
 end
