@@ -121,13 +121,13 @@ function raceCondition()
         local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
         local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')
 
-        print("pre", HeldCollState, collisionState, collisionValue)
+        -- print("pre", HeldCollState, collisionState, collisionValue)
         if collisionValue > 0 and collisionState > 0 then
             HeldCollState = collisionState
         elseif collisionValue == 0 then
             HeldCollState = 0
         end
-        print("pos", HeldCollState, collisionState, collisionValue)
+        -- print("pos", HeldCollState, collisionState, collisionValue)
         local collisionText = getCollision(HeldCollState)
 
         imgui.TextUnformatted(collisionText)

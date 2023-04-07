@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"*\n\x07PosVect\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"i\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"\x82\x01\n\x0bObservation\x12\x16\n\x02SS\x18\x01 \x01(\x0b\x32\n.GT.Screen\x12\x19\n\x02GS\x18\x02 \x01(\x0b\x32\r.GT.GameState\x12\x17\n\x02VS\x18\x03 \x01(\x0b\x32\x0b.GT.Vehicle\x12\r\n\x05\x66rame\x18\x04 \x01(\x05\x12\x18\n\x03pos\x18\x05 \x01(\x0b\x32\x0b.GT.PosVect*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
+  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"*\n\x07PosVect\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"\xb8\x01\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\x12\x11\n\tfLeftSlip\x18\x07 \x01(\x05\x12\x13\n\x0b\x66RighttSlip\x18\x08 \x01(\x05\x12\x11\n\trLeftSlip\x18\t \x01(\x05\x12\x12\n\nrRightSlip\x18\n \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"\x82\x01\n\x0bObservation\x12\x16\n\x02SS\x18\x01 \x01(\x0b\x32\n.GT.Screen\x12\x19\n\x02GS\x18\x02 \x01(\x0b\x32\r.GT.GameState\x12\x17\n\x02VS\x18\x03 \x01(\x0b\x32\x0b.GT.Vehicle\x12\r\n\x05\x66rame\x18\x04 \x01(\x05\x12\x18\n\x03pos\x18\x05 \x01(\x0b\x32\x0b.GT.PosVect*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
 )
 
 _BPP = _descriptor.EnumDescriptor(
@@ -43,8 +43,8 @@ _BPP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=414,
-  serialized_end=443,
+  serialized_start=494,
+  serialized_end=523,
 )
 _sym_db.RegisterEnumDescriptor(_BPP)
 
@@ -182,6 +182,34 @@ _VEHICLE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='fLeftSlip', full_name='GT.Vehicle.fLeftSlip', index=6,
+      number=7, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='fRighttSlip', full_name='GT.Vehicle.fRighttSlip', index=7,
+      number=8, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rLeftSlip', full_name='GT.Vehicle.rLeftSlip', index=8,
+      number=9, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rRightSlip', full_name='GT.Vehicle.rRightSlip', index=9,
+      number=10, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -194,8 +222,8 @@ _VEHICLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=97,
-  serialized_end=202,
+  serialized_start=98,
+  serialized_end=282,
 )
 
 
@@ -247,8 +275,8 @@ _SCREEN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=204,
-  serialized_end=279,
+  serialized_start=284,
+  serialized_end=359,
 )
 
 
@@ -307,8 +335,8 @@ _OBSERVATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=282,
-  serialized_end=412,
+  serialized_start=362,
+  serialized_end=492,
 )
 
 _SCREEN.fields_by_name['bpp'].enum_type = _BPP

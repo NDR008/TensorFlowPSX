@@ -167,6 +167,7 @@ class server():
                             return
             except:
                 print("lost")
+                return
             
     def receiveOneFrame(self):
         self.sendPong(1)
@@ -186,6 +187,7 @@ class server():
                         print(self.myData.GS)
                         print(self.myData.VS)
                         print(self.myData.pos)
+                        print(self.pic.shape)
                     
                     if cv2.waitKey(0) & 0xFF == ord('q'):
                         cv2.destroyAllWindows()
