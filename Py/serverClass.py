@@ -3,10 +3,8 @@ import game_pb2 as Game
 import numpy as np
 from PIL import Image
 import cv2
-# from time import sleep, time  # for benchmarking
+from time import sleep
 from enum import Enum
-from threading import Thread
-# import subprocess
 
 
 class messageState(Enum):
@@ -16,7 +14,7 @@ class messageState(Enum):
     mRecvData = 4  # actual raw data
 
 
-class server(Thread):
+class server():
     def __init__(self, ip='localhost', port=9999, debug=False):
         """Returns a GT AI server object
         Parameters:
@@ -169,6 +167,7 @@ class server(Thread):
                             return
             except:
                 print("lost")
+                return
             
     def receiveOneFrame(self):
         self.sendPong(1)
@@ -188,6 +187,7 @@ class server(Thread):
                         print(self.myData.GS)
                         print(self.myData.VS)
                         print(self.myData.pos)
+                        print(self.pic.shape)
                     
                     if cv2.waitKey(0) & 0xFF == ord('q'):
                         cv2.destroyAllWindows()
@@ -196,4 +196,7 @@ class server(Thread):
             except:
                 print("Exception on single frame")
                 return
-        
+            
+    def reloadSave(self):
+        self.sendPong(2) # loads the save state
+        sleep(0.5)        
