@@ -184,10 +184,6 @@ class server():
                     #self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
                     if self.debug:
                         cv2.imshow('Preview Display', self.pic)
-                        print(self.myData.GS)
-                        print(self.myData.VS)
-                        print(self.myData.pos)
-                        print(self.pic.shape)
                     
                     if cv2.waitKey(0) & 0xFF == ord('q'):
                         cv2.destroyAllWindows()

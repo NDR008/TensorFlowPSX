@@ -45,5 +45,5 @@ message Observation {
     GameState GS = 2;
     Vehicle VS = 3;
     int32 frame = 4;
-    PosVect pos = 5;
+    PosVect posVect = 5;
 }

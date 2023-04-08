@@ -60,11 +60,11 @@ local function readVehicleState()
 end
 
 local function readVehiclePositon()
-    local pos = {}
-    pos['x'] = readValue(mem, 0x800b6704, 'int32_t*')
-    pos['y'] = readValue(mem, 0x800b6708, 'int32_t*')
-    pos['z'] = readValue(mem, 0x800b670c, 'int32_t*')
-    return pos
+    local posVect = {}
+    posVect['x'] = readValue(mem, 0x800b6704, 'int32_t*')
+    posVect['y'] = readValue(mem, 0x800b6708, 'int32_t*')
+    posVect['z'] = readValue(mem, 0x800b670c, 'int32_t*')
+    return posVect
 end
 -- TCP related
 
@@ -74,7 +74,7 @@ function grabGameData()
     screen.bpp = tonumber(screen.bpp)
     local gameState = readGameState()
     local vehicleState
-    local pos = readVehiclePositon()
+    local posVect = readVehiclePositon()
     if gameState['raceState'] < 6 then
         vehicleState = readVehicleState()
     end
@@ -82,7 +82,7 @@ function grabGameData()
     obs['GS'] = gameState
     obs['VS'] = vehicleState
     obs['frame'] = frames
-    obs['pos'] = pos
+    obs['posVect'] = posVect
 
     GlobalData = assert(pb.encode("GT.Observation", obs))
 end
