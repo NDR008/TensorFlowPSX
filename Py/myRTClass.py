@@ -37,19 +37,20 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
 
     # Mandatory method        
     def get_observation_space(self):
-        # eSpeed = spaces.Box(low=0, high=10000, shape=(1,))
-        # eBoost = spaces.Box(low=0, high=10000, shape=(1,))
-        # eGear = spaces.Box(low=0, high=6, shape=(1,))
+        eSpeed = spaces.Box(low=0, high=10000, shape=(1,))
+        eBoost = spaces.Box(low=0, high=10000, shape=(1,))
+        eGear = spaces.Box(low=0, high=6, shape=(1,))
         vSpeed = spaces.Box(low=0, high=500, shape=(1,))
         vSteer = spaces.Box(low=-580, high=580, shape=(1,))
+        vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,))         
+        # data = (eSpeed, eBoost, eGear, vSpeed, vSteer)
         # rState = spaces.Box(low=0, high=1, shape=(1,))
         # fLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
         # fRighttSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rRightSlip = spaces.Box(low=0, high=256, shape=(1,))
         display = spaces.Box(low=0.0, high=255.0, shape=(self.histSize, 240, 320, 3))
-        position = spaces.Box(low=-3000000, high=3000000, shape=(2,))        
-        return spaces.Tuple((position, vSpeed, vSteer, display))
+        return spaces.Tuple(((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition), display))
     
     # Mandatory method
     def get_action_space(self):
