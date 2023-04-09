@@ -1,8 +1,6 @@
-# https://raw.githubusercontent.com/yannbouteiller/rtgym/main/rtgym/tuto/tuto.py
-
 from rtgym import RealTimeGymInterface, DEFAULT_CONFIG_DICT, DummyRCDrone
-import gym.spaces as spaces
-import gym
+import gymnasium.spaces as spaces
+import gymnasium
 import numpy as np
 import cv2
 
@@ -21,8 +19,7 @@ def test_rc_drone():
             vel_y = 0.0
         rc_drone.send_control(vel_x, vel_y)
         pos_x, pos_y = rc_drone.get_observation()
-        print(
-            f"iteration {i}, sent vel: vel_x:{vel_x}, vel_y:{vel_y} - received pos: x:{pos_x:.3f}, y:{pos_y:.3f}")
+        print(f"iteration {i}, sent vel: vel_x:{vel_x}, vel_y:{vel_y} - received pos: x:{pos_x:.3f}, y:{pos_y:.3f}")
         time.sleep(0.05)
 
 
@@ -51,7 +48,7 @@ class MyRealTimeInterface(RealTimeGymInterface):
         vel_y = control[1]
         self.rc_drone.send_control(vel_x, vel_y)
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         if not self.initialized:
             self.rc_drone = DummyRCDrone()
             self.initialized = True
@@ -71,28 +68,24 @@ class MyRealTimeInterface(RealTimeGymInterface):
                np.array([pos_y], dtype='float32'),
                np.array([tar_x], dtype='float32'),
                np.array([tar_y], dtype='float32')]
-        rew = - \
-            np.linalg.norm(
-                np.array([pos_x, pos_y], dtype=np.float32) - self.target)
+        rew = -np.linalg.norm(np.array([pos_x, pos_y], dtype=np.float32) - self.target)
         terminated = rew > -0.01
         info = {}
         return obs, rew, terminated, info
 
     def wait(self):
-        self.send_control(self.get_default_action())
+        pass
 
     def render(self):
         image = np.ones((400, 400, 3), dtype=np.uint8) * 255
         pos_x, pos_y = self.rc_drone.get_observation()
         image = cv2.circle(img=image,
-                           center=(int(pos_x * 200) + 200,
-                                   int(pos_y * 200) + 200),
+                           center=(int(pos_x * 200) + 200, int(pos_y * 200) + 200),
                            radius=10,
                            color=(255, 0, 0),
                            thickness=1)
         image = cv2.circle(img=image,
-                           center=(
-                               int(self.target[0] * 200) + 200, int(self.target[1] * 200) + 200),
+                           center=(int(self.target[0] * 200) + 200, int(self.target[1] * 200) + 200),
                            radius=5,
                            color=(0, 0, 255),
                            thickness=-1)
@@ -112,7 +105,7 @@ my_config["reset_act_buf"] = False
 my_config["benchmark"] = True
 my_config["benchmark_polyak"] = 0.2
 
-env = gym.make("real-time-gym-v0", config=my_config)
+env = gymnasium.make("real-time-gym-v1", config=my_config)
 
 obs_space = env.observation_space
 act_space = env.action_space

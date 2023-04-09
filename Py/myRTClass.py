@@ -1,17 +1,35 @@
 from pygamepad import controlGamepad
-from rtgym import RealTimeGymInterface
+from rtgym import RealTimeGymInterface, DEFAULT_CONFIG_DICT
 from serverClass import server 
 import gymnasium.spaces as spaces
+import gymnasium
 import numpy as np
 import logging
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
-    def __init__(self, debugFlag=False, displayHist=3):
+    def __init__(self, debugFlag=False, img_hist_len=3):
         print("GT Real Time instantiated")
         self.server = server(debug=debugFlag)
         self.display = None
         self.gamepad = None
-        self.histSize = displayHist
+        self.img = None # for render
+        self.img_hist_len = img_hist_len
+        self.img_hist = None        
+
+    # Maybe needed (at least as a helper) wrong place?
+    def getDataImage(self):  
+        self.server.receiveOneFrame()
+        eSpeed = self.server.myData.VS.engSpeed
+        eBoost = self.server.myData.VS.engBoost
+        eBoost = self.server.myData.VS.engBoost
+        eBoost = self.server.myData.VS.engBoost
+        eBoost = self.server.myData.VS.engBoost
+        eGear = self.server.myData.VS.engGear
+        vSpeed = self.server.myData.VS.speed
+        vSteer = self.server.myData.VS.steer
+        vPosition = (self.server.myData.posVect.x, self.server.myData.posVect.y) 
+        display = self.server.pic     
+        return eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display
 
     def startSession(self):
         self.server.connect()
@@ -26,15 +44,6 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.init_control()
         self.startSession()
         
-    def getDataImage(self):
-        self.server.receiveOneFrame
-        # Maybe better not to copy but....
-        # myVS = self.server.myData.VS
-        # myGS = self.server.myData.GS
-        # posVect = self.server.myData.posVect       
-        return (self.server.myData.VS, self.server.myData.GS, self.server.myData.posVect, self.server.pic)
-    
-
     # Mandatory method        
     def get_observation_space(self):
         # eXXXX for engineXXXX
@@ -51,8 +60,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # fRighttSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rRightSlip = spaces.Box(low=0, high=256, shape=(1,))
-        display = spaces.Box(low=0.0, high=255.0, shape=(self.histSize, 240, 320, 3))
-        return spaces.Tuple(((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition), display))
+        display = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3))
+        return spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display))
     
     # Mandatory method
     def get_action_space(self):
@@ -64,9 +73,16 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     
     # Mandatory method
     def reset(self, seed=None, options=None):
-        self.server.reloadSave()
+        eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
         # I think this method should return an initial observation
-    
+        # since it is a reset state, the display history is the current display repeated
+        for _ in range(self.img_hist_len):
+            self.img_hist.append(display)
+        imgs = np.array(list(self.img_hist))
+        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
+        self.reward_function.reset()
+        return obs, {}
+        
     # Mandatory method
     def get_obs_rew_terminated_info(self):
         return super().get_obs_rew_terminated_info()
@@ -82,19 +98,17 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
     # Optional method
     def render(self):
-        pass
+        pass    
+    
+my_config = DEFAULT_CONFIG_DICT
+my_config["interface"] = MyGranTurismoRTGYM
+my_config["time_step_duration"] = 0.05
+my_config["start_obs_capture"] = 0.05
+my_config["time_step_timeout_factor"] = 1.0
+my_config["ep_max_length"] = 100
+my_config["act_buf_len"] = 4
+my_config["reset_act_buf"] = False
+my_config["benchmark"] = True
+my_config["benchmark_polyak"] = 0.2
 
-    # Mandatory but maybe wrong place?
-    def get_observation(self):
-        self.server.receiveOneFrame()
-        eSpeed = self.server.myData.VS.engSpeed
-        eBoost = self.server.myData.VS.engBoost
-        eBoost = self.server.myData.VS.engBoost
-        eBoost = self.server.myData.VS.engBoost
-        eBoost = self.server.myData.VS.engBoost
-        eGear = self.server.myData.VS.engGear
-        vSpeed = self.server.myData.VS.speed
-        vSteer = self.server.myData.VS.steer
-        vPosition = (self.server.myData.posVect.x, self.server.myData.posVect.y) 
-        display = self.server.pic     
-        return (eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition), display
+env = gymnasium.make("real-time-gym-v1", config=my_config)
