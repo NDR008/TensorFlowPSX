@@ -37,6 +37,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
 
     # Mandatory method        
     def get_observation_space(self):
+        # eXXXX for engineXXXX
+        # vXXX for vehicleXXX
         eSpeed = spaces.Box(low=0, high=10000, shape=(1,))
         eBoost = spaces.Box(low=0, high=10000, shape=(1,))
         eGear = spaces.Box(low=0, high=6, shape=(1,))
@@ -63,6 +65,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def reset(self, seed=None, options=None):
         self.server.reloadSave()
+        # I think this method should return an initial observation
     
     # Mandatory method
     def get_obs_rew_terminated_info(self):
@@ -80,3 +83,18 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Optional method
     def render(self):
         pass
+
+    # Mandatory but maybe wrong place?
+    def get_observation(self):
+        self.server.receiveOneFrame()
+        eSpeed = self.server.myData.VS.engSpeed
+        eBoost = self.server.myData.VS.engBoost
+        eBoost = self.server.myData.VS.engBoost
+        eBoost = self.server.myData.VS.engBoost
+        eBoost = self.server.myData.VS.engBoost
+        eGear = self.server.myData.VS.engGear
+        vSpeed = self.server.myData.VS.speed
+        vSteer = self.server.myData.VS.steer
+        vPosition = (self.server.myData.posVect.x, self.server.myData.posVect.y) 
+        display = self.server.pic     
+        return (eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition), display
