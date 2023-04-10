@@ -37,9 +37,9 @@ local function readGameState()
     local raceMode = readValue(mem, 0x800b6226, 'uint8_t*')
     local racing = readValue(mem, 0x8008df72, "int8_t*")
     if racing ~= 58 then
-        gameState['raceState'] = 6 -- not in race
+        gameState['raceState'] = 5 -- not in race
     elseif raceStart == 1 then
-        gameState['raceState'] = 1 -- race finished
+        gameState['raceState'] = 1 -- race start
     elseif raceMode == 0 then
         gameState['raceState'] = 2 -- racing
     else
@@ -78,6 +78,7 @@ function grabGameData()
     if gameState['raceState'] < 6 then
         vehicleState = readVehicleState()
     end
+    print(gameState['raceState'])
     obs['SS'] = screen
     obs['GS'] = gameState
     obs['VS'] = vehicleState

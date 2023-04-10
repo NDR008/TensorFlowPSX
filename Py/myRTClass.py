@@ -5,6 +5,7 @@ import gymnasium.spaces as spaces
 import gymnasium
 import numpy as np
 import logging
+from collections import deque
 
 from gymnasium.experimental.wrappers import FrameStackObservationV0
 
@@ -16,30 +17,37 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.gamepad = None
         self.img = None # for render
         self.img_hist_len = img_hist_len
-        self.img_hist = None      
+        self.img_hist = deque(maxlen=img_hist_len)
+        self.raceState = None
 
     # Maybe needed (at least as a helper) wrong place?
     def getDataImage(self):  
         self.server.receiveOneFrame()
-        # eSpeed = np.asarray(self.server.myData.VS.engSpeed)
-        # eBoost = np.asarray(self.server.myData.VS.engBoost)
-        # eBoost = np.asarray(self.server.myData.VS.engBoost)
-        # eBoost = np.asarray(self.server.myData.VS.engBoost)
-        # eBoost = np.asarray(self.server.myData.VS.engBoost)
-        # eGear  = np.asarray(self.server.myData.VS.engGear)
-        # vSpeed = np.asarray(self.server.myData.VS.speed)
-        # vSteer = np.asarray(self.server.myData.VS.steer)
+        eSpeed = np.array(self.server.myData.VS.engSpeed, dtype='int32')
+        eBoost = np.array(self.server.myData.VS.engBoost, dtype='int32')
+        eBoost = np.array(self.server.myData.VS.engBoost, dtype='int32')
+        eBoost = np.array(self.server.myData.VS.engBoost, dtype='int32')
+        eBoost = np.array(self.server.myData.VS.engBoost, dtype='int32')
+        eGear  = np.array(self.server.myData.VS.engGear, dtype='int32')
+        vSpeed = np.array(self.server.myData.VS.speed, dtype='int32')
+        vSteer = np.array(self.server.myData.VS.steer, dtype='int32')
+        self.raceState = self.server.myData.GS.raceState 
+        # raceState
+        # 1: Race Start (count down)
+        # 2: Racing (from post-countdown till final lap finish line)
+        # 3: Race finished
+        # 5: Some undefined state (like main menu, etc)
         
-        eSpeed = self.server.myData.VS.engSpeed
-        eBoost = self.server.myData.VS.engBoost
-        eBoost = self.server.myData.VS.engBoost
-        eBoost = self.server.myData.VS.engBoost
-        eBoost = self.server.myData.VS.engBoost
-        eGear  = self.server.myData.VS.engGear
-        vSpeed = self.server.myData.VS.speed
-        vSteer = self.server.myData.VS.steer
-        
-        vPosition = (self.server.myData.posVect.x, self.server.myData.posVect.y) 
+        # eSpeed = self.server.myData.VS.engSpeed
+        # eBoost = self.server.myData.VS.engBoost
+        # eBoost = self.server.myData.VS.engBoost
+        # eBoost = self.server.myData.VS.engBoost
+        # eBoost = self.server.myData.VS.engBoost
+        # eGear  = self.server.myData.VS.engGear
+        # vSpeed = self.server.myData.VS.speed
+        # vSteer = self.server.myData.VS.steer
+        # 
+        vPosition = np.array((self.server.myData.posVect.x, self.server.myData.posVect.y), dtype='int32')
         display = self.server.pic     
         return eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display
 
@@ -47,25 +55,26 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.server.connect()
         logging.debug("Server session started")
         
-    def init_control(self):
+    def initControl(self):
         import vgamepad as vg
         self.gamepad = vg.VDS4Gamepad()
         logging.debug("Virtual Dual Shock 4 loaded")
         
     def inititalizeCommon(self):
-        self.init_control()
+        self.img_hist = deque(maxlen=self.img_hist_len)
+        self.initControl()
         self.startSession()
         
     # Mandatory method        
     def get_observation_space(self):
         # eXXXX for engineXXXX
         # vXXX for vehicleXXX
-        eSpeed = spaces.Box(low=0, high=10000, shape=(1,))
-        eBoost = spaces.Box(low=0, high=10000, shape=(1,))
-        eGear =  spaces.Box(low=0, high=6, shape=(1,))
-        vSpeed = spaces.Box(low=0, high=500, shape=(1,))
-        vSteer = spaces.Box(low=-580, high=580, shape=(1,))
-        vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,))         
+        eSpeed = spaces.Box(low=0, high=10000, shape=(1,), dtype='int32')
+        eBoost = spaces.Box(low=0, high=10000, shape=(1,), dtype='int32')
+        eGear =  spaces.Box(low=0, high=6, shape=(1,), dtype='int32')
+        vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='int32')
+        vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='int32')
+        vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='int32')         
         # data = (eSpeed, eBoost, eGear, vSpeed, vSteer)
         # rState = spaces.Box(low=0, high=1, shape=(1,))
         # fLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
@@ -90,17 +99,29 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
         # I think this method should return an initial observation
         # since it is a reset state, the display history is the current display repeated
-        # for _ in range(self.img_hist_len):
-        #     self.img_hist.append(display)
-        # imgs = np.array(list(self.img_hist))
-        #obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
-        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
+        for _ in range(self.img_hist_len):
+            self.img_hist.append(display)
+        # may revisit to use tensors instead
+        imgs = np.array(list(self.img_hist), dtype='uint8')
+        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
+        #obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
         # self.reward_function.reset() # reward_function not implemented yet
         return obs, {}
         
     # Mandatory method
     def get_obs_rew_terminated_info(self):
-        return super().get_obs_rew_terminated_info()
+        eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
+        self.img_hist.append(display)
+        # may revisit to use tensors instead
+        imgs = np.array(list(self.img_hist), dtype='uint8') # we need numpy array
+        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
+        rew = 0 # for now
+        info = {}
+        if self.raceState == 3:
+            terminated = True
+        else:
+            terminated = False
+        return obs, rew, terminated, info
     
     # Mandatory method
     def send_control(self, control):
@@ -130,4 +151,5 @@ env = gymnasium.make("real-time-gym-v1", config=my_config)
 # https://gymnasium.farama.org/api/experimental/wrappers/#gymnasium.experimental.wrappers.FrameStackObservationV0
 wrapped_env = FrameStackObservationV0(env,4)
 obs, _ = env.reset()
-print(obs)
+#print(obs)
+print("boo")
