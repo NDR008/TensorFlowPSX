@@ -3,12 +3,16 @@ Yc = {}
 Pp = {}
 local csv = require("csv")
 local f = csv.open("HighSpeedRing.csv")
+TableSize = 0
 
 for fields in f:lines() do
     table.insert(Xc,tonumber(fields[1]))
     table.insert(Yc,tonumber(fields[2]))
     table.insert(Pp,tonumber(fields[3]))
+    TableSize = TableSize + 1
 end
+
+ 
 
 -- function closestValue(array, value)
 --     local low = 1

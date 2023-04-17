@@ -37,9 +37,9 @@ local function readGameState()
     local raceMode = readValue(mem, 0x800b6226, 'uint8_t*')
     local racing = readValue(mem, 0x8008df72, "int8_t*")
     if racing ~= 58 then
-        gameState['raceState'] = 6 -- not in race
+        gameState['raceState'] = 5 -- not in race
     elseif raceStart == 1 then
-        gameState['raceState'] = 1 -- race finished
+        gameState['raceState'] = 1 -- race start
     elseif raceMode == 0 then
         gameState['raceState'] = 2 -- racing
     else
@@ -60,11 +60,11 @@ local function readVehicleState()
 end
 
 local function readVehiclePositon()
-    local pos = {}
-    pos['x'] = readValue(mem, 0x800b6704, 'int32_t*')
-    pos['y'] = readValue(mem, 0x800b6708, 'int32_t*')
-    pos['z'] = readValue(mem, 0x800b670c, 'int32_t*')
-    return pos
+    local posVect = {}
+    posVect['x'] = readValue(mem, 0x800b6704, 'int32_t*')
+    posVect['y'] = readValue(mem, 0x800b6708, 'int32_t*')
+    posVect['z'] = readValue(mem, 0x800b670c, 'int32_t*')
+    return posVect
 end
 -- TCP related
 
@@ -74,15 +74,16 @@ function grabGameData()
     screen.bpp = tonumber(screen.bpp)
     local gameState = readGameState()
     local vehicleState
-    local pos = readVehiclePositon()
+    local posVect = readVehiclePositon()
     if gameState['raceState'] < 6 then
         vehicleState = readVehicleState()
     end
+    print(gameState['raceState'])
     obs['SS'] = screen
     obs['GS'] = gameState
     obs['VS'] = vehicleState
     obs['frame'] = frames
-    obs['pos'] = pos
+    obs['posVect'] = posVect
 
     GlobalData = assert(pb.encode("GT.Observation", obs))
 end

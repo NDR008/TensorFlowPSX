@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"*\n\x07PosVect\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"\xb8\x01\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\x12\x11\n\tfLeftSlip\x18\x07 \x01(\x05\x12\x13\n\x0b\x66RighttSlip\x18\x08 \x01(\x05\x12\x11\n\trLeftSlip\x18\t \x01(\x05\x12\x12\n\nrRightSlip\x18\n \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"\x82\x01\n\x0bObservation\x12\x16\n\x02SS\x18\x01 \x01(\x0b\x32\n.GT.Screen\x12\x19\n\x02GS\x18\x02 \x01(\x0b\x32\r.GT.GameState\x12\x17\n\x02VS\x18\x03 \x01(\x0b\x32\x0b.GT.Vehicle\x12\r\n\x05\x66rame\x18\x04 \x01(\x05\x12\x18\n\x03pos\x18\x05 \x01(\x0b\x32\x0b.GT.PosVect*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
+  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\">\n\x07PosVect\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\x12\x12\n\npercentage\x18\x04 \x01(\x05\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"\xb8\x01\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\x12\x11\n\tfLeftSlip\x18\x07 \x01(\x05\x12\x13\n\x0b\x66RighttSlip\x18\x08 \x01(\x05\x12\x11\n\trLeftSlip\x18\t \x01(\x05\x12\x12\n\nrRightSlip\x18\n \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"\x86\x01\n\x0bObservation\x12\x16\n\x02SS\x18\x01 \x01(\x0b\x32\n.GT.Screen\x12\x19\n\x02GS\x18\x02 \x01(\x0b\x32\r.GT.GameState\x12\x17\n\x02VS\x18\x03 \x01(\x0b\x32\x0b.GT.Vehicle\x12\r\n\x05\x66rame\x18\x04 \x01(\x05\x12\x1c\n\x07posVect\x18\x05 \x01(\x0b\x32\x0b.GT.PosVect*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
 )
 
 _BPP = _descriptor.EnumDescriptor(
@@ -43,8 +43,8 @@ _BPP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=494,
-  serialized_end=523,
+  serialized_start=518,
+  serialized_end=547,
 )
 _sym_db.RegisterEnumDescriptor(_BPP)
 
@@ -83,6 +83,13 @@ _POSVECT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='percentage', full_name='GT.PosVect.percentage', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -96,7 +103,7 @@ _POSVECT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=21,
-  serialized_end=63,
+  serialized_end=83,
 )
 
 
@@ -127,8 +134,8 @@ _GAMESTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=65,
-  serialized_end=95,
+  serialized_start=85,
+  serialized_end=115,
 )
 
 
@@ -222,8 +229,8 @@ _VEHICLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=98,
-  serialized_end=282,
+  serialized_start=118,
+  serialized_end=302,
 )
 
 
@@ -275,8 +282,8 @@ _SCREEN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=284,
-  serialized_end=359,
+  serialized_start=304,
+  serialized_end=379,
 )
 
 
@@ -317,7 +324,7 @@ _OBSERVATION = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='pos', full_name='GT.Observation.pos', index=4,
+      name='posVect', full_name='GT.Observation.posVect', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -335,15 +342,15 @@ _OBSERVATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=362,
-  serialized_end=492,
+  serialized_start=382,
+  serialized_end=516,
 )
 
 _SCREEN.fields_by_name['bpp'].enum_type = _BPP
 _OBSERVATION.fields_by_name['SS'].message_type = _SCREEN
 _OBSERVATION.fields_by_name['GS'].message_type = _GAMESTATE
 _OBSERVATION.fields_by_name['VS'].message_type = _VEHICLE
-_OBSERVATION.fields_by_name['pos'].message_type = _POSVECT
+_OBSERVATION.fields_by_name['posVect'].message_type = _POSVECT
 DESCRIPTOR.message_types_by_name['PosVect'] = _POSVECT
 DESCRIPTOR.message_types_by_name['GameState'] = _GAMESTATE
 DESCRIPTOR.message_types_by_name['Vehicle'] = _VEHICLE

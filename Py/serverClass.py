@@ -3,7 +3,7 @@ import game_pb2 as Game
 import numpy as np
 from PIL import Image
 import cv2
-from time import sleep
+from time import sleep, time
 from enum import Enum
 
 
@@ -75,7 +75,8 @@ class server():
 
         # NumPy buffer for the result
         shape, typestr = Image._conv_type_shape(im)
-        data = np.empty(shape, dtype=np.dtype(typestr))
+        #data = np.empty(shape, dtype=np.dtype(typestr))
+        data = np.empty(shape, dtype=np.uint8)
         mem = data.data.cast('B', (data.data.nbytes,))
         buffSize, s, offset = 65536, 0, 0
         while not s:
@@ -183,15 +184,12 @@ class server():
                     #size = self.pic.shape
                     #self.pic = cv2.resize(self.pic, (size[1] * 2, size[0] * 2), interpolation=cv2.INTER_NEAREST)
                     if self.debug:
-                        cv2.imshow('Preview Display', self.pic)
-                        print(self.myData.GS)
-                        print(self.myData.VS)
-                        print(self.myData.pos)
-                        print(self.pic.shape)
-                    
-                    if cv2.waitKey(0) & 0xFF == ord('q'):
-                        cv2.destroyAllWindows()
-                        print('Forced Exit')
+                        cv2.imshow('Preview Display', self.pic)                   
+                        if cv2.waitKey(0) & 0xFF == ord('q'):
+                            cv2.destroyAllWindows()
+                            print('Forced Exit')
+                            return
+                    else:
                         return
             except:
                 print("Exception on single frame")

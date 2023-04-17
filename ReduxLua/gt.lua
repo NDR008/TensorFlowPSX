@@ -28,7 +28,9 @@ saveList = {
     { "Arcade HS R33",         "arc2.slice" },
     { "Arcade HS R33 mid-lap", "arc4.slice" },
     { "Arcade HS Corv",        "arc3.slice" },
-    { "Arcade MR2 TT HS",      "arc5.slice" }
+    { "Arcade MR2 TT HS",      "arc5.slice" },
+    { "Arcade MR2 TT HS 2nd Lap",      "arc5b.slice" },
+    { "Arcade MR2 TT HS Last Corner", "arc5c.slice" }
 }
 
 saveList2 = {
