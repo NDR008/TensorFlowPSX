@@ -4,9 +4,10 @@ local protoc = require('protoc')
 local frames = 0
 local frames_needed = 1
 local obs = {}
-local dieing = 0
 local client = nil
 local reconnectTry = false
+CurrentPos = 0
+LastPos = 0
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -77,14 +78,23 @@ function grabGameData()
     local posVect = readVehiclePositon()
     if gameState['raceState'] < 6 then
         vehicleState = readVehicleState()
+        lap = readValue(mem, 0x800b6700, 'int8_t*')
+        if lap == 0 and gameState['raceState'] == 1 then
+            CurrentPos = 0
+            obs['tackID'] = CurrentPos
+        else
+            local x = readValue(mem, 0x800b6704, 'int32_t*')
+            local y = readValue(mem, 0x800b6708, 'int32_t*')  
+            CurrentPos = closestPoints(Xc, Yc, x, y)
+            obs['tackID'] = CurrentPos + (lap-1)*TrackMaxID
+        end
     end
-    print(gameState['raceState'])
+    -- print(obs['tackID'], lap, gameState['raceState'])
     obs['SS'] = screen
     obs['GS'] = gameState
     obs['VS'] = vehicleState
     obs['frame'] = frames
     obs['posVect'] = posVect
-
     GlobalData = assert(pb.encode("GT.Observation", obs))
 end
 

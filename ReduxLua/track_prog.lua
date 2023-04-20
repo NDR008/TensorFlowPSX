@@ -1,15 +1,15 @@
 Xc = {}
 Yc = {}
-Pp = {}
+Dist = {}
 local csv = require("csv")
 local f = csv.open("HighSpeedRing.csv")
-TableSize = 0
+TrackMaxID = 0
 
 for fields in f:lines() do
     table.insert(Xc,tonumber(fields[1]))
     table.insert(Yc,tonumber(fields[2]))
-    table.insert(Pp,tonumber(fields[3]))
-    TableSize = TableSize + 1
+    table.insert(Dist, tonumber(fields[3]))
+    TrackMaxID = TrackMaxID + 1
 end
 
  

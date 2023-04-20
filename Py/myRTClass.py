@@ -44,7 +44,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # vSpeed = self.server.myData.VS.speed
         # vSteer = self.server.myData.VS.steer
         # 
-        vPosition = np.array((self.server.myData.posVect.x, self.server.myData.posVect.y), dtype='float32')
+        vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype='float32')
         display = self.server.pic     
         return eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display
 

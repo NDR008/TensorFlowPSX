@@ -1,7 +1,7 @@
 from serverClass import server
 from time import sleep
 
-serverS = server(debug=True)
+serverS = server(debug=False)
 serverS.connect()
 serverS.reloadSave()
 serverS.receiveOneFrame() #Display first screenshot
