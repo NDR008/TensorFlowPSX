@@ -1,5 +1,6 @@
 from myRTClass import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
+import gymnasium
 
 my_config = DEFAULT_CONFIG_DICT
 my_config["interface"] = MyGranTurismoRTGYM
@@ -12,14 +13,26 @@ my_config["reset_act_buf"] = False
 my_config["benchmark"] = True
 my_config["benchmark_polyak"] = 0.2
 
-#env = gymnasium.make("real-time-gym-v1", config=my_config)
+env = gymnasium.make("real-time-gym-v1", config=my_config)
 # https://gymnasium.farama.org/api/experimental/wrappers/#gymnasium.experimental.wrappers.FrameStackObservationV0
-#wrapped_env = FrameStackObservationV0(env,4)
+# wrapped_env = FrameStackObservationV0(env,4)
 #obs, _ = env.reset()
 
-granTurismo = MyGranTurismoRTGYM(debugFlag=True)
-granTurismo.inititalizeCommon()
-print(granTurismo.get_observation_space())
-granTurismo.reset()
-granTurismo.wait()
-granTurismo.server.receiveAllAlways()
+obs, info = env.reset()
+terminated = False
+while not (terminated):
+    #env.render()
+    #act = model(obs)
+    print(env.action_space.sample())
+    obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
+    #print(obs)
+    print(env.observation_space)
+    print(f"rew:{rew}")
+    #break
+
+# granTurismo = MyGranTurismoRTGYM(debugFlag=True)
+# granTurismo.inititalizeCommon()
+# print(granTurismo.get_observation_space())
+# granTurismo.reset()
+# granTurismo.wait()
+# granTurismo.server.receiveAllAlways()

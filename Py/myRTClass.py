@@ -31,7 +31,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         vSpeed = np.array([self.server.myData.VS.speed], dtype='float32')
         vSteer = np.array([self.server.myData.VS.steer], dtype='float32')
         vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype='float32')
-        trackID = np.array([self.server.myData.trackID], dtype='float32')
+        trackID = self.server.myData.trackID
         self.raceState = self.server.myData.GS.raceState     
         # raceState
         # 1: Race Start (count down)
@@ -73,18 +73,20 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # fRighttSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rRightSlip = spaces.Box(low=0, high=256, shape=(1,))
-        images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype=np.uint8)
+        #images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype=np.uint8)
+        images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype='float32')
         
         # images = spaces.Box(low=0, high=255, shape=(240, 320, 3), dtype=np.uint8)
         return spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, images))
     
     # Mandatory method
     def get_action_space(self):
-        return spaces.Box(low=0.0, high=1.0, shape=(3,))
+        #return spaces.Box(low=-1.0, high=1.0, shape=(3,))
+        return spaces.Box(low=np.array([0, 0, -1]), high=np.array([1.0, 1.0, 1.0]))
     
     # Mandatory method
     def get_default_action(self):
-        return np.array([1,0,0], dtype='float32')
+        return np.array([1,0,0], dtype='int32')
     
     # Mandatory method
     def reset(self, seed=None, options=None):
@@ -96,6 +98,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             self.img_hist.append(display)
         # may revisit to use tensors instead
         imgs = np.array(list(self.img_hist), dtype='uint8')
+        imgs = np.array(list(self.img_hist), dtype='int32')
         
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
         # obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
@@ -105,10 +108,11 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def get_obs_rew_terminated_info(self):
         trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
-        reward, terminated = self.rewardFunction(trackID)
+        reward, terminated = self.rewardFunction.computeReward(trackID)
         self.img_hist.append(display)
         # may revisit to use tensors instead
-        imgs = np.array(list(self.img_hist), dtype='uint8') # we need numpy array
+        # imgs = np.array(list(self.img_hist), dtype='uint8') # we need numpy array
+        imgs = np.array(list(self.img_hist), dtype='float32') # we need numpy array float32 avoids warning
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
         info = {}
         if self.raceState == 3:

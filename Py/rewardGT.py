@@ -12,7 +12,7 @@ class RewardFunction:
         self.step_counter = 0
         self.failure_counter = 0
         
-    def compute_reward(self, latestIndex):
+    def computeReward(self, latestIndex):
         terminated = False
         reward = (latestIndex - self.curTrackIdx) / 100.0
         
