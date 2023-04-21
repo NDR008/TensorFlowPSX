@@ -89,7 +89,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def reset(self, seed=None, options=None):
         self.inititalizeCommon() #only used to debug this
-        #self.server.reloadSave()
+        self.server.reloadSave()
         _, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
         
         for _ in range(self.img_hist_len):
@@ -116,6 +116,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         elif self.raceState == 1:
             terminated = False
             self.rewardFunction.reset()
+        else:
+            terminated = False
         return obs, reward, terminated, info
     
     # Mandatory method
