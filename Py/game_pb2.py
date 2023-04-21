@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"*\n\x07PosVect\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"\xb8\x01\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\x12\x11\n\tfLeftSlip\x18\x07 \x01(\x05\x12\x13\n\x0b\x66RighttSlip\x18\x08 \x01(\x05\x12\x11\n\trLeftSlip\x18\t \x01(\x05\x12\x12\n\nrRightSlip\x18\n \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"\x18\n\x05Track\x12\x0f\n\x07TrackID\x18\x01 \x01(\x05\"\xa2\x01\n\x0bObservation\x12\x16\n\x02SS\x18\x01 \x01(\x0b\x32\n.GT.Screen\x12\x19\n\x02GS\x18\x02 \x01(\x0b\x32\r.GT.GameState\x12\x17\n\x02VS\x18\x03 \x01(\x0b\x32\x0b.GT.Vehicle\x12\r\n\x05\x66rame\x18\x04 \x01(\x05\x12\x1c\n\x07posVect\x18\x05 \x01(\x0b\x32\x0b.GT.PosVect\x12\x1a\n\x07trackID\x18\x06 \x01(\x0b\x32\t.GT.Track*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
+  serialized_pb=b'\n\rPy/game.proto\x12\x02GT\"*\n\x07PosVect\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\t\n\x01z\x18\x03 \x01(\x05\"\x1e\n\tGameState\x12\x11\n\traceState\x18\x01 \x01(\x05\"\xb8\x01\n\x07Vehicle\x12\x10\n\x08\x65ngSpeed\x18\x01 \x01(\x05\x12\x10\n\x08\x65ngBoost\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ngGear\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\r\n\x05steer\x18\x05 \x01(\x11\x12\x0b\n\x03pos\x18\x06 \x01(\x05\x12\x11\n\tfLeftSlip\x18\x07 \x01(\x05\x12\x13\n\x0b\x66RighttSlip\x18\x08 \x01(\x05\x12\x11\n\trLeftSlip\x18\t \x01(\x05\x12\x12\n\nrRightSlip\x18\n \x01(\x05\"K\n\x06Screen\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05width\x18\x02 \x01(\x05\x12\x0e\n\x06height\x18\x03 \x01(\x05\x12\x14\n\x03\x62pp\x18\x04 \x01(\x0e\x32\x07.GT.BPP\"\x18\n\x05Track\x12\x0f\n\x07TrackID\x18\x01 \x01(\x05\"\x97\x01\n\x0bObservation\x12\x16\n\x02SS\x18\x01 \x01(\x0b\x32\n.GT.Screen\x12\x19\n\x02GS\x18\x02 \x01(\x0b\x32\r.GT.GameState\x12\x17\n\x02VS\x18\x03 \x01(\x0b\x32\x0b.GT.Vehicle\x12\r\n\x05\x66rame\x18\x04 \x01(\x05\x12\x1c\n\x07posVect\x18\x05 \x01(\x0b\x32\x0b.GT.PosVect\x12\x0f\n\x07trackID\x18\x06 \x01(\x05*\x1d\n\x03\x42PP\x12\n\n\x06\x42PP_16\x10\x00\x12\n\n\x06\x42PP_24\x10\x01\x62\x06proto3'
 )
 
 _BPP = _descriptor.EnumDescriptor(
@@ -43,8 +43,8 @@ _BPP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=552,
-  serialized_end=581,
+  serialized_start=541,
+  serialized_end=570,
 )
 _sym_db.RegisterEnumDescriptor(_BPP)
 
@@ -357,8 +357,8 @@ _OBSERVATION = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='trackID', full_name='GT.Observation.trackID', index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      number=6, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -375,7 +375,7 @@ _OBSERVATION = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=388,
-  serialized_end=550,
+  serialized_end=539,
 )
 
 _SCREEN.fields_by_name['bpp'].enum_type = _BPP
@@ -383,7 +383,6 @@ _OBSERVATION.fields_by_name['SS'].message_type = _SCREEN
 _OBSERVATION.fields_by_name['GS'].message_type = _GAMESTATE
 _OBSERVATION.fields_by_name['VS'].message_type = _VEHICLE
 _OBSERVATION.fields_by_name['posVect'].message_type = _POSVECT
-_OBSERVATION.fields_by_name['trackID'].message_type = _TRACK
 DESCRIPTOR.message_types_by_name['PosVect'] = _POSVECT
 DESCRIPTOR.message_types_by_name['GameState'] = _GAMESTATE
 DESCRIPTOR.message_types_by_name['Vehicle'] = _VEHICLE

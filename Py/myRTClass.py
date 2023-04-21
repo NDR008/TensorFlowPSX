@@ -8,6 +8,7 @@ import logging
 from collections import deque
 
 from gymnasium.experimental.wrappers import FrameStackObservationV0
+from rewardGT import RewardFunction
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
     def __init__(self, debugFlag=False, img_hist_len=3):
@@ -19,6 +20,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.img_hist_len = img_hist_len
         self.img_hist = deque(maxlen=img_hist_len)
         self.raceState = None
+        self.rewardFunction = None 
 
     # Maybe needed (at least as a helper) wrong place?
     def getDataImage(self):  
@@ -28,25 +30,17 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         eGear  = np.array([self.server.myData.VS.engGear], dtype='float32')
         vSpeed = np.array([self.server.myData.VS.speed], dtype='float32')
         vSteer = np.array([self.server.myData.VS.steer], dtype='float32')
-        self.raceState = self.server.myData.GS.raceState 
+        vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype='float32')
+        trackID = np.array([self.server.myData.trackID], dtype='float32')
+        self.raceState = self.server.myData.GS.raceState     
         # raceState
         # 1: Race Start (count down)
         # 2: Racing (from post-countdown till final lap finish line)
         # 3: Race finished
         # 5: Some undefined state (like main menu, etc)
         
-        # eSpeed = self.server.myData.VS.engSpeed
-        # eBoost = self.server.myData.VS.engBoost
-        # eBoost = self.server.myData.VS.engBoost
-        # eBoost = self.server.myData.VS.engBoost
-        # eBoost = self.server.myData.VS.engBoost
-        # eGear  = self.server.myData.VS.engGear
-        # vSpeed = self.server.myData.VS.speed
-        # vSteer = self.server.myData.VS.steer
-        # 
-        vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype='float32')
         display = self.server.pic     
-        return eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display
+        return trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display
 
     def startSession(self):
         self.server.connect()
@@ -61,6 +55,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.img_hist = deque(maxlen=self.img_hist_len)
         self.initControl()
         self.startSession()
+        self.rewardFunction = RewardFunction()
         
     # Mandatory method        
     def get_observation_space(self):
@@ -79,6 +74,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # rLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rRightSlip = spaces.Box(low=0, high=256, shape=(1,))
         images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype=np.uint8)
+        
         # images = spaces.Box(low=0, high=255, shape=(240, 320, 3), dtype=np.uint8)
         return spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, images))
     
@@ -93,10 +89,9 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def reset(self, seed=None, options=None):
         self.inititalizeCommon() #only used to debug this
-        #self.server.reloadSave()
-        eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
-        # I think this method should return an initial observation
-        # since it is a reset state, the display history is the current display repeated
+        self.server.reloadSave()
+        _, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
+        
         for _ in range(self.img_hist_len):
             self.img_hist.append(display)
         # may revisit to use tensors instead
@@ -104,25 +99,26 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
         # obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
-        # self.reward_function.reset() # reward_function not implemented yet
+        self.rewardFunction.reset() # reward_function not implemented yet
         return obs, {}
         
     # Mandatory method
     def get_obs_rew_terminated_info(self):
-        eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
+        trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
+        reward, terminated = self.rewardFunction(trackID)
         self.img_hist.append(display)
         # may revisit to use tensors instead
         imgs = np.array(list(self.img_hist), dtype='uint8') # we need numpy array
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
-        # obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
-        # obs = [eSpeed, eBoost]
-        rew = 0 # for now
         info = {}
         if self.raceState == 3:
             terminated = True
+        elif self.raceState == 1:
+            terminated = False
+            self.rewardFunction.reset()
         else:
             terminated = False
-        return obs, rew, terminated, info
+        return obs, reward, terminated, info
     
     # Mandatory method
     def send_control(self, control):

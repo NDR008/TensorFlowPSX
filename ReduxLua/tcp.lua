@@ -64,7 +64,7 @@ local function readVehiclePositon()
     local posVect = {}
     posVect['x'] = readValue(mem, 0x800b6704, 'int32_t*')
     posVect['y'] = readValue(mem, 0x800b6708, 'int32_t*')
-    posVect['z'] = readValue(mem, 0x800b670c, 'int32_t*')
+    -- posVect['z'] = readValue(mem, 0x800b670c, 'int32_t*')
     return posVect
 end
 -- TCP related
@@ -81,13 +81,15 @@ function grabGameData()
         lap = readValue(mem, 0x800b6700, 'int8_t*')
         if lap == 0 and gameState['raceState'] == 1 then
             CurrentPos = 0
-            obs['tackID'] = CurrentPos
+            obs['trackID'] = CurrentPos
         else
             local x = readValue(mem, 0x800b6704, 'int32_t*')
             local y = readValue(mem, 0x800b6708, 'int32_t*')  
             CurrentPos = closestPoints(Xc, Yc, x, y)
-            obs['tackID'] = CurrentPos + (lap-1)*TrackMaxID
+            obs['trackID'] = CurrentPos + (lap - 1) * TrackMaxID
         end
+    else
+        obs['trackID'] = 0
     end
     -- print(obs['tackID'], lap, gameState['raceState'])
     obs['SS'] = screen

@@ -24,14 +24,16 @@ class RewardFunction:
         self.step_counter += 1
         index = self.cur_idx
         temp = self.nb_obs_forward
+        
+        # main loop just to check if how far the car moved forward.
         while True:
             dist = np.linalg.norm(pos - self.data[index])
             if dist <= min_dist:
                 min_dist = dist
-                best_index = index
+                best_index = index 
                 temp = self.nb_obs_forward
-            index += 1
-            temp -= 1
+            index += 1 # index is array index
+            temp -= 1 #this is to reduce how far forward to look
             # stop condition
             if index >= self.datalen or temp <= 0:
                 break
