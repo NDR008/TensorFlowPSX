@@ -13,7 +13,6 @@ message PosVect {
     int32 x = 1;
     int32 y = 2;
     int32 z = 3;
-    int32 percentage = 4;
 }
 
 message GameState {
@@ -40,10 +39,15 @@ message Screen {
     BPP bpp = 4;
 }
 
+message Track {
+    int32 TrackID = 1;
+}
+
 message Observation {
     Screen SS = 1;
     GameState GS = 2;
     Vehicle VS = 3;
     int32 frame = 4;
     PosVect posVect = 5;
+    Track trackID = 6;
 }

@@ -280,7 +280,7 @@ function position()
         doSliderInt(mem, 0x800b6708, 'Map Y', -2000000, 2000000, 'int32_t*')
         doSliderInt(mem, 0x800b670c, 'Map Z', -300000, 300000, 'int16_t*')
 
-        imgui.TextUnformatted(Pp[ind])
+        imgui.TextUnformatted(ind)
         -- doSliderInt(mem, 0x800b6728, 'Map X2', -3000000, 3000000, 'int32_t*')
         -- doSliderInt(mem, 0x800b6724, 'Map Z2', -3000000, 300000, 'int16_t*')
         -- doSliderInt(mem, 0x800b672c, 'Map Y2', -3000000, 3000000, 'int32_t*')
