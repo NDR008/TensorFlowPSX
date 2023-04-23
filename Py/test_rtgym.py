@@ -25,6 +25,7 @@ while not (terminated):
     #act = model(obs)
     print(env.action_space.sample())
     obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
+    env.render()
     #print(obs)
     print(env.observation_space)
     print(f"rew:{rew}")

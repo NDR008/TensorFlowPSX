@@ -2,10 +2,12 @@ from pygamepad import controlGamepad
 from rtgym import RealTimeGymInterface, DEFAULT_CONFIG_DICT
 from serverClass import server 
 import gymnasium.spaces as spaces
-import gymnasium
+import cv2
+# import gymnasium
 import numpy as np
 import logging
 from collections import deque
+from threading import Thread
 
 from gymnasium.experimental.wrappers import FrameStackObservationV0
 from rewardGT import RewardFunction
@@ -21,6 +23,12 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.img_hist = deque(maxlen=img_hist_len)
         self.raceState = None
         self.rewardFunction = None 
+        self.renderingThread = Thread(target=self._renderingThread, args=(), kwargs={}, daemon=True)
+    
+    # rendering from the gym env in a seperate thread    
+    def _renderingThread(self):
+        while True:
+            self.render()
 
     # Maybe needed (at least as a helper) wrong place?
     def getDataImage(self):  
@@ -135,7 +143,9 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
     # Optional method
     def render(self):
-        pass    
+        cv2.imshow('Preview Display', self.server.pic)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            return
     
 # my_config = DEFAULT_CONFIG_DICT
 # my_config["interface"] = MyGranTurismoRTGYM
