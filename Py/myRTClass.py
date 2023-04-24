@@ -27,7 +27,9 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     
     # rendering from the gym env in a seperate thread    
     def _renderingThread(self):
+        #from time import sleep
         while True:
+            #sleep(0.1)
             self.render()
 
     # Maybe needed (at least as a helper) wrong place?
@@ -90,11 +92,11 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def get_action_space(self):
         #return spaces.Box(low=-1.0, high=1.0, shape=(3,))
-        return spaces.Box(low=np.array([0, 0, -1]), high=np.array([1.0, 1.0, 1.0]))
+        return spaces.Box(low=np.array([0.0, 0.0, -1.0]), high=np.array([1.0, 1.0, 1.0]), dtype='float64')
     
     # Mandatory method
     def get_default_action(self):
-        return np.array([1,0,0], dtype='int32')
+        return np.array([1.0, 0.0, 0.0], dtype='float64')
     
     # Mandatory method
     def reset(self, seed=None, options=None):
@@ -105,8 +107,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         for _ in range(self.img_hist_len):
             self.img_hist.append(display)
         # may revisit to use tensors instead
-        imgs = np.array(list(self.img_hist), dtype='uint8')
-        imgs = np.array(list(self.img_hist), dtype='int32')
+        imgs = np.array(list(self.img_hist), dtype='float32')
         
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
         # obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
@@ -116,7 +117,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def get_obs_rew_terminated_info(self):
         trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
-        reward, terminated = self.rewardFunction.computeReward(trackID)
+        reward, terminated = self.rewardFunction.computeReward(trackID, vSpeed)
         self.img_hist.append(display)
         # may revisit to use tensors instead
         # imgs = np.array(list(self.img_hist), dtype='uint8') # we need numpy array

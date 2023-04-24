@@ -85,8 +85,9 @@ function grabGameData()
         else
             local x = readValue(mem, 0x800b6704, 'int32_t*')
             local y = readValue(mem, 0x800b6708, 'int32_t*')  
-            CurrentPos = closestPoints(Xc, Yc, x, y)
-            obs['trackID'] = CurrentPos + (lap - 1) * TrackMaxID
+            CurrentPos = closestPoints(Xc, Yc, x, y) + (lap - 1) * TrackMaxID
+            --if CurrentPos < TrackMaxID
+            obs['trackID'] = CurrentPos
         end
     else
         obs['trackID'] = 0

@@ -12,9 +12,10 @@ class RewardFunction:
         self.step_counter = 0
         self.failure_counter = 0
         
-    def computeReward(self, latestIndex):
+    def computeReward(self, latestIndex, vspeed):
         terminated = False
-        reward = (latestIndex - self.curTrackIdx) / 100.0
+        reward = (latestIndex - self.curTrackIdx)*5 + (vspeed / 300)/2
+        # reward +5 for making it to another segment + 0.5 for 300km/h
         
         if latestIndex == self.curTrackIdx:  # if the best index didn't change, we rewind (more Markovian reward)
             self.failure_counter += 1

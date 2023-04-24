@@ -1,6 +1,7 @@
 from myRTClass import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
 import gymnasium
+from time import sleep
 
 my_config = DEFAULT_CONFIG_DICT
 my_config["interface"] = MyGranTurismoRTGYM
@@ -20,16 +21,20 @@ env = gymnasium.make("real-time-gym-v1", config=my_config)
 
 obs, info = env.reset()
 terminated = False
+obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
+obs_space = env.observation_space
+print(f"observation space: {obs_space}")
+print("")
+print(f"observation actual: {obs}")
 while not (terminated):
     #env.render()
     #act = model(obs)
-    print(env.action_space.sample())
     obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
+    #sleep(0.1)
     env.render()
-    #print(obs)
-    print(env.observation_space)
     print(f"rew:{rew}")
     #break
+    
 
 # granTurismo = MyGranTurismoRTGYM(debugFlag=True)
 # granTurismo.inititalizeCommon()
