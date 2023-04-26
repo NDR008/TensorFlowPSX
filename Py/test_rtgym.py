@@ -32,7 +32,7 @@ while not (terminated):
     obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
     #sleep(0.1)
     env.render()
-    print(f"rew:{rew}")
+    #print(f"rew:{rew}")
     #break
     
 

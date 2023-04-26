@@ -1,15 +1,24 @@
 Xc = {}
 Yc = {}
 Dist = {}
-local csv = require("csv")
-local f = csv.open("HighSpeedRing.csv")
+
 TrackMaxID = 0
 
-for fields in f:lines() do
-    table.insert(Xc,tonumber(fields[1]))
-    table.insert(Yc,tonumber(fields[2]))
-    table.insert(Dist, tonumber(fields[3]))
-    TrackMaxID = TrackMaxID + 1
+function fileExists(name)
+    local f = io.open(name, "r")
+    return f ~= nil and io.close(f)
+end
+
+local name = "HighSpeedRing.csv"
+if fileExists(name) then
+    local csv = require("csv")
+    local f = csv.open("HighSpeedRing.csv")
+    for fields in f:lines() do
+        table.insert(Xc,tonumber(fields[1]))
+        table.insert(Yc,tonumber(fields[2]))
+        table.insert(Dist, tonumber(fields[3]))
+        TrackMaxID = TrackMaxID + 1
+    end
 end
 
  

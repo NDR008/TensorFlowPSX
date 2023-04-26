@@ -40,6 +40,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         eGear  = np.array([self.server.myData.VS.engGear], dtype='float32')
         vSpeed = np.array([self.server.myData.VS.speed], dtype='float32')
         vSteer = np.array([self.server.myData.VS.steer], dtype='float32')
+        vDir = np.array([self.server.myData.drivingDir], dtype='float32')
         vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype='float32')
         trackID = self.server.myData.trackID
         self.raceState = self.server.myData.GS.raceState     
@@ -50,7 +51,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # 5: Some undefined state (like main menu, etc)
         
         display = self.server.pic     
-        return trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display
+        return trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display
 
     def startSession(self):
         self.server.connect()
@@ -77,6 +78,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='float32')
         vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='float32')
         vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
+        vDir = spaces.Box(low=0, high=3, shape=(2,), dtype='float32')
         # data = (eSpeed, eBoost, eGear, vSpeed, vSteer)
         # rState = spaces.Box(low=0, high=1, shape=(1,))
         # fLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
@@ -87,7 +89,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype='float32')
         
         # images = spaces.Box(low=0, high=255, shape=(240, 320, 3), dtype=np.uint8)
-        return spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, images))
+        return spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, images))
     
     # Mandatory method
     def get_action_space(self):
@@ -102,27 +104,27 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     def reset(self, seed=None, options=None):
         self.inititalizeCommon() #only used to debug this
         self.server.reloadSave()
-        _, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
+        _, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
         
         for _ in range(self.img_hist_len):
             self.img_hist.append(display)
         # may revisit to use tensors instead
         imgs = np.array(list(self.img_hist), dtype='float32')
         
-        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
+        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, imgs]
         # obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
         self.rewardFunction.reset() # reward_function not implemented yet
         return obs, {}
         
     # Mandatory method
     def get_obs_rew_terminated_info(self):
-        trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display = self.getDataImage()
-        reward, terminated = self.rewardFunction.computeReward(trackID, vSpeed)
+        trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
+        reward, terminated = self.rewardFunction.computeReward(trackID, vSpeed, vDir)
         self.img_hist.append(display)
         # may revisit to use tensors instead
         # imgs = np.array(list(self.img_hist), dtype='uint8') # we need numpy array
         imgs = np.array(list(self.img_hist), dtype='float32') # we need numpy array float32 avoids warning
-        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, imgs]
+        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, imgs]
         info = {}
         if self.raceState == 3:
             terminated = True
@@ -144,7 +146,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
     # Optional method
     def render(self):
-        cv2.imshow('Preview Display', self.server.pic)
+        cv2.imshow('Render Display', self.server.pic)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return
     

@@ -116,7 +116,7 @@ function raceCondition()
         elseif way == 2 then
             str = 'Direction: Wrong -ve laps ['
         elseif way == 3 then
-            str = 'Direction: Right -ve laps ['
+            str = 'Direction: Wrong -ve laps ['
         end
         str = str .. tostring(way) .. ']'
 

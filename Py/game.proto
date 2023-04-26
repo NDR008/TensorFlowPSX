@@ -39,10 +39,6 @@ message Screen {
     BPP bpp = 4;
 }
 
-message Track {
-    int32 TrackID = 1;
-}
-
 message Observation {
     Screen SS = 1;
     GameState GS = 2;
@@ -50,4 +46,5 @@ message Observation {
     int32 frame = 4;
     PosVect posVect = 5;
     int32 trackID = 6;
+    int32 drivingDir = 7;
 }
