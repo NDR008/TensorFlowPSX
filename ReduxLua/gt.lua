@@ -119,6 +119,8 @@ function raceCondition()
             str = 'Direction: Wrong -ve laps ['
         end
         str = str .. tostring(way) .. ']'
+        local displayMessage = 'State: ' .. readValue(mem, 0x800b6e74, 'int8_t*')
+        imgui.TextUnformatted(displayMessage)
 
         local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
         local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')

@@ -16,7 +16,7 @@ class RewardFunction:
         
         terminated = False
         penalty = 1
-        if vDir == 1 or vDir == 2:
+        if vDir == 1:
             penalty = -50
         reward = (latestIndex - self.curTrackIdx)*1 + (vSpeed / 300)*2*penalty
         print((latestIndex - self.curTrackIdx)*1, (vSpeed / 300)*2*penalty, vSpeed)
