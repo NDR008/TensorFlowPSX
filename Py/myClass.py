@@ -9,6 +9,10 @@ from collections import deque
 from threading import Thread
 from rewardGT import RewardFunction
 
+from gym.envs.registration import register
+
+
+
 class MyGranTurismoGYM(Env):
     def __init__(self):
         print("GT Real Time instantiated")

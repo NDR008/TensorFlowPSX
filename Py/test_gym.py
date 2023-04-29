@@ -5,11 +5,10 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from gymnasium.experimental.wrappers import FrameStackObservationV0
+import gymnasium as gym
 
 env = MyGranTurismoGYM()
 # https://gymnasium.farama.org/api/experimental/wrappers/#gymnasium.experimental.wrappers.FrameStackObservationV0
-# wrapped_env = FrameStackObservationV0(env,4)
-#obs, _ = env.reset()
 wrapped_env = FrameStackObservationV0(env,4)
 model = PPO("MlpPolicy", wrapped_env, verbose=1)
 model.learn(total_timesteps=25000)
