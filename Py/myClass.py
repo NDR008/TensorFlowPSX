@@ -25,7 +25,7 @@ class MyGranTurismoGYM(gym.Env):
         vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='float32')
         vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='float32')
         vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
-        vDir = spaces.Box(low=0, high=3, shape=(2,), dtype='float32')
+    
         images = spaces.Box(low=0.0, high=255.0, shape=(240, 320, 3), dtype='uint8')
         self.observation_space = spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, images))
         self.action_space = spaces.Box(low=np.array([0.0, 0.0, -1.0]), high=np.array([1.0, 1.0, 1.0]), dtype='float64')
@@ -35,14 +35,7 @@ class MyGranTurismoGYM(gym.Env):
     def reset(self, seed=None, options=None):
         self.inititalizeCommon() #only used to debug this
         self.server.reloadSave()
-        _, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
-        
-        # for _ in range(self.img_hist_len):
-        #     self.img_hist.append(display)
-        # # may revisit to use tensors instead
-        # imgs = np.array(list(self.img_hist), dtype='float32')
-        # obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, imgs]
-        
+        trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
         
         self.rewardFunction.reset()
@@ -103,15 +96,6 @@ class MyGranTurismoGYM(gym.Env):
         vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='float32')
         vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='float32')
         vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
-        vDir = spaces.Box(low=0, high=3, shape=(2,), dtype='float32')
-        # data = (eSpeed, eBoost, eGear, vSpeed, vSteer)
-        # rState = spaces.Box(low=0, high=1, shape=(1,))
-        # fLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
-        # fRighttSlip = spaces.Box(low=0, high=256, shape=(1,))
-        # rLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
-        # rRightSlip = spaces.Box(low=0, high=256, shape=(1,))
-        #images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype=np.uint8)
-        # images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype='float32')
         
         images = spaces.Box(low=0, high=255, shape=(240, 320, 3), dtype=np.uint8)
         return spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, images))
