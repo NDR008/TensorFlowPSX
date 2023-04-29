@@ -127,7 +127,7 @@ class MyGranTurismoGYM(Env):
             self.rewardFunction.reset()
         else:
             terminated = False
-        return obs, reward, terminated, False, info
+        return obs, reward, terminated, True, info
     
     def _get_info(self):
         return {"info": 0}
