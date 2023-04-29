@@ -1,5 +1,5 @@
 from pygamepad import controlGamepad
-import gym as gym
+from gymnasium import Env
 from serverClass import server 
 import gym.spaces as spaces
 import cv2
@@ -9,7 +9,7 @@ from collections import deque
 from threading import Thread
 from rewardGT import RewardFunction
 
-class MyGranTurismoGYM(gym.Env):
+class MyGranTurismoGYM(Env):
     def __init__(self):
         print("GT Real Time instantiated")
         self.server = server(debug=False)
@@ -39,7 +39,7 @@ class MyGranTurismoGYM(gym.Env):
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
         
         self.rewardFunction.reset()
-        return obs
+        return obs, None
     
     # rendering from the gym env in a seperate thread    
     def _renderingThread(self):
@@ -114,7 +114,6 @@ class MyGranTurismoGYM(gym.Env):
         self.send_control(control)
         trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
         reward, terminated = self.rewardFunction.computeReward(trackID, vSpeed, vDir)
-        rwd = reward[0]
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
         info = {}
         if self.raceState == 3:
@@ -124,8 +123,15 @@ class MyGranTurismoGYM(gym.Env):
             self.rewardFunction.reset()
         else:
             terminated = False
-        return obs, rwd, terminated, info
+        return obs, reward, terminated, False, info
     
+    def _get_info(self):
+        return {"info": 0}
+    
+    def _get_obs(self):
+        trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
+        obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, display]
+        return obs
     # Mandatory method
     def send_control(self, control):
         controlGamepad(self.gamepad, control)
