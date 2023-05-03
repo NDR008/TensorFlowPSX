@@ -25,10 +25,20 @@ my_config["act_buf_len"] = 4
 my_config["reset_act_buf"] = False
 my_config["benchmark"] = True
 my_config["benchmark_polyak"] = 0.2
-myenv = gymnasium.make("real-time-gym-v1", config=my_config)
+from tmrl.util import partial
+from tmrl.envs import GenericGymEnv
+
+def env_creater(env_config):
+    env_cls=partial(GenericGymEnv, id="real-time-gym-v1", gym_kwargs={"config": env_config})
+    dummy_env = env_cls()
+    return dummy_env
+
+from ray.tune.registry import register_env
+register_env("my_env", env_creater)
 
 info = ray.init(ignore_reinit_error=True)
 print("Dashboard URL: http://{}".format(info["webui_url"]))
+
 
 N_ITER = 10                                     # Number of training runs.
 config = ppo.DEFAULT_CONFIG.copy()              # PPO's default configuration. See the next code cell.
@@ -47,7 +57,7 @@ ppo.PPOConfig(config)
 # 2: MyGranTurismoRTGYM is MyGranTurismoRTGYM(RealTimeGymInterface) which is not 
 # BaseEnv, gymnasium.Env, gym.Env, MultiAgentEnv, VectorEnv, RemoteBaseEnv, ExternalMultiAgentEnv, ExternalEnv...
 
-agent = algs.Algorithm(env=MyGranTurismoRTGYM) 
+agent = algs.Algorithm(config, env="my_env") 
 
 checkpoint_root = "tmp/ppo/cart"
 # Where checkpoints are written:

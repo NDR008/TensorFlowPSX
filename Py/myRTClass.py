@@ -129,7 +129,6 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             terminated = True
         elif self.raceState == 1:
             terminated = False
-            self.rewardFunction.reset()
         else:
             terminated = False
         return obs, reward, terminated, info
