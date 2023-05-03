@@ -18,7 +18,7 @@ class RewardFunction:
         if vDir == 1:
             penalty = -50
         reward = (latestIndex - self.curTrackIdx)*1 + (vSpeed[0] / 300)*2*penalty
-        print(reward)
+        #print(reward)
         
         if latestIndex == self.curTrackIdx:  # if the best index didn't change, we rewind (more Markovian reward)
             self.failure_counter += 1
