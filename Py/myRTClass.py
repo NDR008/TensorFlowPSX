@@ -9,7 +9,6 @@ import logging
 from collections import deque
 from threading import Thread
 
-from gymnasium.experimental.wrappers import FrameStackObservationV0
 from rewardGT import RewardFunction
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
