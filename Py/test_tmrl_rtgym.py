@@ -4,7 +4,7 @@ from time import sleep
 from tmrl.util import partial
 from tmrl.envs import GenericGymEnv
 
-my_config = DEFAULT_CONFIG_DICT
+my_config = DEFAULT_CONFIG_DICT.copy()
 my_config["interface"] = MyGranTurismoRTGYM
 my_config["time_step_duration"] = 0.05
 my_config["start_obs_capture"] = 0.05
