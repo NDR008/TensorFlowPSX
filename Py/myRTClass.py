@@ -77,7 +77,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='float32')
         vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='float32')
         vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
-        vDir = spaces.Box(low=0, high=3, shape=(2,), dtype='float32')
+        vDir = spaces.Box(low=0, high=3, shape=(1,), dtype='float32')
         # data = (eSpeed, eBoost, eGear, vSpeed, vSteer)
         # rState = spaces.Box(low=0, high=1, shape=(1,))
         # fLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
