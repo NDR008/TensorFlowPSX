@@ -4,11 +4,11 @@ def controlGamepad(gamepad, control):
     # This function accepts only controls between -1.0 and 1.0
     # control(gas, brake, steer) range(0,1)
     # assert all(-1.0 <= c <= 1.0 for c in control)
-    if control[0] > 0.1:  # gas
+    if control[0] > 0:  # gas
         gamepad.press_button(button = 1 << 5) # X
     else:
         gamepad.release_button(button = 1 << 5) # release X
-    if control[1] > 0.9:  # brake
+    if control[1] > 0:  # brake
         gamepad.press_button(button = 1 << 4) # O
     else:
         gamepad.release_button(button = 1 << 4) # release O
