@@ -23,27 +23,13 @@ ppoconfig["sgd_minibatch_size"] = 128              # The amount of data records 
 ppoconfig["model"]["fcnet_hiddens"] = [50, 50]    #
 ppoconfig["num_cpus_per_worker"] = 0 
 
-#env = gymnasium.make("real-time-gym-v1", config=my_config)
 def env_creator(env_config):
-  env = gymnasium.make("real-time-gym-v1", config=my_config)()
+  env = gymnasium.make("real-time-gym-v1", config=my_config)
   return env  # return an env instance
 
 from ray.tune.registry import register_env
 register_env("gt-rtgym-env-v1", env_creator)
 
-ppoconfig["env"] = "gt-rtgym-env-v1"
 
 ray.init()
-algo = ppo.PPO(config=ppoconfig)
-
-
-
-# obs, info = env.reset()
-# terminated = False
-# truncated = False
-# obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
-# obs_space = env.observation_space
-# while not (terminated or truncated):
-#     obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
-#     env.render()
-#     print(f"rew:{rew}")
+algo = ppo.PPO(env="gt-rtgym-env-v1", config=ppoconfig)
