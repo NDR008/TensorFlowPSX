@@ -102,6 +102,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     
     # Mandatory method
     def reset(self, seed=None, options=None):
+        print("reset triggered")
         self.server.reloadSave() # loads the save state
         _, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
         
