@@ -23,6 +23,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.raceState = None
         self.rewardFunction = None 
         self.renderingThread = Thread(target=self._renderingThread, args=(), kwargs={}, daemon=True)
+        self.inititalizeCommon() # starts the TCP server and waits for the emulator to connect
     
     # rendering from the gym env in a seperate thread    
     def _renderingThread(self):
@@ -101,8 +102,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     
     # Mandatory method
     def reset(self, seed=None, options=None):
-        self.inititalizeCommon() #only used to debug this
-        self.server.reloadSave()
+        self.server.reloadSave() # loads the save state
         _, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
         
         for _ in range(self.img_hist_len):
@@ -120,8 +120,6 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         trackID, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
         reward, terminated = self.rewardFunction.computeReward(trackID, vSpeed, vDir)
         self.img_hist.append(display)
-        # may revisit to use tensors instead
-        # imgs = np.array(list(self.img_hist), dtype='uint8') # we need numpy array
         imgs = np.array(list(self.img_hist), dtype='float32') # we need numpy array float32 avoids warning
         obs = [eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, imgs]
         info = {}
@@ -147,19 +145,3 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         cv2.imshow('Render Display', self.server.pic)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return
-    
-# my_config = DEFAULT_CONFIG_DICT
-# my_config["interface"] = MyGranTurismoRTGYM
-# my_config["time_step_duration"] = 0.05
-# my_config["start_obs_capture"] = 0.05
-# my_config["time_step_timeout_factor"] = 1.0
-# my_config["ep_max_length"] = 100
-# my_config["act_buf_len"] = 4
-# my_config["reset_act_buf"] = False
-# my_config["benchmark"] = True
-# my_config["benchmark_polyak"] = 0.2
-
-#env = gymnasium.make("real-time-gym-v1", config=my_config)
-# https://gymnasium.farama.org/api/experimental/wrappers/#gymnasium.experimental.wrappers.FrameStackObservationV0
-#wrapped_env = FrameStackObservationV0(env,4)
-#obs, _ = env.reset()
