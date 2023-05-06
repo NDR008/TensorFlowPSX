@@ -12,9 +12,10 @@ from threading import Thread
 from rewardGT import RewardFunction
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
-    def __init__(self, debugFlag=False, img_hist_len=3):
+    def __init__(self, debugFlag=False, img_hist_len=3, rrlib=False):
         print("GT Real Time instantiated")
         self.server = server(debug=debugFlag)
+        self.rrlib = rrlib
         self.display = None
         self.gamepad = None
         self.img = None # for render
@@ -22,7 +23,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.img_hist = deque(maxlen=img_hist_len)
         self.raceState = None
         self.rewardFunction = None 
-        self.renderingThread = Thread(target=self._renderingThread, args=(), kwargs={}, daemon=True)
+        if self.rrlib == False:
+            self.renderingThread = Thread(target=self._renderingThread, args=(), kwargs={}, daemon=True)
         self.inititalizeCommon() # starts the TCP server and waits for the emulator to connect
     
     # rendering from the gym env in a seperate thread    
@@ -143,6 +145,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
     # Optional method
     def render(self):
-        cv2.imshow('Render Display', self.server.pic)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            return
+        if self.rrlib == False:
+            cv2.imshow('Render Display', self.server.pic)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                return
+            return True
