@@ -12,21 +12,30 @@ class RewardFunction:
         self.step_counter = 0
         self.failure_counter = 0
         
-    def computeReward(self, latestIndex, vSpeed, vDir):
+    def computeReward(self, modelMode, latestIndex, vSpeed, vDir):
         terminated = False
-        penalty = 1
-        if vDir == 1:
-            penalty = -50
-        reward = (latestIndex - self.curTrackIdx)*1 + (vSpeed[0] / 300)*2*penalty
-        #print(reward)
         
-        if latestIndex == self.curTrackIdx:  # if the best index didn't change, we rewind (more Markovian reward)
-            self.failure_counter += 1
-            if self.failure_counter > self.nb_zero_rew_before_failure:
-                terminated = True
-        else:
-            self.failure_counter = 0
-        self.curTrackIdx = latestIndex
+        if modelMode == 1:
+            penalty = 1
+            if vDir == 1:
+                penalty = 50
+            reward = (latestIndex - self.curTrackIdx)* 1 * (vSpeed[0] / 300)*2*penalty
+            #print(reward)
+            
+            if latestIndex == self.curTrackIdx:  # if the best index didn't change, we rewind (more Markovian reward)
+                self.failure_counter += 1
+                if self.failure_counter > self.nb_zero_rew_before_failure:
+                    terminated = True
+            else:
+                self.failure_counter = 0
+            self.curTrackIdx = latestIndex
+        
+        elif modelMode == 2:
+            penalty = 5
+            if vDir == 1:
+                penalty = -10
+            reward = (vSpeed[0])*2*penalty
+        #print(reward)  
         return reward, terminated
     
     def reset(self):

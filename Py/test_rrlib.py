@@ -14,7 +14,7 @@ my_config["interface"] = MyGranTurismoRTGYM
 my_config["time_step_duration"] = 0.05
 my_config["start_obs_capture"] = 0.05
 my_config["time_step_timeout_factor"] = 1.0
-#my_config["ep_max_length"] = 256
+my_config["ep_max_length"] = 1024
 my_config["act_buf_len"] = 3
 my_config["reset_act_buf"] = False
 my_config["benchmark"] = True
@@ -45,12 +45,12 @@ algo = (
     PPOConfig()
     #SACConfig()
     .resources(
-        num_gpus=0
+        num_gpus=1
         )
     .rollouts(
         num_rollout_workers=1,
-        batch_mode="truncate_episodes",
-        rollout_fragment_length="auto"
+        #batch_mode="truncate_episodes",
+        #rollout_fragment_length=128
         )
     .framework("torch")
     .environment(
@@ -62,20 +62,19 @@ algo = (
             #lr=0.0003,
             #lambda_=0.95,
             #gamma=0.99,
-            sgd_minibatch_size=128,
-            train_batch_size=128,
-            num_sgd_iter=8,
+            #sgd_minibatch_size=512,
+            train_batch_size=512,
+            #num_sgd_iter=8,
             #clip_param=0.2,
-            #model={"fcnet_hiddens": [32, 32]},
+            model={"fcnet_hiddens": [128, 128]},
         )
     .build()
 )
 
-N = 1
+N = 50
 results = []
 episode_data = []
 episode_json = []
-
 
 
 for n in range(N):
@@ -93,5 +92,11 @@ for n in range(N):
     episode_json.append(json.dumps(episode))
     
     print(f'Max reward: {episode["episode_reward_max"]}')
+    
+path_to_checkpoint = algo.save()
+print(
+    "An Algorithm checkpoint has been created inside directory: "
+    f"'{path_to_checkpoint}'."
+)
 
 ray.shutdown()
