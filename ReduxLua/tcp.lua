@@ -57,6 +57,7 @@ local function readVehicleState()
     vehicleState['speed'] = readValue(mem, 0x800b66ec, 'uint8_t*')
     vehicleState['steer'] = readValue(mem, 0x800b66d6, "int16_t*")
     vehicleState['pos'] = readValue(mem, 0x800b6d69, "int16_t*")
+    vehicleState['eClutch'] = readValue(mem, 0x800b6d63, "uint16_t*")
     return vehicleState
 end
 

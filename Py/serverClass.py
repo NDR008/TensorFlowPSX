@@ -198,4 +198,4 @@ class server():
     def reloadSave(self):
         print("reload save")
         self.sendPong(2) # loads the save state
-        sleep(0.1)        
+        sleep(0.01)        
