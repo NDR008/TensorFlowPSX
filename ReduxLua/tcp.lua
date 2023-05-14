@@ -129,7 +129,7 @@ function netTCP(netChanged, netStatus)
             local file = Support.File.open("arc5.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 2 then
+        elseif readVal == 3 then
             local file = Support.File.open("mr2_400.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()

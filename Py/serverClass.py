@@ -195,7 +195,7 @@ class server():
                 print("Exception on single frame")
                 return
             
-    def reloadSave(self,race=1):
-        print("reload save for track :", self.trackChoice)
-        self.sendPong(self.trackChoice+1) # loads the save state
+    def reloadSave(self, trackChoice):
+        print("reload save for track :", trackChoice)
+        self.sendPong(trackChoice) # loads the save state
         sleep(0.5)        
