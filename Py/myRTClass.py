@@ -11,32 +11,28 @@ from threading import Thread
 from rewardGT import RewardFunction
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
-    def __init__(self, debugFlag=False, img_hist_len=3, rrlib=True, modelMode=2):
+    def __init__(self, debugFlag=False, img_hist_len=3, modelMode=2, agent="PPO", imageHeight=240, imageWidth=320):
         print("GT Real Time instantiated")
         self.server = server(debug=debugFlag)
-        self.rrlib = rrlib
         self.display = None
+        self.renderImage = None
         self.gamepad = None
         self.img = None # for render
-        self.img_hist_len = img_hist_len
+        self.modelMode = modelMode # 2 = reduced observation
+        if self.modelMode == 1:
+            self.img_hist_len = img_hist_len
         self.img_hist = None
         self.raceState = None
         self.rewardFunction = None 
-        self.agent = "SAC"
-        self.modelMode = modelMode # 2 = reduced observation
-        if self.rrlib == False:
-            self.renderingThread = Thread(target=self._renderingThread, args=(), kwargs={}, daemon=True)
+        self.agent = agent
+        self.imageSize = (imageWidth, imageHeight)
+        self.colour = False
+
         self.inititalizeCommon() # starts the TCP server and waits for the emulator to connect
-    
-    # rendering from the gym env in a seperate thread    
-    def _renderingThread(self):
-        #from time import sleep
-        while True:
-            # sleep(0.1)
-            self.render()
 
     # Maybe needed (at least as a helper) wrong place?
     def getDataImage(self):  
+        import cv2
         self.server.receiveOneFrame()
         eClutch = np.array([self.server.myData.VS.eClutch], dtype='float32')
         eSpeed = np.array([self.server.myData.VS.engSpeed], dtype='float32')
@@ -54,11 +50,25 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # 2: Racing (from post-countdown till final lap finish line)
         # 3: Race finished
         # 5: Some undefined state (like main menu, etc)
+        tmp = cv2.resize(self.server.pic, (self.imageSize[0], self.imageSize[1]))
+        # print(tmp.shape)
+        # cv2.imshow("original",tmp)
+        # cv2.waitKey(0)
         
-        display = self.server.pic
-        return trackID, rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display
+        tmp = cv2.cvtColor(tmp, cv2.COLOR_BGR2GRAY)
+        # print(tmp.shape)
+        # cv2.imshow("grey",tmp)
+        # cv2.waitKey(0)
+        
+        tmp2 = tmp.reshape(self.imageSize[1], self.imageSize[0],  1)
+        # print(tmp2.shape)
+        # cv2.imshow("reshaped",tmp2)
+        # cv2.waitKey(0)
+        
+        self.renderImage = tmp2
+        return trackID, rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, self.renderImage
 
-    def startSession(self):
+    def startServerToRedux(self):
         self.server.connect()
         logging.debug("Server session started")
         
@@ -68,9 +78,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         logging.debug("Virtual Dual Shock 4 loaded")
         
     def inititalizeCommon(self):
-        self.img_hist = deque(maxlen=self.img_hist_len)
+        if self.modelMode == 1:
+            self.img_hist = deque(maxlen=self.img_hist_len)
         self.initControl()
-        self.startSession()
+        self.startServerToRedux()
         self.rewardFunction = RewardFunction()
         
     # Mandatory method        
@@ -89,33 +100,38 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # fRighttSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rLeftSlip = spaces.Box(low=0, high=256, shape=(1,))
         # rRightSlip = spaces.Box(low=0, high=256, shape=(1,))
-        #images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype=np.uint8)
         vDir = spaces.Box(low=0, high=3, shape=(1,), dtype='float32')
         
         if self.modelMode == 1:
             vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='float32')
             vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
-            images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, 240, 320, 3), dtype='float32')
+            images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, self.imageSize[1], self.imageSize[0],1), dtype='uint8')
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, images))
+        
+        if self.modelMode == 3:
+            vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='float32')
+            vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
+            images = spaces.Box(low=0.0, high=255.0, shape=(self.imageSize[1], self.imageSize[0],1), dtype='uint8')
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, images))
+        
         elif self.modelMode == 2:
             return spaces.Tuple((rState, eClutch, eSpeed, eGear, vSpeed, vDir))
         
-    
+
     # Mandatory method
     def get_action_space(self):
         #return spaces.Box(low=-1.0, high=1.0, shape=(3,))
-        if self.agent == "SAC":
+        if self.agent == "SAC" or "A3C":
             return spaces.Box(low=np.array([0.0, 0.0, -1.0]), high=np.array([1.0, 1.0, 1.0]), dtype='float64')
         else:
             return spaces.MultiDiscrete([ 2, 2, 3 ])
     
     # Mandatory method
     def get_default_action(self):
-        if self.agent == "SAC":
-            print("default SAC action")
-            return np.array([1.0, 0.0, 0.0], dtype='float64')
+        if self.agent == "SAC" or "A3C":
+            return np.array([.0, 0.0, 0.0], dtype='float64')
         else:
-            return np.array([1, 0, 0])
+            return np.array([0, 0, 0])
     
     # Mandatory method
     def reset(self, seed=None, options=None):
@@ -126,9 +142,11 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         if self.modelMode == 1:
             for _ in range(self.img_hist_len):
                 self.img_hist.append(display)
-            # may revisit to use tensors instead
-            imgs = np.array(list(self.img_hist), dtype='float32')
+            imgs = np.array(list(self.img_hist), dtype='uint8')
             obs = [rstate, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, imgs]
+
+        if self.modelMode == 3:
+            obs = [rstate, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display]
         
         elif self.modelMode == 2:    
             obs = [rstate, eClutch, eSpeed, eGear, vSpeed, vDir]
@@ -139,13 +157,15 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def get_obs_rew_terminated_info(self):
         trackID, rstate, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display = self.getDataImage()
-        
         reward, terminated = self.rewardFunction.computeReward(self.modelMode, trackID, vSpeed, vDir)
         
         if self.modelMode == 1:
             self.img_hist.append(display)
-            imgs = np.array(list(self.img_hist), dtype='float32') # we need numpy array float32 avoids warning
+            imgs = np.array(list(self.img_hist), dtype='uint8') # we need numpy array float32 avoids warning
             obs = [rstate, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, imgs]
+
+        if self.modelMode == 3:
+            obs = [rstate, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, display]
             
         elif self.modelMode == 2:    
             obs = [rstate, eClutch, eSpeed, eGear, vSpeed, vDir]            
@@ -170,7 +190,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
     # Optional method
     def render(self):
-        cv2.imshow('Render Display', self.server.pic)
+        #cv2.imshow('Render Display', self.server.pic)
+        cv2.imshow('Render Display', self.renderImage)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return
-        return True

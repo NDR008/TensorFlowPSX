@@ -34,6 +34,7 @@ saveList = {
 }
 
 saveList2 = {
+    { "MR2 400m",              "mr2_400.slice" },
     { "Hi-Def MR2 TT HS",      "arc7.slice" },
     { "Hi-Def MR2 Night",      "arc6.slice" },
     { "Sim Endurance Race",    "sim4.slice" },

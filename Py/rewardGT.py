@@ -15,7 +15,7 @@ class RewardFunction:
     def computeReward(self, modelMode, latestIndex, vSpeed, vDir):
         terminated = False
         
-        if modelMode == 1:
+        if modelMode == 1 or modelMode == 3:
             penalty = 1
             if vDir == 1:
                 penalty = 50
