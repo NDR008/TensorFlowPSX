@@ -104,13 +104,13 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         vDir = spaces.Box(low=0, high=3, shape=(1,), dtype='float32')
         
         if self.modelMode == 1:
-            vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='float32')
+            vSteer = spaces.Box(low=-1024, high=1024, shape=(1,), dtype='float32')
             vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
             images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, self.imageSize[1], self.imageSize[0],1), dtype='uint8')
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, images))
         
         if self.modelMode == 3:
-            vSteer = spaces.Box(low=-580, high=580, shape=(1,), dtype='float32')
+            vSteer = spaces.Box(low=-1024, high=1024, shape=(1,), dtype='float32')
             vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
             images = spaces.Box(low=0.0, high=255.0, shape=(self.imageSize[1], self.imageSize[0],1), dtype='uint8')
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, images))
