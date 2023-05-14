@@ -11,7 +11,7 @@ from threading import Thread
 from rewardGT import RewardFunction
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
-    def __init__(self, debugFlag=False, img_hist_len=3, modelMode=2, agent="PPO", imageHeight=240, imageWidth=320):
+    def __init__(self, debugFlag=False, img_hist_len=3, modelMode=2, agent="PPO", imageHeight=240, imageWidth=320, trackChoice=1):
         print("GT Real Time instantiated")
         self.server = server(debug=debugFlag)
         self.display = None
@@ -27,6 +27,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.agent = agent
         self.imageSize = (imageWidth, imageHeight)
         self.colour = False
+        self.trackChoice = trackChoice
 
         self.inititalizeCommon() # starts the TCP server and waits for the emulator to connect
 

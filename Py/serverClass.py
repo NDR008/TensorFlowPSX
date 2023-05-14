@@ -196,9 +196,6 @@ class server():
                 return
             
     def reloadSave(self,race=1):
-        print("reload save")
-        if race == 1:
-            self.sendPong(2) # loads the save state
-        else:
-            self.sendPong(3)
+        print("reload save for track :", self.trackChoice)
+        self.sendPong(self.trackChoice+1) # loads the save state
         sleep(0.5)        
