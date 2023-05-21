@@ -40,7 +40,7 @@ saveList2 = {
     { "Sim Endurance Race",    "sim4.slice" },
     { "Simulation Home",       "sim1.slice" },
     { "SARD Supra HS",         "sim2.slice" },
-    { "0-400m Test MR2",       "sim3.slice" }
+    { "SARD Supra Drag",       "sim5.slice" },
 }
 
 
@@ -61,7 +61,7 @@ function carInfo()
         doSliderInt(mem, 0x800b66de, 'Brake (Front? ABS1)', 0, 4096, 'int16_t*')
         doSliderInt(mem, 0x800b66e0, 'Brake (Rear?  ABS2)', 0, 4096, 'int16_t*')
         doSliderInt(mem, 0x800b6d64, 'P-Brake', 0, 16, 'int16_t*')
-        doCheckbox(mem, 0x800b67bd, 'Car in sun', 0, 2, 'int16_t*')
+        doCheckbox(mem, 0x800b67bd, 'Car in sun', 0, 2, 'int8_t*')
     end
 end
 

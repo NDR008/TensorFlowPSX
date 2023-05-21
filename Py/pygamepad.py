@@ -14,7 +14,7 @@ def controlGamepad(gamepad, control, agent):
     else:
         gamepad.release_button(button = 1 << 4) # release O
         
-    if agent == "SAC" or "PPO":
+    if agent == "SAC" or "A3C":
         if control[2] > 0.25:  # right
             gamepad.directional_pad(direction = 0x2) # press right 
         elif control[2] < -0.25: #left

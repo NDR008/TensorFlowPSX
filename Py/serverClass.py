@@ -198,4 +198,4 @@ class server():
     def reloadSave(self, trackChoice):
         print("reload save for track :", trackChoice)
         self.sendPong(trackChoice) # loads the save state
-        sleep(0.01)        
+        sleep(0.05)        

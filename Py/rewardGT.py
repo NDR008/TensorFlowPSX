@@ -12,10 +12,11 @@ class RewardFunction:
         self.step_counter = 0
         self.failure_counter = 0
         
-    def computeReward(self, modelMode, latestIndex, vSpeed, vDir):
+    def computeReward(self, rewardMode, latestIndex, vSpeed, vDir):
         terminated = False
         
-        if modelMode == 1 or modelMode == 3:
+        # needs major rework
+        if rewardMode == 1:
             penalty = 1
             if vDir == 1:
                 penalty = 50
@@ -30,11 +31,12 @@ class RewardFunction:
                 self.failure_counter = 0
             self.curTrackIdx = latestIndex
         
-        elif modelMode == 2:
-            penalty = 5
+        # OK as quick and dirty
+        elif rewardMode == 0:
+            penalty = 0.5
             if vDir == 1:
-                penalty = -10
-            reward = (vSpeed[0])*2*penalty
+                penalty = -2
+            reward = (vSpeed[0])*penalty
         #print(reward)  
         return reward, terminated
     
