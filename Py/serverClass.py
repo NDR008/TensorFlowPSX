@@ -76,7 +76,7 @@ class server():
         # NumPy buffer for the result
         shape, typestr = Image._conv_type_shape(im)
         #data = np.empty(shape, dtype=np.dtype(typestr))
-        data = np.empty(shape, dtype=np.uint8)
+        data = np.empty(shape, dtype='uint8')
         mem = data.data.cast('B', (data.data.nbytes,))
         buffSize, s, offset = 65536, 0, 0
         while not s:
@@ -195,7 +195,7 @@ class server():
                 print("Exception on single frame")
                 return
             
-    def reloadSave(self):
-        print("reload save")
-        self.sendPong(2) # loads the save state
-        sleep(0.01)        
+    def reloadSave(self, trackChoice):
+        print("reload save for track :", trackChoice)
+        self.sendPong(trackChoice) # loads the save state
+        sleep(0.05)        

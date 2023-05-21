@@ -27,10 +27,14 @@ message Vehicle {
     sint32 steer = 5;
     int32 pos = 6;
     int32 fLeftSlip = 7;
-    int32 fRighttSlip = 8;
+    int32 fRightSlip = 8;
     int32 rLeftSlip = 9;
     int32 rRightSlip = 10;
     int32 eClutch = 11;
+    int32 fLWheel = 12;
+    int32 fRWheel = 13;
+    int32 rLWheel = 14;
+    int32 rRWheel = 15;
 }
 
 message Screen {

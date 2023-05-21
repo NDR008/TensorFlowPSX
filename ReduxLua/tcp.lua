@@ -58,6 +58,14 @@ local function readVehicleState()
     vehicleState['steer'] = readValue(mem, 0x800b66d6, "int16_t*")
     vehicleState['pos'] = readValue(mem, 0x800b6d69, "int16_t*")
     vehicleState['eClutch'] = readValue(mem, 0x800b6d63, "uint16_t*")
+    vehicleState['fLeftSlip '] =readValue(mem, 0x800b674e,'uint8_t*')
+    vehicleState['fRightSlip'] =readValue(mem, 0x800b6792,'uint8_t*')
+    vehicleState['rLeftSlip'] = readValue(mem, 0x800b67d6,'uint8_t*')
+    vehicleState['rRightSlip']= readValue(mem, 0x800b681a,'uint8_t*')
+    vehicleState['fLWheel'] =readValue(mem, 0x800b6778, 'int8_t*')
+    vehicleState['fRWheel'] =readValue(mem, 0x800b67bc, 'int8_t*')
+    vehicleState['rLWheel'] =readValue(mem, 0x800b6800, 'int8_t*')
+    vehicleState['rRWheel'] =readValue(mem, 0x800b6844, 'int8_t*')
     return vehicleState
 end
 
@@ -127,6 +135,14 @@ function netTCP(netChanged, netStatus)
         -- 2 is for loading a savestate    
         elseif readVal == 2 then
             local file = Support.File.open("arc5.slice", "READ")
+            PCSX.loadSaveState(file)
+            file:close()
+        elseif readVal == 3 then
+            local file = Support.File.open("mr2_400.slice", "READ")
+            PCSX.loadSaveState(file)
+            file:close()
+        elseif readVal == 4 then
+            local file = Support.File.open("sim5.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
         end

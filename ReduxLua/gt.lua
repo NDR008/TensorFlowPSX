@@ -34,12 +34,13 @@ saveList = {
 }
 
 saveList2 = {
+    { "MR2 400m",              "mr2_400.slice" },
     { "Hi-Def MR2 TT HS",      "arc7.slice" },
     { "Hi-Def MR2 Night",      "arc6.slice" },
     { "Sim Endurance Race",    "sim4.slice" },
     { "Simulation Home",       "sim1.slice" },
     { "SARD Supra HS",         "sim2.slice" },
-    { "0-400m Test MR2",       "sim3.slice" }
+    { "SARD Supra Drag",       "sim5.slice" },
 }
 
 
@@ -52,7 +53,7 @@ function carInfo()
         doSliderInt(mem, 0x800b66f8, 'Boost', 0, 12000, 'uint16_t*')
         doSliderInt(mem, 0x800bd990, 'Max Speed', 0, 5000, 'uint16_t*')
         doSliderInt(mem, 0x800b66e8, 'Gear', 0, 10, 'uint8_t*')
-        doSliderInt(mem, 0x800b66d6, 'Steering', -580, 580, 'int16_t*')
+        doSliderInt(mem, 0x800b66d6, 'Steering', -1024, 1024, 'int16_t*')
         doSliderInt(mem, 0x800b6d63, 'Clutch', 0, 3, 'uint16_t*')
         doSliderInt(mem, 0x800b66d8, 'Accel (input)', 0, 4096, 'int16_t*')
         doSliderInt(mem, 0x800b66da, 'Accel (Transfer)', 0, 4096, 'int16_t*')
@@ -60,7 +61,7 @@ function carInfo()
         doSliderInt(mem, 0x800b66de, 'Brake (Front? ABS1)', 0, 4096, 'int16_t*')
         doSliderInt(mem, 0x800b66e0, 'Brake (Rear?  ABS2)', 0, 4096, 'int16_t*')
         doSliderInt(mem, 0x800b6d64, 'P-Brake', 0, 16, 'int16_t*')
-        doCheckbox(mem, 0x800b67bd, 'Car in sun', 0, 2, 'int16_t*')
+        doCheckbox(mem, 0x800b67bd, 'Car in sun', 0, 2, 'int8_t*')
     end
 end
 
