@@ -6,8 +6,9 @@ local frames_needed = 1
 local obs = {}
 local client = nil
 local reconnectTry = false
-CurrentPos = 0
-LastPos = 0
+local CurrentPos = 0
+local maxLostPings = 500
+local currentMissedPings = 0
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -116,7 +117,6 @@ function netTCP(netChanged, netStatus)
     local turnOn = (reconnectTry or netChanged)
     if turnOn then
         if netStatus then
-            print("trying to reacher server")
             client = Support.File.uvFifo("127.0.0.1", 9999)
             frames = 0
             reconnectTry = false
@@ -131,7 +131,7 @@ function netTCP(netChanged, netStatus)
         -- 1 is the main loop for frame capture
         if readVal == 1 then
             ready = true
-
+            currentMissedPings = 0
         -- 2 is for loading a savestate    
         elseif readVal == 2 then
             local file = Support.File.open("arc5.slice", "READ")
@@ -145,8 +145,16 @@ function netTCP(netChanged, netStatus)
             local file = Support.File.open("sim5.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
+        else
+            currentMissedPings = currentMissedPings + 1
         end
 
+        if currentMissedPings > maxLostPings then
+            currentMissedPings = 0
+            reconnectTry = true
+            print("Retry to connect to server")
+            ready = false
+        end
         -- keep track of the number of frames rendered
         frames = frames + 1
 
