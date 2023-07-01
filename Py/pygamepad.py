@@ -1,10 +1,15 @@
 # https://github.com/yannbouteiller/vgamepad/blob/main/vgamepad/win/vigem_commons.py
 
+import math
+
 def controlGamepad(gamepad, control, agent):
     # This function accepts only controls between -1.0 and 1.0
     # control(gas, brake, steer) range(0,1)
     # assert all(-1.0 <= c <= 1.0 for c in control)
     #print(control)
+    if math.isnan(control[0]) or math.isnan(control[1]) or math.isnan(control[2]):
+        raise RuntimeError("Got NaN action!")
+    
     if control[0] > 0.5:  # gas
         gamepad.press_button(button = 1 << 5) # X
     else:

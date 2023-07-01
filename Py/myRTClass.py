@@ -111,7 +111,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, self.imageSize[1], self.imageSize[0],1), dtype='uint8')
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, images))
         
-        if self.modelMode == 3:
+        elif self.modelMode == 3:
             vSteer = spaces.Box(low=-1024, high=1024, shape=(1,), dtype='float32')
             vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float32')         
             images = spaces.Box(low=0.0, high=255.0, shape=(self.imageSize[1], self.imageSize[0], 1), dtype='uint8')
@@ -130,8 +130,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             rLWheel= spaces.Box(low=0, high=4, shape=(1,))
             rRWheel= spaces.Box(low=0, high=4, shape=(1,))
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vDir, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel))
-        
 
+        
     # Mandatory method
     def get_action_space(self):
         #return spaces.Box(low=-1.0, high=1.0, shape=(3,))
@@ -189,7 +189,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             
         elif self.modelMode == 4:
             obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vDir, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel] 
-            
+
         info = {}
         if self.raceState == 3:
             terminated = True

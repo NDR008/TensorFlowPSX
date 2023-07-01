@@ -145,6 +145,10 @@ function netTCP(netChanged, netStatus)
             local file = Support.File.open("sim5.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
+        elseif readVal == 5 then
+            local file = Support.File.open("sim6.slice", "READ")
+            PCSX.loadSaveState(file)
+            file:close()
         else
             currentMissedPings = currentMissedPings + 1
         end
