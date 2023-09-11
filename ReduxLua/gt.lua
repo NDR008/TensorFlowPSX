@@ -360,8 +360,6 @@ function DrawImguiFrame()
         if (imgui.Button("Reload")) then
             reload()
         end
-
-
         imgui.BeginTable("TopTable", 2, imgui.constant.TableFlags.Resizable)
         imgui.TableNextRow()
         imgui.TableSetColumnIndex(0)
@@ -382,8 +380,8 @@ function DrawImguiFrame()
         simulation()
         imgui.EndTable()
         funkyStuff()
-        imgui.End()
     end
+	imgui.End()
 end
 
 function checkRegion()
