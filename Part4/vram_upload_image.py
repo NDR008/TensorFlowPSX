@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# oRIGINAL CONTRIBUTOR spicyjpeg
+# Thanks to the help of spicyjpeg
 
 import numpy, requests
 from PIL import Image
