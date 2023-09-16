@@ -198,4 +198,4 @@ class server():
     def reloadSave(self, trackChoice):
         print("reload save for track :", trackChoice)
         self.sendPong(trackChoice) # loads the save state
-        sleep(0.05)        
+        sleep(0.05) # Redux takes a few milliseconds to load the savestate       
