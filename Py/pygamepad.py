@@ -1,3 +1,10 @@
+"""
+Controller functions for Gran Turismo (PSX)
+Written by NDR008
+nadir.syedsammut@gmail.com
+Development started in December 2022
+"""
+
 # https://github.com/yannbouteiller/vgamepad/blob/main/vgamepad/win/vigem_commons.py
 
 import math

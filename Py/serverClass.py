@@ -1,3 +1,10 @@
+"""
+Server class for receiving in-game parameters from Gran Turismo via PCSX-Redux
+Written by NDR008
+nadir.syedsammut@gmail.com
+Development started in December 2022
+"""
+
 import socket
 import game_pb2 as Game
 import numpy as np

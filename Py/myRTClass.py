@@ -1,3 +1,11 @@
+"""
+Environment class for a Real Time Gymnasium Environment for Gran Turismo
+Written by NDR008
+nadir.syedsammut@gmail.com
+Development started in December 2022
+"""
+
+
 from pygamepad import controlGamepad
 from rtgym import RealTimeGymInterface, DEFAULT_CONFIG_DICT
 from serverClass import server 
