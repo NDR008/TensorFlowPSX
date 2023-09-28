@@ -43,7 +43,7 @@ while not (terminated or truncated):
     #print(act)
     obs, rew, terminated, truncated, info = env.step(act)
     #sleep(0.1)
-    env.render()
+    #env.render()
     #print(f"rew:{rew}")
     #break
     

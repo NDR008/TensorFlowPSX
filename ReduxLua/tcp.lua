@@ -158,6 +158,7 @@ function netTCP(netChanged, netStatus)
             reconnectTry = true
             print("Retry to connect to server")
             ready = false
+            client:close()
         end
         -- keep track of the number of frames rendered
         frames = frames + 1
