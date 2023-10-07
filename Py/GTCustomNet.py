@@ -77,7 +77,7 @@ class GTCustomNet(TorchModelV2, nn.Module):
             i = str(i)
             # Image space.
             if len(component.shape) == 3 and isinstance(component, Box):
-                print("I found cov2d layers")
+                print("I found Cov2d layers")
                 print(component)
                 config = {
                     "conv_filters": model_config["conv_filters"]
@@ -108,6 +108,8 @@ class GTCustomNet(TorchModelV2, nn.Module):
                 self.add_module("cnn_{}".format(i), self.cnns[i])
             # Discrete|MultiDiscrete inputs -> One-hot encode.
             elif isinstance(component, (Discrete, MultiDiscrete)):
+                print("I found non Cov2D")
+                print(component)
                 if isinstance(component, Discrete):
                     size = component.n
                 else:
