@@ -55,9 +55,9 @@ def disAccelnotBrakeDiscSteer(gamepad, control): # control2
     else:
         gamepad.release_button(button = 1 << 5) # release accel   
     
-    if control[1] > 1:  # right
+    if control[1] > 0.25:  # right
         gamepad.directional_pad(direction = 0x2) # press right 
-    elif control[1] < -0: #left
+    elif control[1] < -0.25: #left
         gamepad.directional_pad(direction = 0x6) # press left
     else:
         gamepad.directional_pad(direction = 0x8) # nothing
@@ -139,8 +139,7 @@ def controlGamepad(gamepad, control, choice):
         contAccelOnly(gamepad, control)        
         
     elif choice==2: 
-        disAccelnotBrakeDiscSteer(gamepad, control)
-        print(control)                
+        disAccelnotBrakeDiscSteer(gamepad, control)     
         
     elif choice==1: 
         disAccelandBrakeDiscSteer(gamepad, control)         
