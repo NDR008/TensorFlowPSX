@@ -77,6 +77,8 @@ class GTCustomNet(TorchModelV2, nn.Module):
             i = str(i)
             # Image space.
             if len(component.shape) == 3 and isinstance(component, Box):
+                print("I found cov2d layers")
+                print(component)
                 config = {
                     "conv_filters": model_config["conv_filters"]
                     if "conv_filters" in model_config
@@ -110,12 +112,11 @@ class GTCustomNet(TorchModelV2, nn.Module):
                     size = component.n
                 else:
                     size = np.sum(component.nvec)
-                #REMOVED FOR NOW (Nadir)
-                # config = {
-                #     "fcnet_hiddens": model_config["fcnet_hiddens"],
-                #     "fcnet_activation": model_config.get("fcnet_activation"),
-                #     "post_fcnet_hiddens": [],
-                # }
+                config = {
+                    #"fcnet_hiddens": model_config["fcnet_hiddens"], #REMOVED FOR NOW (Nadir)
+                    "fcnet_activation": model_config.get("fcnet_activation"),
+                    "post_fcnet_hiddens": [],
+                }
                 self.one_hot[i] = ModelCatalog.get_model_v2(
                     Box(-1.0, 1.0, (size,), np.float32),
                     action_space,
@@ -130,7 +131,7 @@ class GTCustomNet(TorchModelV2, nn.Module):
             else:
                 size = int(np.product(component.shape))
                 config = {
-                    "fcnet_hiddens": model_config["fcnet_hiddens"],
+                    #"fcnet_hiddens": model_config["fcnet_hiddens"], #REMOVED FOR NOW (Nadir)
                     "fcnet_activation": model_config.get("fcnet_activation"),
                     "post_fcnet_hiddens": [],
                 }
