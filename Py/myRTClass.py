@@ -102,7 +102,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # mode 1 to 15 resizes and
         if self.modelMode >= 1 and self.modelMode < 10:       
             tmp = cv2.resize(self.server.pic, (self.imageSize[0], self.imageSize[1]))
-            tmp = cv2.cvtColor(tmp, cv2.COLOR_BGR2GRAY)
+            #tmp = cv2.cvtColor(tmp, cv2.COLOR_BGR2GRAY)
             self.renderImage = tmp
             # print(tmp.shape)
         else:
