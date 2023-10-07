@@ -1,53 +1,79 @@
 """
 Reward functions for Gran Turismo (PSX)
-Written by NDR008
+Simplified version of : https://github.com/trackmania-rl/tmrl/blob/e3254888ae7e865c56236d72fb03311a41c10310/tmrl/custom/utils/compute_reward.py#L10
 nadir.syedsammut@gmail.com
 Development started in December 2022
 """
 
+
+# third-party imports
+import numpy as np
+
 class RewardFunction:
-    """
-    Computes a reward from GT on Redux
-    RewardFunction(nb_zero_rew_before_failure=10, min_nb_steps_before_failure=int(3.5 * 20))
-    nb_zer_rew_before_failure: number of non-progress to count as a failure.
-    min_nb_steps_before_failure: number of observatitons without a reward.
-    """
-    def __init__(self, nb_zero_rew_before_failure=10, min_nb_steps_before_failure=int(3.5 * 20)):
-        self.curTrackIdx = 0
-        self.nb_zero_rew_before_failure = nb_zero_rew_before_failure
-        self.min_nb_steps_before_failure = min_nb_steps_before_failure
-        self.step_counter = 0
-        self.failure_counter = 0
-        
-    def computeReward(self, rewardMode, latestIndex, vSpeed, vDir):
+    def __init__(self,
+                 filename='Py/hsSpaced.csv',):
+        self.cur_idx = 0
+        self.maxSearch = 500
+        self.data = np.genfromtxt(filename, delimiter=",")
+        self.datalen = len(self.data)
+        self.fudgeFactor = 2 #since the spacing of data points along the track may vary this scales the reward
+
+    def computeReward(self, pos):
+        """
+        Computes the current reward given the position pos
+        Args:
+            pos: the current position
+        Returns:
+            float, bool: the reward and the terminated signal
+        """
+        # self.traj.append(pos)
+
         terminated = False
-        
-        # needs major rework
-        if rewardMode == 1:
-            penalty = 1
-            if vDir == 1:
-                penalty = 50
-            reward = (latestIndex - self.curTrackIdx)* 1 * (vSpeed[0] / 300)*2*penalty
-            #print(reward)
+        min_dist = np.inf  # smallest distance found so far in the trajectory to the target pos
+        index = self.cur_idx  # cur_idx is where we were last step in the trajectory        
+        best_index = 0  # index best matching the target pos
+        counter = 0
+
+        while True:
+            dist = np.linalg.norm(pos - self.data[index])  # distance of the current index to target pos
+            if dist <= min_dist:  # if dist is smaller than our minimum found distance so far,
+                min_dist = dist  # then we found a new best distance,
+                best_index = index  # and a new best index
+            index += 1  # now we will evaluate the next index in the trajectory
+            counter += 1
+            if index >= self.datalen or counter > self.maxSearch:  # if trajectory complete or cuts counter depleted
+                # We check that we are not too far from the demo trajectory:
+                #if min_dist > self.max_dist_from_traj:
+                    #best_index = self.cur_idx  # if so, consider we didn't move
+                break  # we found the best index and can break the while loop
+
+        index = self.cur_idx                
+        counter = 0
+        while True:
+            dist = np.linalg.norm(pos - self.data[index])  # distance of the current index to target pos
+            if dist <= min_dist:  # if dist is smaller than our minimum found distance so far,
+                min_dist = dist  # then we found a new best distance,
+                best_index = index  # and a new best index
+            index -= 1  # now we will evaluate the next index in the trajectory
+            counter += 1
+            if index <= 0 or counter > self.maxSearch:  # if trajectory complete or cuts counter depleted
+                # We check that we are not too far from the demo trajectory:
+                # if min_dist > self.max_dist_from_traj:
+                    #best_index = self.cur_idx  # if so, consider we didn't move
+                break  # we found the best index and can break the while loop
+
+        # The reward is then proportional to the number of passed indexes (i.e., track distance):
+        reward = (best_index - self.cur_idx) / self.fudgeFactor
+        if reward < 0:
+            reward = -1 
             
-            if latestIndex == self.curTrackIdx:  # if the best index didn't change, we rewind (more Markovian reward)
-                self.failure_counter += 1
-                if self.failure_counter > self.nb_zero_rew_before_failure:
-                    terminated = True
-            else:
-                self.failure_counter = 0
-            self.curTrackIdx = latestIndex
-        
-        # OK as quick and dirty
-        elif rewardMode == 0:
-            penalty = 0.5
-            if vDir == 1:
-                penalty = -2
-            reward = (vSpeed[0])*penalty
-        #print(reward)  
+        self.cur_idx = best_index  # finally, we save our new best matching index
+
         return reward, terminated
-    
+
     def reset(self):
-        self.curTrackIdx = 0
-        self.step_counter = 0
-        self.failure_counter = 0
+        """
+        Resets the reward function for a new episode.
+        """
+        print(self.cur_idx)
+        self.cur_idx = 0

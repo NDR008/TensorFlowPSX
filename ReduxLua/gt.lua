@@ -11,7 +11,7 @@ HeldCollState = 0
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
 loadfile("track.lua")()
-loadfile("track_prog.lua")()
+-- loadfile("track_prog.lua")() -- to be deleted
 
 local function reload()
     PCSX.pauseEmulator()
@@ -19,7 +19,7 @@ local function reload()
     loadfile("gt.lua")()
     loadfile("tcp.lua")()
     loadfile("track.lua")()
-    loadfile("track_prog.lua")()
+    -- loadfile("track_prog.lua")() -- to be deleted
 end
 
 saveList = {
@@ -41,7 +41,7 @@ saveList2 = {
     { "Simulation Home",       "sim1.slice" },
     { "SARD Supra HS",         "sim2.slice" },
     { "SARD Supra Drag",       "sim5.slice" },
-    { "SARD Speed Ring",       "sim6.slice" },
+    { "SARD Speed Drag Con",   "sim6.slice" },
 }
 
 

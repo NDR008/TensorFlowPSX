@@ -86,6 +86,9 @@ function grabGameData()
     local gameState = readGameState()
     local vehicleState
     local posVect = readVehiclePositon()
+
+    -- will offload the track position calculations to Python
+    --[[
     if gameState['raceState'] < 6 then
         vehicleState = readVehicleState()
         lap = readValue(mem, 0x800b6700, 'int8_t*')
@@ -94,15 +97,15 @@ function grabGameData()
             obs['trackID'] = CurrentPos
         else
             local x = readValue(mem, 0x800b6704, 'int32_t*')
-            local y = readValue(mem, 0x800b6708, 'int32_t*')  
+            local y = readValue(mem, 0x800b6708, 'int32_t*')
             CurrentPos = closestPoints(Xc, Yc, x, y) + (lap - 1) * TrackMaxID
-            --if CurrentPos < TrackMaxID
             obs['trackID'] = CurrentPos
         end
     else
         obs['trackID'] = 0
     end
-    -- print(obs['tackID'], lap, gameState['raceState'])
+    ]]--
+
     obs['SS'] = screen
     obs['GS'] = gameState
     obs['VS'] = vehicleState
@@ -134,19 +137,28 @@ function netTCP(netChanged, netStatus)
             currentMissedPings = 0
         -- 2 is for loading a savestate    
         elseif readVal == 2 then
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print(lapTime)
             local file = Support.File.open("arc5.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
         elseif readVal == 3 then
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print(lapTime)
             local file = Support.File.open("mr2_400.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
         elseif readVal == 4 then
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print(lapTime)
             local file = Support.File.open("sim5.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
         elseif readVal == 5 then
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print(lapTime)
             local file = Support.File.open("sim6.slice", "READ")
+            print("loaded sim6.slice")
             PCSX.loadSaveState(file)
             file:close()
         else

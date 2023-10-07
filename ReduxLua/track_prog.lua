@@ -1,3 +1,7 @@
+-- TO be deleted
+
+--[[
+
 Xc = {}
 Yc = {}
 Dist = {}
@@ -21,7 +25,7 @@ if fileExists(name) then
     end
 end
 
- 
+
 
 -- function closestValue(array, value)
 --     local low = 1
@@ -64,3 +68,4 @@ function closestPoints(x,y, target_x, target_y)
     end
     return indFound
 end
+ ]]--
