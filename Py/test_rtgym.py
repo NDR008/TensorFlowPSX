@@ -22,7 +22,7 @@ my_config["interface_kwargs"] = {
   'discSteer' : True,
   'contAccelOnly' : False,
   'discAccelOnly' : False,
-  'modelMode': 3,
+  'modelMode': 7,
   'agent' : 'PPO',
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : 42, # there is a default Cov layer for PPO with 240 x 320
@@ -37,9 +37,12 @@ obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
 obs_space = env.observation_space
 act_space = env.action_space
 print("observation space:")
-pp.pprint(obs_space)
+for i in obs_space:
+    print(i)
+# pp.pprint(obs_space)
 print("observation:")
-pp.pprint(obs)
+for i in obs:
+    print("value:", i, "with shape:", i.shape)
 #print(f"observation actual: {obs}")
 #print(act_space)
 while not (terminated or truncated):
