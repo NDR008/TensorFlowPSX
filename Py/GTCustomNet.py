@@ -115,7 +115,7 @@ class GTCustomNet(TorchModelV2, nn.Module):
                 else:
                     size = np.sum(component.nvec)
                 config = {
-                    #"fcnet_hiddens": model_config["fcnet_hiddens"], #REMOVED FOR NOW (Nadir)
+                    "fcnet_hiddens": model_config["fcnet_hiddens"], #REMOVED FOR NOW (Nadir)
                     "fcnet_activation": model_config.get("fcnet_activation"),
                     "post_fcnet_hiddens": [],
                 }
@@ -133,7 +133,7 @@ class GTCustomNet(TorchModelV2, nn.Module):
             else:
                 size = int(np.product(component.shape))
                 config = {
-                    #"fcnet_hiddens": model_config["fcnet_hiddens"], #REMOVED FOR NOW (Nadir)
+                    "fcnet_hiddens": model_config["fcnet_hiddens"], #REMOVED FOR NOW (Nadir)
                     "fcnet_activation": model_config.get("fcnet_activation"),
                     "post_fcnet_hiddens": [],
                 }
