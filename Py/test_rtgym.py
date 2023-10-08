@@ -24,7 +24,6 @@ my_config["interface_kwargs"] = {
 'contAccelOnly' : False,
 'discAccelOnly' : False,
 'modelMode': mode,
-'agent' : 'PPO',
 #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
 'imageWidth' : 42, # there is a default Cov layer for PPO with 240 x 320
 'imageHeight' : 42,
@@ -36,6 +35,7 @@ pp = pprint.PrettyPrinter(indent=4)
 obs, info = env.reset()
 obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
 obs_space = env.observation_space
+print(obs_space.shape)
 act_space = env.action_space
 obs, info = env.reset()
 print("observation space:")
