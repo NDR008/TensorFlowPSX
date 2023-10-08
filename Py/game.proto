@@ -35,6 +35,7 @@ message Vehicle {
     int32 fRWheel = 13;
     int32 rLWheel = 14;
     int32 rRWheel = 15;
+    int32 vColl = 16;
 }
 
 message Screen {

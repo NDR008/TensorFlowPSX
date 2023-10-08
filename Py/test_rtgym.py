@@ -3,7 +3,7 @@ import numpy as np
 import gymnasium
 import pprint
 from time import sleep
-mode = 7
+mode = 1
 
 my_config = DEFAULT_CONFIG_DICT
 my_config["interface"] = MyGranTurismoRTGYM
@@ -42,9 +42,10 @@ print("observation space:")
 for i in obs_space:
     print(i)
 print("observation:")
-# for i in obs:
-#     print("value:", i, "with shape:", i.shape)
-for i in range(0,3):
+for i in obs:
+    print("value:", i, "with shape:", i.shape, i.dtype)
+#for i in range(0,3):
+while True:
     act = env.action_space.sample()
     obs, rew, terminated, truncated, info = env.step(act)
     env.render()

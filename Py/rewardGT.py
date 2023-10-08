@@ -18,7 +18,7 @@ class RewardFunction:
         self.datalen = len(self.data)
         self.fudgeFactor = 2 #since the spacing of data points along the track may vary this scales the reward
 
-    def computeReward(self, pos):
+    def computeReward(self, pos, vColl):
         """
         Computes the current reward given the position pos
         Args:
@@ -64,8 +64,9 @@ class RewardFunction:
 
         # The reward is then proportional to the number of passed indexes (i.e., track distance):
         reward = (best_index - self.cur_idx) / self.fudgeFactor
-        if reward < 0:
-            reward = -1 
+        if reward < 0 or vColl > 0:
+            reward = -5 
+            print("penatly!", pos, vColl, reward)
             
         self.cur_idx = best_index  # finally, we save our new best matching index
 

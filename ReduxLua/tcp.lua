@@ -50,6 +50,20 @@ local function readGameState()
     return gameState
 end
 
+local function readCollission()
+    local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
+    local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')
+
+    -- print("pre", HeldCollState, collisionState, collisionValue)
+    if collisionValue > 0 and collisionState > 0 then
+        HeldCollState = collisionState
+    elseif collisionValue == 0 then
+        HeldCollState = 0
+    end
+    -- print("pos", HeldCollState, collisionState, collisionValue)
+    return HeldCollState
+end
+
 local function readVehicleState()
     local vehicleState = {}
     vehicleState['engSpeed'] = readValue(mem, 0x800b66ee, 'uint16_t*')
@@ -67,6 +81,7 @@ local function readVehicleState()
     vehicleState['fRWheel'] =readValue(mem, 0x800b67bc, 'int8_t*')
     vehicleState['rLWheel'] =readValue(mem, 0x800b6800, 'int8_t*')
     vehicleState['rRWheel'] =readValue(mem, 0x800b6844, 'int8_t*')
+    vehicleState['vColl'] = readCollission()
     return vehicleState
 end
 
@@ -79,12 +94,14 @@ local function readVehiclePositon()
 end
 -- TCP related
 
+
+
 function grabGameData()
     local screen = PCSX.GPU.takeScreenShot()
     screen.data = tostring(screen.data)
     screen.bpp = tonumber(screen.bpp)
     local gameState = readGameState()
-    local vehicleState
+    local vehicleState = readVehicleState()
     local posVect = readVehiclePositon()
 
     -- will offload the track position calculations to Python

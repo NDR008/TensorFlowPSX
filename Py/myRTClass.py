@@ -53,7 +53,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.colour = False
         self.trackChoice = trackChoice # 1 is HS, 2 is 0-400m
         self.inititalizeCommon() # starts the TCP server and waits for the emulator to connect
+        
         self.vPosition = None # used to track wherever the vehicle is and for calculating rewards
+        self.vColl = None # used to track the vehicle contact and for calculating rewards
+        
         if discAccelOnly:
             self.controlChoice = 7
             print("Discrete Accel Only 7")
@@ -97,24 +100,24 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         fRightSlip =np.array([self.server.myData.VS.fRightSlip], dtype=dataType)
         rLeftSlip = np.array([self.server.myData.VS.rLeftSlip], dtype=dataType)
         rRightSlip =np.array([self.server.myData.VS.rRightSlip], dtype=dataType)
-        vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype=dataType)
+        self.vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype=dataType)
+        self.vColl = np.array([self.server.myData.VS.vColl], dtype=dataType)
         fLWheel= np.array([self.server.myData.VS.fLWheel], dtype=dataType)
         fRWheel= np.array([self.server.myData.VS.fRWheel], dtype=dataType)
         rLWheel= np.array([self.server.myData.VS.rLWheel], dtype=dataType)
         rRWheel= np.array([self.server.myData.VS.rRWheel], dtype=dataType)
         # trackID = self.server.myData.trackID
 
-
-        # resize to (imageWidth, imageHeight) passed through config
         # mode 1 to 15 resizes and
         if self.modelMode >= 1 and self.modelMode < 10:       
             tmp = cv2.resize(self.server.pic, (self.imageSize[0], self.imageSize[1]))
-            #tmp = cv2.cvtColor(tmp, cv2.COLOR_BGR2GRAY)
+            tmp = cv2.cvtColor(tmp, cv2.COLOR_BGR2GRAY)
+            tmp = tmp[:,:,np.newaxis]
             self.renderImage = tmp
             # print(tmp.shape)
         else:
             self.renderImage = self.server.pic
-        return rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vPosition, vDir, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, self.renderImage
+        return rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, self.renderImage
 
     def startServerToRedux(self):
         self.server.connect()
@@ -138,7 +141,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
     # Mandatory method        
     def get_observation_space(self):
-        vPosition = spaces.Box(low=-3000000.0, high=3000000.0, shape=(2,), dtype='float64') 
+        # self.vPosition = spaces.Box(low=-3000000.0, high=3000000.0, shape=(2,), dtype='float64') 
         fLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='float64')
         fRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='float64')
         rLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='float64')
@@ -157,6 +160,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             rState = spaces.Discrete(6)
             vDir = spaces.Discrete(4)
             vSteer = spaces.Discrete(1024*2+1, start=-1024)
+            vColl = spaces.Discrete(13)
         # vVel = spaces.Box(low=-300.0, high=300, dtype='uint8') # Given up idea (wanted local vedctor speed)
         # https://gymnasium.farama.org/api/spaces/fundamental/#multidiscrete says that it has a start function to offset a multidiscrete box but clearly not
         
@@ -169,48 +173,47 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             rState = spaces.Box(low=0, high=5, shape=(1,), dtype='float64')
             vDir = spaces.Box(low=0, high=3, shape=(1,), dtype='float64')  
             vSteer = spaces.Box(low=-1024, high=1024, shape=(1,), dtype='float64')
+            vColl = spaces.Box(low=0, high=12, shape=(1,), dtype='float64')
+            image = spaces.Box(low=0, high=255, shape=(self.imageSize[1], self.imageSize[0], 1), dtype='uint8')
 
         # 3 images    
         if self.modelMode == 1:
-            images = spaces.Box(low=0.0, high=255.0, shape=(self.img_hist_len, self.imageSize[1], self.imageSize[0], 3), dtype='uint8')
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, images))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, image, image, image))
         
         elif self.modelMode == 2:
-            images = spaces.Box(low=0, high=255, shape=(self.img_hist_len, self.imageSize[1], self.imageSize[0], 3), dtype='uint8')
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, images))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vColl, image, image, image))
         
         elif self.modelMode == 3:
-            images = spaces.Box(low=0, high=255, shape=(self.img_hist_len, self.imageSize[1], self.imageSize[0], 3), dtype='uint8')
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSteer, images))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSteer, vColl, image, image, image))
+        
+        elif self.modelMode == 3.5:
+            return spaces.Tuple((image, image, image))
+        
         
         # single image
         elif self.modelMode == 5:  
-            image = spaces.Box(low=0, high=255, shape=(self.imageSize[1], self.imageSize[0], 3), dtype='uint8')
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, image))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, image))
         
         elif self.modelMode == 6:    
-            image = spaces.Box(low=0, high=255, shape=(self.imageSize[1], self.imageSize[0], 3), dtype='uint8')
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, image))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vColl, image))
         
         elif self.modelMode == 7:      
-            image = spaces.Box(low=0, high=255, shape=(self.imageSize[1], self.imageSize[0], 3), dtype='uint8')
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, image))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vColl, image))
         
         elif self.modelMode == 7.5:      # check if issue with RLLIB is Box vs Discrete
-            image = spaces.Box(low=0, high=255, shape=(self.imageSize[1], self.imageSize[0], 3), dtype='uint8')
             return spaces.Tuple((eSpeed, image))
 
         elif self.modelMode == 10:
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vDir, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel))
 
         elif self.modelMode == 11:
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip))       
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip))       
 
-        elif self.modelMode == 11:
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip))  
-        
         elif self.modelMode == 12:
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear))    
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip))  
+        
+        elif self.modelMode == 13:
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vColl))    
         
         elif self.modelMode == 99:
             image = spaces.Box(low=0.0, high=255.0, shape=(240, 320, 3), dtype='uint8')
@@ -236,32 +239,36 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     
     
     def getObs(self, reset):
-        rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, self.vPosition, vDir, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, display = self.getDataImage()
-        if self.modelMode >= 1 and self.modelMode < 5 and reset:            
-            self.img_hist.append(display)
-            displayHistory = np.array(list(self.img_hist), dtype='uint8')
-        else:
-            for _ in range(self.img_hist_len):
+        rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, display = self.getDataImage()
+        if self.modelMode >= 1 and self.modelMode < 5:
+            if not reset:          
                 self.img_hist.append(display)
-            displayHistory = np.array(list(self.img_hist), dtype='uint8')
+                displayHistory = np.array(list(self.img_hist), dtype='uint8')
+            else:
+                for _ in range(self.img_hist_len):
+                    self.img_hist.append(display)
+                displayHistory = np.array(list(self.img_hist), dtype='uint8')
             
         if self.modelMode == 1:
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, displayHistory]
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, self.vColl, displayHistory[0], displayHistory[1], displayHistory[2]]
 
         elif self.modelMode == 2:
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, displayHistory]
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, self.vColl, displayHistory[0], displayHistory[1], displayHistory[2]]
 
         elif self.modelMode == 3:    
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSteer, displayHistory]
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSteer, self.vColl, displayHistory[0], displayHistory[1], displayHistory[2]]
+        
+        elif self.modelMode == 3.5:    
+            obs = [displayHistory[0], displayHistory[1], displayHistory[2]]
         
         elif self.modelMode == 5:  
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, display]
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, self.vColl, display]
         
         elif self.modelMode == 6:    
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, display]
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, self.vColl, display]
         
         elif self.modelMode == 7:      
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, display]
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vColl, display]
                    
         elif self.modelMode == 7.5:
             act_alt_eSpeed = np.array([eSpeed], dtype='float64')    
@@ -289,7 +296,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def get_obs_rew_terminated_info(self):       
         obs = self.getObs(reset=False)
-        reward, terminated = self.rewardFunction.computeReward(self.vPosition)
+        reward, terminated = self.rewardFunction.computeReward(self.vPosition, self.vColl)
         
         info = {}
         if self.raceState == 3:
