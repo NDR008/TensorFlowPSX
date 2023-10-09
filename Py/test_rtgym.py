@@ -35,7 +35,8 @@ pp = pprint.PrettyPrinter(indent=4)
 obs, info = env.reset()
 obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
 obs_space = env.observation_space
-print(obs_space.shape)
+print("shapeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", obs.shape)
+print("shapeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", obs.space)
 act_space = env.action_space
 obs, info = env.reset()
 print("observation space:")

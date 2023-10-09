@@ -32,7 +32,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             contAccelOnly (bool, optional): Detrmines if ONLY accelerator exists in the control space as a continuous space (overwites other parameters). Defaults to False.
             discAccelOnly (bool, optional): Detrmines if ONLY accelerator exists in the control space as a discrete space (overwites other parameters). Defaults to False.
             modelMode (int, optional): Models 1 to 4 are using 3 image histories (greyscale), Mode 5 to 9 use single images, Mode 10 to 14 use parameters only. Defaults to 2.
-            agent (str, optional): Note used. Defaults to "PPO".
+            Note, discrete is not true discrete. The action space is still a Box, but the results are clipped e.g. >= 0.5 is On, <0.5 is off. This is to deal with algo limitations.
             imageHeight (int, optional): Display resize. Defaults to 240.
             imageWidth (int, optional): Display resize. Defaults to 320.
             trackChoice (int, optional): To be fixed. Defaults to 1.
@@ -274,7 +274,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         elif self.modelMode == 7.5:
             act_alt_eSpeed = np.array([eSpeed], dtype='float64')    
             obs = [act_alt_eSpeed, display]
-             
+            
+        elif self.modelMode == 13:      
+            obs = [rState, eClutch, eSpeed, vSpeed]     
+
         elif self.modelMode == 99:    # debug
             obs = [rState, display]
         return obs    
