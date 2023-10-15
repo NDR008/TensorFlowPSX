@@ -14,7 +14,7 @@ my_config["interface"] = MyGranTurismoRTGYM
 my_config["time_step_duration"] = 0.05
 my_config["start_obs_capture"] = 0.05
 my_config["time_step_timeout_factor"] = 1.0
-my_config["ep_max_length"] = 500
+my_config["ep_max_length"] = 50
 my_config["act_buf_len"] = 4
 my_config["reset_act_buf"] = True
 my_config["benchmark"] = False
@@ -42,7 +42,7 @@ obs, info = env.reset()
 obs, rew, terminated, truncated, info = env.step(env.action_space.sample())
 obs_space = env.observation_space
 act_space = env.action_space
-obs, info = env.reset()
+
 print("observation space:")
 for i in obs_space:
     print(i)
@@ -51,10 +51,12 @@ for i in obs:
     print("value:", i, "with shape:", i.shape, i.dtype)
 #for i in range(0,3):
 while True:
-    act = env.action_space.sample()
-    obs, rew, terminated, truncated, info = env.step(act)
-    #print(obs)
-    env.render()
+    obs, info = env.reset()
+    while not truncated or not terminated:
+        act = env.action_space.sample()
+        obs, rew, terminated, truncated, info = env.step(act)
+        #print(obs)
+        env.render()
     
 
 # granTurismo = MyGranTurismoRTGYM(debugFlag=True)

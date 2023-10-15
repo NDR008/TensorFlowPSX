@@ -8,17 +8,19 @@ Development started in December 2022
 
 # third-party imports
 import numpy as np
+import logging
 
 class RewardFunction:
     def __init__(self,
                  filename='Py/hsSpaced.csv'):
+        print(filename)
         self.cur_idx = 0
         self.maxSearch = 500
         self.data = np.genfromtxt(filename, delimiter=",")
         self.datalen = len(self.data)
         self.fudgeFactor = 5 #since the spacing of data points along the track may vary this scales the reward
         self.totalReward = 0
-        print(filename)
+        self.episodeNumber = 0
         
     def complexReward(self, pos, vColl, vSpeed = None):       
         """
@@ -106,8 +108,11 @@ class RewardFunction:
         """
         Resets the reward function for a new episode.
         """
-        # print(self.cur_idx)
-        print("Total reward was:", self.totalReward)
+        logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.INFO)
+        string = "Total reward was:" + str(self.totalReward) + " after " + str(self.episodeNumber) + "episodes"
+        logging.info(string)
+        print(string)
+        self.episodeNumber =self.episodeNumber + 1
         self.totalReward = 0
         self.cur_idx = 0
         
