@@ -11,14 +11,16 @@ import numpy as np
 
 class RewardFunction:
     def __init__(self,
-                 filename='Py/hsSpaced.csv',):
+                 filename='Py/hsSpaced.csv'):
         self.cur_idx = 0
         self.maxSearch = 500
         self.data = np.genfromtxt(filename, delimiter=",")
         self.datalen = len(self.data)
         self.fudgeFactor = 5 #since the spacing of data points along the track may vary this scales the reward
-
-    def computeReward(self, pos, vColl):
+        self.totalReward = 0
+        print(filename)
+        
+    def complexReward(self, pos, vColl, vSpeed = None):       
         """
         Computes the current reward given the position pos
         Args:
@@ -27,13 +29,13 @@ class RewardFunction:
             float, bool: the reward and the terminated signal
         """
         # self.traj.append(pos)
-
         terminated = False
         min_dist = np.inf  # smallest distance found so far in the trajectory to the target pos
         index = self.cur_idx  # cur_idx is where we were last step in the trajectory        
         best_index = 0  # index best matching the target pos
         counter = 0
-
+    
+            
         while True:
             dist = np.linalg.norm(pos - self.data[index])  # distance of the current index to target pos
             if dist <= min_dist:  # if dist is smaller than our minimum found distance so far,
@@ -62,20 +64,51 @@ class RewardFunction:
                     #best_index = self.cur_idx  # if so, consider we didn't move
                 break  # we found the best index and can break the while loop
 
-        # The reward is then proportional to the number of passed indexes (i.e., track distance):
-        reward = (best_index - self.cur_idx) / self.fudgeFactor
-        if reward < 0 or vColl > 0:
-            reward = -1 
-            
-            
-        self.cur_idx = best_index  # finally, we save our new best matching index
-        print(pos, vColl, reward)
 
+        if vSpeed == None:
+        # The reward is then proportional to the number of passed indexes (i.e., track distance):
+            self.reward = (best_index - self.cur_idx) / self.fudgeFactor    
+            if self.reward < 0 or vColl > 0:
+                self.reward = -5             
+                
+              # finally, we save our new best matching index
+        
+        else:
+            reward = ((best_index - self.cur_idx) * vSpeed / 200) / self.fudgeFactor    
+            if vColl > 0: 
+                reward = reward * -2   
+        
+        #print(pos, vColl, vSpeed, reward)
+
+        return reward, terminated
+
+    def simplexReward(self, vSpeed, vDir):
+        terminated = False       
+        penalty = 0.5
+        if vDir == 1:
+            penalty = -2
+        reward = (vSpeed)*penalty / 4
+        
+        #print(vSpeed, reward)
+
+        return reward, terminated
+
+    def computeReward(self, pos=None, vColl=None, vDir=None, vSpeed = None, mode="complex"):
+        if mode == "complex":
+            reward, terminated = self.complexReward(pos, vColl, vSpeed)
+        else:
+            reward, terminated = self.simplexReward(vSpeed, vDir)
+            
+        self.totalReward = self.totalReward + reward
         return reward, terminated
 
     def reset(self):
         """
         Resets the reward function for a new episode.
         """
-        print(self.cur_idx)
+        # print(self.cur_idx)
+        print("Total reward was:", self.totalReward)
+        self.totalReward = 0
         self.cur_idx = 0
+        
+        

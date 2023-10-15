@@ -145,39 +145,56 @@ function netTCP(netChanged, netStatus)
         end
     -- main loop    
     elseif netStatus then
-        local readVal = client:readU16() -- receive a 1 or 2
+        local readVal = client:readU32() -- receive a 1 or 2 had a bug till U32 not U16 14.10!
         local ready = false
-        
         -- 1 is the main loop for frame capture
         if readVal == 1 then
             ready = true
             currentMissedPings = 0
         -- 2 is for loading a savestate    
-        elseif readVal == 2 then
+        elseif readVal == 8+1 then -- MR2 at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-            print(lapTime)
-            local file = Support.File.open("arc5.slice", "READ")
+            print("lapt_time ", lapTime)
+            local file = Support.File.open("mr2_1_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 3 then
+        elseif readVal == 24+1 then -- Supra at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-            print(lapTime)
-            local file = Support.File.open("mr2_400.slice", "READ")
+            print("lapt_time ", lapTime)
+            local file = Support.File.open("Sup_1_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 4 then
+        elseif readVal == 0+1 then -- MR2 at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-            print(lapTime)
-            local file = Support.File.open("sim5.slice", "READ")
+            print("lapt_time ", lapTime)
+            local file = Support.File.open("mr2_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 5 then
-            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-            print(lapTime)
-            local file = Support.File.open("sim6.slice", "READ")
-            print("loaded sim6.slice")
-            PCSX.loadSaveState(file)
-            file:close()
+        -- elseif readVal == 1 then
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     print(lapTime)
+        --     local file = Support.File.open("arc5.slice", "READ")
+        --     PCSX.loadSaveState(file)
+        --     file:close()
+        -- elseif readVal == 3 then
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     print(lapTime)
+        --     local file = Support.File.open("mr2_400.slice", "READ")
+        --     PCSX.loadSaveState(file)
+        --     file:close()
+        -- elseif readVal == 4 then
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     print(lapTime)
+        --     local file = Support.File.open("sim5.slice", "READ")
+        --     PCSX.loadSaveState(file)
+        --     file:close()
+        -- elseif readVal == 5 then
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     print(lapTime)
+        --     local file = Support.File.open("sim6.slice", "READ")
+        --     print("loaded sim6.slice")
+        --     PCSX.loadSaveState(file)
+        --     file:close()
         else
             currentMissedPings = currentMissedPings + 1
         end
