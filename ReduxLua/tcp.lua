@@ -152,19 +152,19 @@ function netTCP(netChanged, netStatus)
             ready = true
             currentMissedPings = 0
         -- 2 is for loading a savestate    
-        elseif readVal == 8+1 then -- MR2 at Drag
+        elseif readVal == 8 + 64 then -- MR2 at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("mr2_1_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 24+1 then -- Supra at Drag
+        elseif readVal == 24 + 64 then -- Supra at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("Sup_1_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 0+1 then -- MR2 at HS
+        elseif readVal == 0 + 64 then -- MR2 at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("mr2_0_0_0_0.slice", "READ")

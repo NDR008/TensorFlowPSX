@@ -108,7 +108,7 @@ class GTCustomNet(TorchModelV2, nn.Module):
                 self.add_module("cnn_{}".format(i), self.cnns[i])
             # Discrete|MultiDiscrete inputs -> One-hot encode.
             elif isinstance(component, (Discrete, MultiDiscrete)):
-                print("I found non Cov2D")
+                print("Discrete / MutliDiscrete")
                 print(component)
                 if isinstance(component, Discrete):
                     size = component.n
@@ -131,6 +131,8 @@ class GTCustomNet(TorchModelV2, nn.Module):
                 self.add_module("one_hot_{}".format(i), self.one_hot[i])
             # Everything else (1D Box).
             else:
+                print("I found a BOX")
+                print(component)
                 size = int(np.product(component.shape))
                 config = {
                     "fcnet_hiddens": model_config["fcnet_hiddens"], #REMOVED FOR NOW (Nadir)
