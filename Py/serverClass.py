@@ -1,3 +1,10 @@
+"""
+Server class for receiving in-game parameters from Gran Turismo via PCSX-Redux
+Written by NDR008
+nadir.syedsammut@gmail.com
+Development started in December 2022
+"""
+
 import socket
 import game_pb2 as Game
 import numpy as np
@@ -198,4 +205,4 @@ class server():
     def reloadSave(self, trackChoice):
         print("reload save for track :", trackChoice)
         self.sendPong(trackChoice) # loads the save state
-        sleep(0.05)        
+        sleep(0.05) # Redux takes a few milliseconds to load the savestate       

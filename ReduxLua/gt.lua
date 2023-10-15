@@ -11,7 +11,7 @@ HeldCollState = 0
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
 loadfile("track.lua")()
-loadfile("track_prog.lua")()
+-- loadfile("track_prog.lua")() -- to be deleted
 
 local function reload()
     PCSX.pauseEmulator()
@@ -19,28 +19,57 @@ local function reload()
     loadfile("gt.lua")()
     loadfile("tcp.lua")()
     loadfile("track.lua")()
-    loadfile("track_prog.lua")()
+    -- loadfile("track_prog.lua")() -- to be deleted
 end
 
-saveList = {
-    { "Start",                 "start1.slice" },
-    { "Arcade Start",          "arc1.slice" },
-    { "Arcade HS R33",         "arc2.slice" },
-    { "Arcade HS R33 mid-lap", "arc4.slice" },
-    { "Arcade HS Corv",        "arc3.slice" },
-    { "Arcade MR2 TT HS",      "arc5.slice" },
-    { "Arcade MR2 TT HS 2nd Lap",      "arc5b.slice" },
-    { "Arcade MR2 TT HS Last Corner", "arc5c.slice" }
+-- saveList1 = {
+--     { "Start",                 "start1.slice" },
+--     { "Arcade Start",          "arc1.slice" },
+--     { "Arcade HS R33",         "arc2.slice" },
+--     { "Arcade HS R33 mid-lap", "arc4.slice" },
+--     { "Arcade HS Corv",        "arc3.slice" },
+--     { "Arcade MR2 TT HS",      "arc5.slice" },
+--     { "Arcade MR2 TT HS 2nd Lap",      "arc5b.slice" },
+--     { "Arcade MR2 TT HS Last Corner", "arc5c.slice" }
+-- }
+
+-- saveList2 = {
+--     { "MR2 400m",              "mr2_400.slice" },
+--     { "Hi-Def MR2 TT HS",      "arc7.slice" },
+--     { "Hi-Def MR2 Night",      "arc6.slice" },
+--     { "Sim Endurance Race",    "sim4.slice" },
+--     { "Simulation Home",       "sim1.slice" },
+--     { "SARD Supra HS",         "sim2.slice" },
+--     { "SARD Supra Drag",       "sim5.slice" },
+--     { "SARD Speed Drag Con",   "sim6.slice" },
+-- }
+
+
+saveList1 = {
+    -- Car_Dr_Ds-Da-Cpu
+    { "MR2 400m Digital All",          "mr2_1_0_0_0.slice" }, -- Done
+    { "MR2 400m Cont Steer",           "mr2_1_1_0_0.slice" },
+    { "MR2 400m Cont Accel",           "mr2_1_0_1_0.slice" },
+    { "MR2 400m Cont All",             "mr2_1_1_1_0.slice" },
+    --{ "MR2 400m Digital All (x2 CPU)", "mr2_1_0_0_1.slice" },
 }
 
 saveList2 = {
-    { "MR2 400m",              "mr2_400.slice" },
-    { "Hi-Def MR2 TT HS",      "arc7.slice" },
-    { "Hi-Def MR2 Night",      "arc6.slice" },
-    { "Sim Endurance Race",    "sim4.slice" },
-    { "Simulation Home",       "sim1.slice" },
-    { "SARD Supra HS",         "sim2.slice" },
-    { "SARD Supra Drag",       "sim5.slice" },
+    -- Car_Dr_Ds-Da-Cpu
+    { "Supra 400m Digital All",         "Sup_1_0_0_0.slice" }, -- Done
+    { "Supra 400m Cont Steer",          "Sup_1_1_0_0.slice" },
+    { "Supra 400m Cont Accel",          "Sup_1_0_1_0.slice" },
+    { "Supra 400m Cont All",            "Sup_1_1_1_0.slice" },
+    ---{ "Supra 400m Digital All (x2 CPU)","Sup_1_0_0_1.slice" },
+}
+
+saveList3 = {
+    -- Car_Dr_Ds-Da-Cpu
+    { "MR2 HS Digital All",          "mr2_0_0_0_0.slice" },          -- Done
+    { "MR2 HS Cont Steer",           "mr2_0_1_0_0.slice" },
+    { "MR2 HS Cont Accel",           "mr2_0_0_1_0.slice" },
+    { "MR2 HS Cont All",             "mr2_0_1_1_0.slice" },
+    ---{ "MR2 HS Digital All (x2 CPU)", "mr2_0_0_0_1.slice" },
 }
 
 
@@ -281,7 +310,7 @@ function position()
         doSliderInt(mem, 0x800b6704, 'Map X', -3000000, 3000000, 'int32_t*')
         doSliderInt(mem, 0x800b6708, 'Map Y', -2000000, 2000000, 'int32_t*')
         doSliderInt(mem, 0x800b670c, 'Map Z', -300000, 300000, 'int16_t*')
-        imgui.TextUnformatted(CurrentPos)
+        -- imgui.TextUnformatted(CurrentPos)
         -- doSliderInt(mem, 0x800b6728, 'Map X2', -3000000, 3000000, 'int32_t*')
         -- doSliderInt(mem, 0x800b6724, 'Map Z2', -3000000, 300000, 'int16_t*')
         -- doSliderInt(mem, 0x800b672c, 'Map Y2', -3000000, 3000000, 'int32_t*')
@@ -317,11 +346,14 @@ function drawTable(listOfSaves)
 end
 
 function saveMenu()
-    if (imgui.CollapsingHeader("Saves1", ImGuiTreeNodeFlags_None)) then
-        drawTable(saveList)
+    if (imgui.CollapsingHeader("MR2 Drag", ImGuiTreeNodeFlags_None)) then
+        drawTable(saveList1)
     end
-    if (imgui.CollapsingHeader("Saves2", ImGuiTreeNodeFlags_None)) then
+    if (imgui.CollapsingHeader("Supra Drag", ImGuiTreeNodeFlags_None)) then
         drawTable(saveList2)
+    end
+    if (imgui.CollapsingHeader("MR2 HS", ImGuiTreeNodeFlags_None)) then
+        drawTable(saveList3)
     end
 end
 
@@ -357,8 +389,6 @@ function DrawImguiFrame()
         if (imgui.Button("Reload")) then
             reload()
         end
-
-
         imgui.BeginTable("TopTable", 2, imgui.constant.TableFlags.Resizable)
         imgui.TableNextRow()
         imgui.TableSetColumnIndex(0)
@@ -379,8 +409,8 @@ function DrawImguiFrame()
         simulation()
         imgui.EndTable()
         funkyStuff()
-        imgui.End()
     end
+	imgui.End()
 end
 
 function checkRegion()

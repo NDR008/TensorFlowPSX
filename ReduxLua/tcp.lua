@@ -50,6 +50,20 @@ local function readGameState()
     return gameState
 end
 
+local function readCollission()
+    local collisionState = readValue(mem, 0x800b66e9, 'int8_t*')
+    local collisionValue = readValue(mem, 0x800b66ea, 'int8_t*')
+
+    -- print("pre", HeldCollState, collisionState, collisionValue)
+    if collisionValue > 0 and collisionState > 0 then
+        HeldCollState = collisionState
+    elseif collisionValue == 0 then
+        HeldCollState = 0
+    end
+    -- print("pos", HeldCollState, collisionState, collisionValue)
+    return HeldCollState
+end
+
 local function readVehicleState()
     local vehicleState = {}
     vehicleState['engSpeed'] = readValue(mem, 0x800b66ee, 'uint16_t*')
@@ -67,6 +81,7 @@ local function readVehicleState()
     vehicleState['fRWheel'] =readValue(mem, 0x800b67bc, 'int8_t*')
     vehicleState['rLWheel'] =readValue(mem, 0x800b6800, 'int8_t*')
     vehicleState['rRWheel'] =readValue(mem, 0x800b6844, 'int8_t*')
+    vehicleState['vColl'] = readCollission()
     return vehicleState
 end
 
@@ -79,13 +94,18 @@ local function readVehiclePositon()
 end
 -- TCP related
 
+
+
 function grabGameData()
     local screen = PCSX.GPU.takeScreenShot()
     screen.data = tostring(screen.data)
     screen.bpp = tonumber(screen.bpp)
     local gameState = readGameState()
-    local vehicleState
+    local vehicleState = readVehicleState()
     local posVect = readVehiclePositon()
+
+    -- will offload the track position calculations to Python
+    --[[
     if gameState['raceState'] < 6 then
         vehicleState = readVehicleState()
         lap = readValue(mem, 0x800b6700, 'int8_t*')
@@ -94,15 +114,15 @@ function grabGameData()
             obs['trackID'] = CurrentPos
         else
             local x = readValue(mem, 0x800b6704, 'int32_t*')
-            local y = readValue(mem, 0x800b6708, 'int32_t*')  
+            local y = readValue(mem, 0x800b6708, 'int32_t*')
             CurrentPos = closestPoints(Xc, Yc, x, y) + (lap - 1) * TrackMaxID
-            --if CurrentPos < TrackMaxID
             obs['trackID'] = CurrentPos
         end
     else
         obs['trackID'] = 0
     end
-    -- print(obs['tackID'], lap, gameState['raceState'])
+    ]]--
+
     obs['SS'] = screen
     obs['GS'] = gameState
     obs['VS'] = vehicleState
@@ -125,26 +145,56 @@ function netTCP(netChanged, netStatus)
         end
     -- main loop    
     elseif netStatus then
-        local readVal = client:readU16() -- receive a 1 or 2
+        local readVal = client:readU32() -- receive a 1 or 2 had a bug till U32 not U16 14.10!
         local ready = false
-        
         -- 1 is the main loop for frame capture
         if readVal == 1 then
             ready = true
             currentMissedPings = 0
         -- 2 is for loading a savestate    
-        elseif readVal == 2 then
-            local file = Support.File.open("arc5.slice", "READ")
+        elseif readVal == 8+1 then -- MR2 at Drag
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print("lapt_time ", lapTime)
+            local file = Support.File.open("mr2_1_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 3 then
-            local file = Support.File.open("mr2_400.slice", "READ")
+        elseif readVal == 24+1 then -- Supra at Drag
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print("lapt_time ", lapTime)
+            local file = Support.File.open("Sup_1_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 4 then
-            local file = Support.File.open("sim5.slice", "READ")
+        elseif readVal == 0+1 then -- MR2 at HS
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print("lapt_time ", lapTime)
+            local file = Support.File.open("mr2_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
+        -- elseif readVal == 1 then
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     print(lapTime)
+        --     local file = Support.File.open("arc5.slice", "READ")
+        --     PCSX.loadSaveState(file)
+        --     file:close()
+        -- elseif readVal == 3 then
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     print(lapTime)
+        --     local file = Support.File.open("mr2_400.slice", "READ")
+        --     PCSX.loadSaveState(file)
+        --     file:close()
+        -- elseif readVal == 4 then
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     print(lapTime)
+        --     local file = Support.File.open("sim5.slice", "READ")
+        --     PCSX.loadSaveState(file)
+        --     file:close()
+        -- elseif readVal == 5 then
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     print(lapTime)
+        --     local file = Support.File.open("sim6.slice", "READ")
+        --     print("loaded sim6.slice")
+        --     PCSX.loadSaveState(file)
+        --     file:close()
         else
             currentMissedPings = currentMissedPings + 1
         end
@@ -154,6 +204,7 @@ function netTCP(netChanged, netStatus)
             reconnectTry = true
             print("Retry to connect to server")
             ready = false
+            client:close()
         end
         -- keep track of the number of frames rendered
         frames = frames + 1
