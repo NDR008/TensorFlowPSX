@@ -254,7 +254,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         if self.controlChoice ==7:
             return np.array([0.0,0.0], dtype='float64')
         elif self.controlChoice ==6:
-            return np.array([0.0,0.0], dtype='float64')
+            return np.array([0.0], dtype='float64')
         elif self.controlChoice ==2:
             return np.array([0.0 ,0.0], dtype='float64')
     

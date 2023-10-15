@@ -21,6 +21,7 @@ class RewardFunction:
         self.fudgeFactor = 5 #since the spacing of data points along the track may vary this scales the reward
         self.totalReward = 0
         self.episodeNumber = 0
+        logging.basicConfig(filename='J:/git/TensorFlowPSX/log', encoding='utf-8', level=logging.INFO)
         
     def complexReward(self, pos, vColl, vSpeed = None):       
         """
@@ -108,8 +109,7 @@ class RewardFunction:
         """
         Resets the reward function for a new episode.
         """
-        logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.INFO)
-        string = "Total reward was:" + str(self.totalReward) + " after " + str(self.episodeNumber) + "episodes"
+        string = "Total reward was: " + str(self.totalReward) + " after " + str(self.episodeNumber) + " episodes"
         logging.info(string)
         print(string)
         self.episodeNumber =self.episodeNumber + 1

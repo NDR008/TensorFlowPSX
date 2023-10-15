@@ -22,17 +22,17 @@ my_config["benchmark_polyak"] = 0.2
 
 my_config["interface_kwargs"] = {
   'debugFlag': False, # do not use render() while True
-  'discreteAccel' : True,
+  'discreteAccel' : False,
   'accelAndBrake' : False,
   'discSteer' : True,
-  'contAccelOnly' : False,
+  'contAccelOnly' : True,
   'discAccelOnly' : False,
-  'modelMode': 1,
+  'modelMode': 14,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : 84, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : 84,
   'trackChoice' : 1, # 0 is HS, 1 is 400m
-  'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
+  'carChoice' : 1, # 0 is MR2, 1 is Supra, 2 is Civic
   'rewardMode' : 'simplex'
 }
 
