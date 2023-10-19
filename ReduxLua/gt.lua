@@ -11,6 +11,7 @@ HeldCollState = 0
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
 loadfile("track.lua")()
+loadfile("drive_record.lua")()
 -- loadfile("track_prog.lua")() -- to be deleted
 
 local function reload()
@@ -19,6 +20,7 @@ local function reload()
     loadfile("gt.lua")()
     loadfile("tcp.lua")()
     loadfile("track.lua")()
+    loadfile("drive_record.lua")()
     -- loadfile("track_prog.lua")() -- to be deleted
 end
 
@@ -371,6 +373,17 @@ function pythonStuff()
             end
         else
             if dumpTrack then writeTrack() end
+        end
+
+        driveChange, dumpDrive = imgui.Checkbox("Record Drive", dumpDrive)
+        if driveChange then
+            if dumpDrive then
+                openRecord()
+            else
+                closeRecord()
+            end
+        else
+            if dumpTrack then writeRecord() end
         end
     end
 end

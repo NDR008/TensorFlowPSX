@@ -21,7 +21,9 @@ class RewardFunction:
         self.fudgeFactor = 5 #since the spacing of data points along the track may vary this scales the reward
         self.totalReward = 0
         self.episodeNumber = 0
-        logging.basicConfig(filename='J:/git/TensorFlowPSX/log', encoding='utf-8', level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, filename="reward_log.log",filemode="a", format="%(asctime)s %(levelname)s %(message)s")
+        logging.info(logging.info(f">> New Sessions <<"))
+        self.steps = 0
         
     def complexReward(self, pos, vColl, vSpeed = None):       
         """
@@ -101,7 +103,7 @@ class RewardFunction:
             reward, terminated = self.complexReward(pos, vColl, vSpeed)
         else:
             reward, terminated = self.simplexReward(vSpeed, vDir)
-            
+        self.steps = self.steps + 1    
         self.totalReward = self.totalReward + reward
         return reward, terminated
 
@@ -110,10 +112,9 @@ class RewardFunction:
         Resets the reward function for a new episode.
         """
         string = "Total reward was: " + str(self.totalReward) + " after " + str(self.episodeNumber) + " episodes"
-        logging.info(string)
-        print(string)
+        logging.info(logging.info(f"Episode number, number of steps, total reward: {self.episodeNumber, self.steps, self.totalReward}"))
         self.episodeNumber =self.episodeNumber + 1
         self.totalReward = 0
         self.cur_idx = 0
-        
+        self.steps = 0
         

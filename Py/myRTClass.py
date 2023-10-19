@@ -9,6 +9,8 @@ Notes to self: RLLIB cannot use Boxes for actions, need MultiDiscrete:
 (RolloutWorker pid=18956) ValueError: Box(..., `int`) action spaces are not supported. Use MultiDiscrete  or Box(..., `float`).
 """
 
+#scaled
+
 
 from pygamepad import controlGamepad
 from rtgym import RealTimeGymInterface, DEFAULT_CONFIG_DICT
