@@ -1,16 +1,12 @@
 coordDrive = ''
-lastStrDrive = ''
 indexDrive = 0
 
-SingleLap = False
-
 function openRecord()
-    print("open")
+    print("open record")
     local file = Support.File.open("drive.csv", "CREATE")
     file:close()
 end
 
-local last_lap = 0
 function writeRecord()
     -- Front Left
     local lap = readValue(mem, 0x800b6700, 'int32_t*')
@@ -18,22 +14,18 @@ function writeRecord()
     local y = readValue(mem, 0x800b6708, 'int32_t*')
     -- local z = readValue(mem, 0x800b670c, 'int32_t*')
     
-    local strDrive = tostring(x) .. ',' .. tostring(y) .. '\n'
-    if strDrive ~= lastStr then
-        indexDrive = indexDrive + 1
-        if index % 1 == 0 then
-            coordDrive = coordDrive .. strDrive
-            lastStrDrive = strDrive
-        end
-    end
+    local strDrive = tostring(lap) .. ',' .. tostring(x) .. ',' .. tostring(y) .. '\n'
+    coordDrive = coordDrive .. strDrive
+    print(strDrive)
 end
 
 function closeRecord()
-    appendCoordDrve()
+    appendCoordDrive()
 end
 
-function appendCoordDrve()
-    file = Support.File.open("hs.csv", "READWRITE")
+function appendCoordDrive()
+    file = Support.File.open("drive.csv", "READWRITE")
     file:write(coordDrive)
     file:close()
+    print("close record")
 end

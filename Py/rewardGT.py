@@ -9,23 +9,34 @@ Development started in December 2022
 # third-party imports
 import numpy as np
 import logging
+import csv
+import datetime
+
+DEBUG = True
 
 class RewardFunction:
     def __init__(self,
                  filename='Py/hsSpaced.csv'):
         print(filename)
         self.cur_idx = 0
-        self.maxSearch = 500
+        self.maxSearch = 300
         self.data = np.genfromtxt(filename, delimiter=",")
         self.datalen = len(self.data)
-        self.fudgeFactor = 5 #since the spacing of data points along the track may vary this scales the reward
+        self.fudgeFactor = 8 #since the spacing of data points along the track may vary this scales the reward
         self.totalReward = 0
         self.episodeNumber = 0
-        logging.basicConfig(level=logging.INFO, filename="reward_log.log",filemode="a", format="%(asctime)s %(levelname)s %(message)s")
-        logging.info(logging.info(f">> New Sessions <<"))
         self.steps = 0
-        
-    def complexReward(self, pos, vColl, vSpeed = None):       
+        self.badDirectionSteps = 0
+        self.maxBadDirectionSteps = 100
+        x = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        with open('logging.csv', 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([x])
+
+
+    # I think the reward needs to include speed        
+    def complexReward(self, pos, vColl, vSpeed):
+              
         """
         Computes the current reward given the position pos
         Args:
@@ -69,33 +80,34 @@ class RewardFunction:
                     #best_index = self.cur_idx  # if so, consider we didn't move
                 break  # we found the best index and can break the while loop
 
-
-        if vSpeed == None:
         # The reward is then proportional to the number of passed indexes (i.e., track distance):
-            self.reward = (best_index - self.cur_idx) / self.fudgeFactor    
-            if self.reward < 0 or vColl > 0:
-                self.reward = -5             
+        self.reward = (best_index - self.cur_idx) / self.fudgeFactor    
+        if self.reward < 0 or vColl > 0:
+            self.reward = -5             
+            self.badDirectionSteps = self.badDirectionSteps + 1
+          # finally, we save our new best matching index
+        self.cur_idx = best_index
                 
-              # finally, we save our new best matching index
-        
-        else:
-            reward = ((best_index - self.cur_idx) * vSpeed / 200) / self.fudgeFactor    
-            if vColl > 0: 
-                reward = reward * -2   
-        
-        #print(pos, vColl, vSpeed, reward)
+        if self.badDirectionSteps > self.maxBadDirectionSteps:
+            terminated = True
+            
+        if DEBUG:
+            print(self.reward, self.cur_idx)
 
-        return reward, terminated
+        return self.reward, terminated
 
     def simplexReward(self, vSpeed, vDir):
         terminated = False       
         penalty = 0.5
         if vDir == 1:
             penalty = -2
+            self.badDirectionSteps = self.badDirectionSteps + 1
         reward = (vSpeed)*penalty / 4
         
-        #print(vSpeed, reward)
+        if self.badDirectionSteps > self.maxBadDirectionSteps:
+            terminated = True
 
+        #print(reward)
         return reward, terminated
 
     def computeReward(self, pos=None, vColl=None, vDir=None, vSpeed = None, mode="complex"):
@@ -105,16 +117,19 @@ class RewardFunction:
             reward, terminated = self.simplexReward(vSpeed, vDir)
         self.steps = self.steps + 1    
         self.totalReward = self.totalReward + reward
+        
         return reward, terminated
 
     def reset(self):
         """
         Resets the reward function for a new episode.
         """
-        string = "Total reward was: " + str(self.totalReward) + " after " + str(self.episodeNumber) + " episodes"
-        logging.info(logging.info(f"Episode number, number of steps, total reward: {self.episodeNumber, self.steps, self.totalReward}"))
+        with open('logging.csv', 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([self.episodeNumber, self.steps, self.totalReward])
         self.episodeNumber =self.episodeNumber + 1
         self.totalReward = 0
         self.cur_idx = 0
         self.steps = 0
+        self.badDirectionSteps = 0
         

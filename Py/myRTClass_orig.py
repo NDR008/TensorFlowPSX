@@ -76,7 +76,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     def getDataImage(self):  
         import cv2
         self.server.receiveOneFrame()
-
+        self.raceState = np.int64(self.server.myData.GS.raceState)
         if self.modelMode >= 10:
             dataType = 'int64'
             self.raceState = np.int64(self.server.myData.GS.raceState)    
@@ -214,9 +214,6 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
         elif self.modelMode == 7:      
             return spaces.Tuple((rState, eClutch, eSpeed, vSpeed, image))
-        
-        elif self.modelMode == 7.5:      # check if issue with RLLIB is Box vs Discrete
-            return spaces.Tuple((eSpeed, image))
 
         elif self.modelMode == 10:
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel))
@@ -287,11 +284,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
         elif self.modelMode == 7:      
             obs = [rState, eClutch, eSpeed, self.vSpeed, display]
-                   
-        elif self.modelMode == 7.5:
-            act_alt_eSpeed = np.array([eSpeed], dtype='float64')    
-            obs = [act_alt_eSpeed, display]
-        
+                          
         elif self.modelMode == 10:      
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, self.vDir, self.vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel]     
         
@@ -337,10 +330,6 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         info = {}
         if self.raceState == 3:
             terminated = True
-        #elif self.raceState == 1:
-        #    terminated = False
-        else:
-            terminated = False
         return obs, reward, terminated, info
     
     # Mandatory method

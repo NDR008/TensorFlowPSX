@@ -383,7 +383,7 @@ function pythonStuff()
                 closeRecord()
             end
         else
-            if dumpTrack then writeRecord() end
+            if dumpDrive then writeRecord() end
         end
     end
 end

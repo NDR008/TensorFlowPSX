@@ -74,17 +74,15 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         elif discreteAccel and not accelAndBrake and discSteer: # discreteAccel & not accelAndBrake & discreteSteer
             self.controlChoice = 2
             print("Discrete Accel or Brake (cannot left foot) and Discrete Steering 2")
-            
-        print(self.carChoice, self.trackChoice)     
         
     # Maybe needed (at least as a helper) wrong place?
     def getDataImage(self):  
         import cv2
         self.server.receiveOneFrame()
-
+        self.raceState = np.int64(self.server.myData.GS.raceState)  
         if self.modelMode >= 10:
             dataType = 'int64'
-            self.raceState = np.int64(self.server.myData.GS.raceState)    
+            rState = np.int64(self.server.myData.GS.raceState)  
             eClutch = np.int64(self.server.myData.VS.eClutch)
             eSpeed = np.int64(self.server.myData.VS.engSpeed)
             eBoost = np.int64(self.server.myData.VS.engBoost)
@@ -103,7 +101,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             self.vSpeed = np.array([self.server.myData.VS.speed/500], dtype=dataType)
             vSteer = np.array([self.server.myData.VS.steer/1024], dtype=dataType)
             self.vDir = np.array([self.server.myData.drivingDir/3], dtype=dataType)
-            rState = np.array([self.server.myData.GS.raceState/5], dtype=dataType)
+            rState = np.array([self.server.myData.GS.raceState], dtype=dataType)
             self.vColl = np.array([self.server.myData.VS.vColl/12], dtype=dataType)
       
        
@@ -111,7 +109,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         fRightSlip =np.array([self.server.myData.VS.fRightSlip/256], dtype=dataType)
         rLeftSlip = np.array([self.server.myData.VS.rLeftSlip/256], dtype=dataType)
         rRightSlip =np.array([self.server.myData.VS.rRightSlip/256], dtype=dataType)
-        self.vPosition = np.array([self.server.myData.posVect.x/3000000, self.server.myData.posVect.y/3000000], dtype=dataType)
+        self.vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype=dataType)
         
         fLWheel= np.array([self.server.myData.VS.fLWheel/4], dtype=dataType)
         fRWheel= np.array([self.server.myData.VS.fRWheel/4], dtype=dataType)
@@ -182,13 +180,13 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             eBoost = spaces.Box(low=0, high=1.0, shape=(1,), dtype='float64') # 10000
             eGear =  spaces.Box(low=0, high=1, shape=(1,), dtype='float64') #6
             vSpeed = spaces.Box(low=0, high=1, shape=(1,), dtype='float64') #500
-            rState = spaces.Box(low=0, high=1, shape=(1,), dtype='float64') #5
+            rState = spaces.Box(low=0, high=3, shape=(1,), dtype='float64') #5
             vDir = spaces.Box(low=0, high=1, shape=(1,), dtype='float64')  # 3
             vSteer = spaces.Box(low=-1, high=1, shape=(1,), dtype='float64') # 1024
             vColl = spaces.Box(low=0, high=1, shape=(1,), dtype='float64') # 12
             image = spaces.Box(low=0, high=255, shape=(self.imageSize[1], self.imageSize[0], 1), dtype='uint8') #255
             
-            vPosition = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype='float64')  #3000000
+            vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float64')  #3000000
             fLeftSlip  = spaces.Box(low=0, high=1, shape=(1,), dtype='float64') #256
             fRightSlip = spaces.Box(low=0, high=1, shape=(1,), dtype='float64')
             rLeftSlip  = spaces.Box(low=0, high=1, shape=(1,), dtype='float64')
@@ -220,9 +218,6 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
         elif self.modelMode == 7:      
             return spaces.Tuple((rState, eClutch, eSpeed, vSpeed, image))
-        
-        elif self.modelMode == 7.5:      # check if issue with RLLIB is Box vs Discrete
-            return spaces.Tuple((eSpeed, image))
 
         elif self.modelMode == 10:
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel))
@@ -290,11 +285,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
         elif self.modelMode == 7:      
             obs = [rState, eClutch, eSpeed, self.vSpeed, display]
-                   
-        elif self.modelMode == 7.5:
-            act_alt_eSpeed = np.array([eSpeed], dtype='float64')    
-            obs = [act_alt_eSpeed, display]
-        
+                           
         elif self.modelMode == 10:      
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, self.vDir, self.vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel]     
         
@@ -325,8 +316,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             c = None
             
         choice = choiceA + choiceB + 64 # hack to avoid missed ping as a load
-        self.rewardFunction.reset()
-        print(choiceA, choiceB, choice)                
+        self.rewardFunction.reset()         
         self.server.reloadSave(choice) # loads the save state
         obs = self.getObs(reset=True)
         
@@ -335,17 +325,15 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def get_obs_rew_terminated_info(self):       
         obs = self.getObs(reset=False)
-        reward, terminated = self.rewardFunction.computeReward(self.vPosition, self.vColl, self.vDir, self.vSpeed, self.rewardMode)
+        reward, terminated = self.rewardFunction.computeReward(pos=self.vPosition, vColl=self.vColl, vDir=self.vDir, vSpeed=self.vSpeed, mode=self.rewardMode)
         if self.modelMode < 10:
             reward = reward[0]
         
         info = {}
+
         if self.raceState == 3:
             terminated = True
-        #elif self.raceState == 1:
-        #    terminated = False
-        else:
-            terminated = False
+            # reward = reward + 500 # a new idea
         return obs, reward, terminated, info
     
     # Mandatory method
