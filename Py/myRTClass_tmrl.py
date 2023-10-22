@@ -1,5 +1,5 @@
 """
-For CNN
+For CNN (tmrl)
 Environment class for a Real Time Gymnasium Environment for Gran Turismo
 Written by NDR008
 nadir.syedsammut@gmail.com
@@ -8,8 +8,6 @@ Development started in December 2022
 Notes to self: RLLIB cannot use Boxes for actions, need MultiDiscrete:
 (RolloutWorker pid=18956) ValueError: Box(..., `int`) action spaces are not supported. Use MultiDiscrete  or Box(..., `float`).
 """
-
-#scaled
 
 
 from pygamepad import controlGamepad
@@ -25,7 +23,7 @@ from threading import Thread
 from rewardGT import RewardFunction
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
-    def __init__(self, debugFlag=False, discreteAccel=True, accelAndBrake=False, discSteer=True, contAccelOnly=False, discAccelOnly=False, modelMode=1, imageHeight=240, imageWidth=320, trackChoice=1, carChoice=1, rewardMode="complex"):
+    def __init__(self, debugFlag=False, discreteAccel=True, accelAndBrake=False, discSteer=True, contAccelOnly=False, discAccelOnly=False, modelMode=1, imageHeight=64, imageWidth=64, trackChoice=1, carChoice=1, rewardMode="complex"):
         """MyGranTurismoRTGYM returns an environment that contains a gym environment and a server session to receive data from PCSX Redux.
         Args:
             debugFlag (bool, optional): Makes the server do image rendinering (and not use the env.render()). Defaults to False.
@@ -47,7 +45,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.gamepad = None
         self.img = None # for render
         self.modelMode = modelMode
-        self.img_hist_len = 3
+        self.img_hist_len = 4
         self.img_hist = None
         self.raceState = None
         self.rewardFunction = None 
@@ -62,7 +60,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.vColl = None # used to track the vehicle contact and for calculating rewards
         self.vSpeed = None
         self.vDir = None
-        
+        self.controlChoice = 2
         if discAccelOnly:
             self.controlChoice = 7
             print("Discrete Accel Only 7")
@@ -80,48 +78,41 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         import cv2
         self.server.receiveOneFrame()
         self.raceState = np.int64(self.server.myData.GS.raceState)  
-        if self.modelMode >= 10:
-            dataType = 'int64'
-            rState = np.int64(self.server.myData.GS.raceState)  
-            eClutch = np.int64(self.server.myData.VS.eClutch)
-            eSpeed = np.int64(self.server.myData.VS.engSpeed)
-            eBoost = np.int64(self.server.myData.VS.engBoost)
-            eGear  = np.int64(self.server.myData.VS.engGear)
-            self.vSpeed = np.int64(self.server.myData.VS.speed)
-            vSteer = np.int64(self.server.myData.VS.steer)
-            self.vDir = np.int64(self.server.myData.drivingDir)
-            rState = np.int64(self.server.myData.GS.raceState)
-            self.vColl = np.int64(self.server.myData.VS.vColl)
-        else:
-            dataType = 'float64'
-            eClutch = np.array([self.server.myData.VS.eClutch/3], dtype=dataType)
-            eSpeed = np.array([self.server.myData.VS.engSpeed/10000], dtype=dataType)
-            eBoost = np.array([self.server.myData.VS.engBoost/10000], dtype=dataType)
-            eGear  = np.array([self.server.myData.VS.engGear/6], dtype=dataType)
-            self.vSpeed = np.array([self.server.myData.VS.speed/500], dtype=dataType)
-            vSteer = np.array([self.server.myData.VS.steer/1024], dtype=dataType)
-            self.vDir = np.array([self.server.myData.drivingDir/3], dtype=dataType)
-            rState = np.array([self.server.myData.GS.raceState], dtype=dataType)
-            self.vColl = np.array([self.server.myData.VS.vColl/12], dtype=dataType)
-      
-       
-        fLeftSlip = np.array([self.server.myData.VS.fLeftSlip/256], dtype=dataType)
-        fRightSlip =np.array([self.server.myData.VS.fRightSlip/256], dtype=dataType)
-        rLeftSlip = np.array([self.server.myData.VS.rLeftSlip/256], dtype=dataType)
-        rRightSlip =np.array([self.server.myData.VS.rRightSlip/256], dtype=dataType)
+                
+        dataType = 'int64'
+        #eClutch = np.int64(self.server.myData.VS.eClutch)
+        #self.vDir = np.int64(self.server.myData.drivingDir)
+        #rState = np.int64(self.server.myData.GS.raceState)
+        #self.vColl = np.int64(self.server.myData.VS.vColl)
+        
+        eClutch = np.array([self.server.myData.VS.eClutch], dtype=dataType)
+        self.vDir = np.array([self.server.myData.drivingDir], dtype=dataType)
+        rState = np.array([self.server.myData.GS.raceState], dtype=dataType)
+        self.vColl = np.array([self.server.myData.VS.vColl], dtype=dataType)       
+        
+        eSpeed = np.array([self.server.myData.VS.engSpeed], dtype=dataType)
+        eBoost = np.array([self.server.myData.VS.engBoost], dtype=dataType)
+        eGear  = np.array([self.server.myData.VS.engGear], dtype=dataType)
+        self.vSpeed = np.array([self.server.myData.VS.speed], dtype=dataType)
+        vSteer = np.array([self.server.myData.VS.steer], dtype=dataType)
+        
+        fLeftSlip = np.array([self.server.myData.VS.fLeftSlip], dtype=dataType)
+        fRightSlip =np.array([self.server.myData.VS.fRightSlip], dtype=dataType)
+        rLeftSlip = np.array([self.server.myData.VS.rLeftSlip], dtype=dataType)
+        rRightSlip =np.array([self.server.myData.VS.rRightSlip], dtype=dataType)
         self.vPosition = np.array([self.server.myData.posVect.x, self.server.myData.posVect.y], dtype=dataType)
         
-        fLWheel= np.array([self.server.myData.VS.fLWheel/4], dtype=dataType)
-        fRWheel= np.array([self.server.myData.VS.fRWheel/4], dtype=dataType)
-        rLWheel= np.array([self.server.myData.VS.rLWheel/4], dtype=dataType)
-        rRWheel= np.array([self.server.myData.VS.rRWheel/4], dtype=dataType)
+        fLWheel= np.array([self.server.myData.VS.fLWheel], dtype=dataType)
+        fRWheel= np.array([self.server.myData.VS.fRWheel], dtype=dataType)
+        rLWheel= np.array([self.server.myData.VS.rLWheel], dtype=dataType)
+        rRWheel= np.array([self.server.myData.VS.rRWheel], dtype=dataType)
         # trackID = self.server.myData.trackID
 
         # mode 1 to 15 resizes and
         if self.modelMode >= 1 and self.modelMode < 10:       
             tmp = cv2.resize(self.server.pic, (self.imageSize[0], self.imageSize[1]))
             tmp = cv2.cvtColor(tmp, cv2.COLOR_BGR2GRAY)
-            tmp = tmp[:,:,np.newaxis]
+            #tmp = tmp[:,:,np.newaxis]
             self.renderImage = tmp
             # print(tmp.shape)
         else:
@@ -143,62 +134,51 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.initControl()
         self.startServerToRedux()
         if self.trackChoice == 0:
-            self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX\Py\hsSpaced.csv')
+            self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX2\Py\hsSpaced.csv')
                 
         elif self.trackChoice == 1:
-            self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX\Py\dragSpaced.csv')
+            self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX2\Py\dragSpaced.csv')
         
     # Mandatory method        
     def get_observation_space(self):
-        if self.modelMode >= 10:
-            eClutch = spaces.Discrete(4)
-            eSpeed = spaces.Discrete(10000)
-            eBoost = spaces.Discrete(10000)
-            eGear =  spaces.Discrete(6)
-            vSpeed = spaces.Discrete(500)
-            rState = spaces.Discrete(6)
-            vDir = spaces.Discrete(4)
-            vSteer = spaces.Discrete(1024*2+1, start=-1024)
-            vColl = spaces.Discrete(13)
-            
-            vPosition = spaces.Box(low=-3000000.0, high=3000000.0, shape=(2,), dtype='int64') 
-            fLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
-            fRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
-            rLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
-            rRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
-            fLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
-            fRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
-            rLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
-            rRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
-            
-        # vVel = spaces.Box(low=-300.0, high=300, dtype='uint8') # Given up idea (wanted local vedctor speed)
-        # https://gymnasium.farama.org/api/spaces/fundamental/#multidiscrete says that it has a start function to offset a multidiscrete box but clearly not
+        # rState = spaces.Discrete(4) # starting, racing, finished
+        # eClutch = spaces.Discrete(4)
+
+        rState = spaces.Box(low=0, high=3, shape=(1,), dtype='int64')
+        eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='int64')
         
-        else:
-            eClutch = spaces.Box(low=0, high=1, shape=(1,), dtype='float64') # 3
-            eSpeed = spaces.Box(low=0, high=1.0, shape=(1,), dtype='float64') # 10000
-            eBoost = spaces.Box(low=0, high=1.0, shape=(1,), dtype='float64') # 10000
-            eGear =  spaces.Box(low=0, high=1, shape=(1,), dtype='float64') #6
-            vSpeed = spaces.Box(low=0, high=1, shape=(1,), dtype='float64') #500
-            rState = spaces.Box(low=0, high=3, shape=(1,), dtype='float64') #5
-            vDir = spaces.Box(low=0, high=1, shape=(1,), dtype='float64')  # 3
-            vSteer = spaces.Box(low=-1, high=1, shape=(1,), dtype='float64') # 1024
-            vColl = spaces.Box(low=0, high=1, shape=(1,), dtype='float64') # 12
-            image = spaces.Box(low=0, high=255, shape=(self.imageSize[1], self.imageSize[0], 1), dtype='uint8') #255
-            
-            vPosition = spaces.Box(low=-3000000, high=3000000, shape=(2,), dtype='float64')  #3000000
-            fLeftSlip  = spaces.Box(low=0, high=1, shape=(1,), dtype='float64') #256
-            fRightSlip = spaces.Box(low=0, high=1, shape=(1,), dtype='float64')
-            rLeftSlip  = spaces.Box(low=0, high=1, shape=(1,), dtype='float64')
-            rRightSlip = spaces.Box(low=0, high=1, shape=(1,), dtype='float64')
-            fLWheel= spaces.Box(low=0, high=1, shape=(1,), dtype='float64') #4
-            fRWheel= spaces.Box(low=0, high=1, shape=(1,), dtype='float64')
-            rLWheel= spaces.Box(low=0, high=1, shape=(1,), dtype='float64')
-            rRWheel= spaces.Box(low=0, high=1, shape=(1,), dtype='float64')
+        eSpeed = spaces.Box(low=0, high=10000, shape=(1,), dtype='int64') # 10000
+        eBoost = spaces.Box(low=0, high=10000, shape=(1,), dtype='int64') # 10000
+        eGear =  spaces.Box(low=0, high=6, shape=(1,), dtype='int64') #6
+        vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='int64') #500
+        vSteer = spaces.Box(low=-1024, high=1024, shape=(1,), dtype='int64')        
+        
+        #vDir = spaces.Discrete(2) #fixed as a flag (0,1)
+        #vColl = spaces.Discrete(13)
+        
+        vDir = spaces.Box(low=0, high=1, shape=(1,), dtype='int64')
+        vColl = spaces.Box(low=0, high=12, shape=(1,), dtype='int64')
+        
+        vPosition = spaces.Box(low=-3000000.0, high=3000000.0, shape=(2,), dtype='int64') 
+        fLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int64') 
+        fRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
+        rLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
+        rRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
+        # fLWheel= spaces.Discrete(5) #one-hot
+        # fRWheel= spaces.Discrete(5) #one-hot
+        # rLWheel= spaces.Discrete(5) #box better
+        # rRWheel= spaces.Discrete(5) #box better           
+        fLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
+        fRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
+        rLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
+        rRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
+        
+        image = spaces.Box(low=0, high=255, shape=(self.imageSize[1], self.imageSize[0], 1), dtype='uint8') #255`
+        images = spaces.Box(low=0, high=255, shape=(self.img_hist_len, self.imageSize[1], self.imageSize[0]), dtype='uint8') #255`
 
         # 3 images    
         if self.modelMode == 1:
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, image, image, image))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images))
         
         elif self.modelMode == 2:
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vColl, image, image, image))
@@ -237,21 +217,11 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                 
     # Mandatory method
     def get_action_space(self):
-        if self.controlChoice ==7:
-            return spaces.Box(low=np.array([0.0, 0.0]), high=np.array([1.0, 1.0]), dtype='float64')
-        elif self.controlChoice ==6:
-            return spaces.Box(low=np.array([0.0]), high=np.array([1.0]), dtype='float64')
-        elif self.controlChoice ==2:
-            return spaces.Box(low=np.array([0.0,-1.0]), high=np.array([1.0,1.0]), dtype='float64')
+        return spaces.Box(low=-1.0, high=1.0, shape=(2, ))
     
     # Mandatory method
     def get_default_action(self):
-        if self.controlChoice ==7:
-            return np.array([0.0,0.0], dtype='float64')
-        elif self.controlChoice ==6:
-            return np.array([0.0], dtype='float64')
-        elif self.controlChoice ==2:
-            return np.array([0.0 ,0.0], dtype='float64')
+        return np.array([0.0 ,0.0], dtype='float32')
     
     
     def getObs(self, reset):
@@ -266,7 +236,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                 displayHistory = np.array(list(self.img_hist), dtype='uint8')
             
         if self.modelMode == 1:
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory[0], displayHistory[1], displayHistory[2]]
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
 
         elif self.modelMode == 2:
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vColl, displayHistory[0], displayHistory[1], displayHistory[2]]
@@ -334,11 +304,12 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         if self.raceState == 3:
             terminated = True
             # reward = reward + 500 # a new idea
+        
         return obs, reward, terminated, info
     
     # Mandatory method
     def send_control(self, control):
-        controlGamepad(self.gamepad, control, self.controlChoice)
+        controlGamepad(self.gamepad, control, 2)
 
     # Optional method
     def wait(self):
@@ -348,10 +319,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     def render(self):
         # uncomment for debug env
         if self.modelMode >= 1 and self.modelMode < 5:
-            displayHistory = np.array(list(self.img_hist), dtype='uint8')
-            cv2.imshow('Render Display1', displayHistory[0])
-            cv2.imshow('Render Display2', displayHistory[1])
-            cv2.imshow('Render Display3', displayHistory[2])
+            #displayHistory = np.array(list(self.img_hist), dtype='uint8')
+            for index, img in enumerate(self.img_hist):
+                display = "display " + str(index)
+                cv2.imshow(display, img)
         elif self.modelMode >= 5 and self.modelMode < 10:
             cv2.imshow('Render Display', self.renderImage)
         if cv2.waitKey(1) & 0xFF == ord('q'):

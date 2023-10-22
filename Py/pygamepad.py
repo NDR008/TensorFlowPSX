@@ -50,7 +50,8 @@ def disAccelandBrakeContSteer(gamepad, control): # control1
 # discreteAccel & not accelAndBrake & discreteSteer
 # 2 controls
 def disAccelnotBrakeDiscSteer(gamepad, control): # control2
-    if control[0] > 0.5:  # gas
+    #print(control)
+    if control[0] > 0:  # gas
         gamepad.press_button(button = 1 << 5) # accel
     else:
         gamepad.release_button(button = 1 << 5) # release accel   

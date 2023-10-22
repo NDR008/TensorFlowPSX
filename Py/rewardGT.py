@@ -12,7 +12,7 @@ import logging
 import csv
 import datetime
 
-DEBUG = True
+DEBUG = False
 
 class RewardFunction:
     def __init__(self,
@@ -22,7 +22,7 @@ class RewardFunction:
         self.maxSearch = 300
         self.data = np.genfromtxt(filename, delimiter=",")
         self.datalen = len(self.data)
-        self.fudgeFactor = 8 #since the spacing of data points along the track may vary this scales the reward
+        self.fudgeFactor = 20 #since the spacing of data points along the track may vary this scales the reward
         self.totalReward = 0
         self.episodeNumber = 0
         self.steps = 0

@@ -7,7 +7,7 @@ local obs = {}
 local client = nil
 local reconnectTry = false
 local CurrentPos = 0
-local maxLostPings = 500
+local maxLostPings = 50000
 local currentMissedPings = 0
 
 local function read_file_as_string(filename)
