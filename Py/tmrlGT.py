@@ -1,4 +1,4 @@
-from rtgym import RealTimeGymInterface, DEFAULT_CONFIG_DICT, DummyRCDrone
+from myRTClass_tmrl import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import gymnasium.spaces as spaces
 import numpy as np
 import cv2
@@ -31,11 +31,12 @@ from torch.nn import Conv2d, Module, ModuleList
 from tmrl.memory import TorchMemory
 
 
-CRC_DEBUG = False
+CRC_DEBUG = True
 
-imgSize = 64
+imgSize = 64 #assuming 64 x 64
 imgHist = 4
-maxEpLength = 100
+maxEpLength = 800
+BATCH_SIZE = 512
 
 # === Networking parameters ============================================================================================
 
@@ -57,7 +58,7 @@ if __name__ == "__main__":
 # rtgym interface:
 
 # rtgym configuration dictionary:
-from myRTClass_tmrl import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+#from myRTClass_tmrl import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 my_config = DEFAULT_CONFIG_DICT
 my_config["interface"] = MyGranTurismoRTGYM
 my_config["time_step_duration"] = 0.05
@@ -89,25 +90,18 @@ my_config["interface_kwargs"] = {
 
 env_cls = partial(GenericGymEnv, id="real-time-gym-v1", gym_kwargs={"config": my_config})
 
-# Observation and action space:
-        # rState = spaces.Discrete(4) # starting, racing, finished
-        # eClutch = spaces.Discrete(4)
+rState = spaces.Box(low=0, high=1, shape=(1,), dtype='int64')
+#rState = spaces.Discrete(2)
+#rState = spaces.Tuple(spaces.Discrete(2),)
 
-rState = spaces.Box(low=0, high=3, shape=(1,), dtype='int64')
 eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='int64')
-
 eSpeed = spaces.Box(low=0, high=10000, shape=(1,), dtype='int64') # 10000
 eBoost = spaces.Box(low=0, high=10000, shape=(1,), dtype='int64') # 10000
 eGear =  spaces.Box(low=0, high=6, shape=(1,), dtype='int64') #6
 vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='int64') #500
 vSteer = spaces.Box(low=-1024, high=1024, shape=(1,), dtype='int64')        
-
-#vDir = spaces.Discrete(2) #fixed as a flag (0,1)
-#vColl = spaces.Discrete(13)
-
 vDir = spaces.Box(low=0, high=1, shape=(1,), dtype='int64')
 vColl = spaces.Box(low=0, high=12, shape=(1,), dtype='int64')
-
 vPosition = spaces.Box(low=-3000000.0, high=3000000.0, shape=(2,), dtype='int64') 
 fLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int64') 
 fRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
@@ -118,7 +112,6 @@ fRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
 rLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
 rRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')        
 images = spaces.Box(low=0, high=255, shape=(4, 64, 64, 1), dtype='uint8') #255`
-
 act_space = spaces.Box(low=-1.0, high=1.0, shape=(2, ))
 obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images))
 
@@ -465,20 +458,21 @@ def replace_hist_before_eoe(hist, eoe_idx_in_hist):
 class MyMemory(TorchMemory):
     def __init__(self,
                  memory_size=1e6,
-                 batch_size=64,
+                 batch_size=BATCH_SIZE,
                  dataset_path="",
                  imgs_obs=4,
                  act_buf_len=1,
                  nb_steps=1,
                  sample_preprocessor: callable = None,
-                 crc_debug=False,
+                 crc_debug=CRC_DEBUG,
                  device="cpu"):
+        
         self.imgs_obs = imgs_obs
         self.act_buf_len = act_buf_len
         self.min_samples = max(self.imgs_obs, self.act_buf_len)
         self.start_imgs_offset = max(0, self.min_samples - self.imgs_obs)
         self.start_acts_offset = max(0, self.min_samples - self.act_buf_len)
-        print("WWEWWWWWWWWWWWWWWWWWWWWWWWEIRD", batch_size)
+        
         super().__init__(memory_size=memory_size,
                          batch_size=batch_size,
                          dataset_path=dataset_path,
@@ -487,8 +481,8 @@ class MyMemory(TorchMemory):
                          crc_debug=crc_debug,
                          device=device)
 
-    def append_buffer(self, buffer):
-        raise NotImplementedError
+    # def append_buffer(self, buffer):
+    #     raise NotImplementedError
 
     def __len__(self):
         if len(self.data) == 0:
@@ -499,8 +493,8 @@ class MyMemory(TorchMemory):
         else:
             return res
 
-    def get_transition(self, item):
-        raise NotImplementedError
+    # def get_transition(self, item):
+    #     raise NotImplementedError
     
     def get_transition(self, item):
         """

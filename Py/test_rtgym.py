@@ -23,8 +23,8 @@ my_config["interface_kwargs"] = {
   'discAccelOnly' : False,
   'modelMode': 1,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
-  'imageWidth' : 200, # there is a default Cov layer for PPO with 240 x 320
-  'imageHeight' : 200,
+  'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
+  'imageHeight' : 64,
   'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
   'trackChoice' : 1, # 0 is HS, 1 is 400m
   'rewardMode' : 'complex'
@@ -38,12 +38,12 @@ obs_space = env.observation_space
 #act_space = env.action_space
 truncated = False
 
-print("observation space:")
-for i in obs_space:
-    print(i)
-print("observation:")
-for i in obs:
-    print("value:", i, "with shape:", i.shape, i.dtype)
+# print("observation space:")
+# for i in obs_space:
+#     print(i)
+# print("observation:")
+# for i in obs:
+#     print("value:", i, "with shape:", i.shape, i.dtype)
 
 while True:
     obs, info = env.reset()

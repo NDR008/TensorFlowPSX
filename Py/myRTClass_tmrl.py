@@ -141,10 +141,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
     # Mandatory method        
     def get_observation_space(self):
-        # rState = spaces.Discrete(4) # starting, racing, finished
+        # rState = spaces.Discrete(2) # starting, racing, finished
         # eClutch = spaces.Discrete(4)
 
-        rState = spaces.Box(low=0, high=3, shape=(1,), dtype='int64')
+        rState = spaces.Box(low=0, high=1, shape=(1,), dtype='int64')
         eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='int64')
         
         eSpeed = spaces.Box(low=0, high=10000, shape=(1,), dtype='int64') # 10000

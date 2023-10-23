@@ -128,7 +128,11 @@ function grabGameData()
     obs['VS'] = vehicleState
     obs['frame'] = frames
     obs['posVect'] = posVect
-    obs['drivingDir'] = readValue(mem, 0x800b6e74, 'int16_t*')
+    local vDir = readValue(mem, 0x800b6e74, 'int16_t*')
+    if vDir >= 1 then
+        vDir = 1
+    end
+    obs['drivingDir'] = vDir
     GlobalData = assert(pb.encode("GT.Observation", obs))
 end
 

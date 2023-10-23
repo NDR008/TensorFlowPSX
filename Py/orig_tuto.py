@@ -319,7 +319,7 @@ class MyMemory(TorchMemory):
                  dataset_path=""):
 
         self.act_buf_len = act_buf_len  # length of the action buffer
-
+        print("MY MEMORY ---------------------------------------------------------------------------------------------------1")
         super().__init__(device=device,
                          nb_steps=nb_steps,
                          sample_preprocessor=sample_preprocessor,
