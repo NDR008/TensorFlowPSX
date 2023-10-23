@@ -31,12 +31,24 @@ from torch.nn import Conv2d, Module, ModuleList
 from tmrl.memory import TorchMemory
 
 
-CRC_DEBUG = True
-
+CRC_DEBUG = False
+worker_device = "cpu"
+trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
 imgHist = 4
-maxEpLength = 800
+maxEpLength = 600
 BATCH_SIZE = 512
+
+# Training parameters:
+
+epochs = np.inf  # maximum number of epochs, usually set this to np.inf
+rounds = 10  # number of rounds per epoch (to print stuff)
+steps = 1000  # number of training steps per round
+update_buffer_interval = 1000 #steps
+update_model_interval = 1000 #steps
+max_training_steps_per_env_step = 2.0
+start_training = 5 # waits for... 1000
+device = trainer_device
 
 # === Networking parameters ============================================================================================
 
@@ -372,9 +384,6 @@ sample_compressor = get_local_buffer_sample_tm20_imgs
 # Device
 # device = "cpu"
 
-worker_device = "cpu"
-trainer_device = "cuda"
-
 
 # Networking
 
@@ -559,7 +568,8 @@ class MyMemory(TorchMemory):
 
     def load_imgs(self, item):
         res = self.data[11][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
-        return np.stack(res).astype(np.float32)
+        #return np.stack(res).astype(np.float32)
+        return np.stack(res).astype(np.uint8)
 
     def load_acts(self, item):
         res = self.data[1][(item + self.start_acts_offset):(item + self.start_acts_offset + self.act_buf_len + 1)]
@@ -796,16 +806,7 @@ training_agent_cls = partial(MyTrainingAgent,
                              target_entropy=-0.5) # only for learn_entrop_coef is True
 
 
-# Training parameters:
 
-epochs = np.inf  # maximum number of epochs, usually set this to np.inf
-rounds = 10  # number of rounds per epoch (to print stuff)
-steps = 1000  # number of training steps per round
-update_buffer_interval = 1000 #steps
-update_model_interval = 1000 #steps
-max_training_steps_per_env_step = 2.0
-start_training = 5 # waits for... 1000
-device = trainer_device
 
 
 # Trainer instance:
