@@ -97,12 +97,12 @@ class RewardFunction:
         self.cur_idx = best_index
         
         if self.firstLoop: # hack just in case the car is not starting at index 0
-            self.reward = 0
+            self.reward = 0.0
             self.firstLoop = False
                 
         #if self.badDirectionSteps > self.maxBadDirectionSteps:
             #terminated = True
-
+        self.reward = np.int32(self.reward)
 
         return self.reward, terminated
 
@@ -140,7 +140,7 @@ class RewardFunction:
             writer = csv.writer(file)
             writer.writerow([self.episodeNumber, int(self.steps), int(self.totalReward)])
         self.episodeNumber =self.episodeNumber + 1
-        self.totalReward = 0
+        self.totalReward = 0.0
         self.cur_idx = 0
         self.steps = 0
         self.badDirectionSteps = 0

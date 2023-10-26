@@ -4,7 +4,7 @@ os.environ['NUMEXPR_NUM_THREADS'] = '14'
 import numexpr as ne 
 
 
-from myRTClass_tmrl_V2 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+from myRTClass_tmrl_V1 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import gymnasium.spaces as spaces
 import numpy as np
 import cv2
@@ -42,7 +42,7 @@ worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
 imgHist = 4
-maxEpLength = 80
+maxEpLength = 20
 BATCH_SIZE = 256
 MEMORY_SIZE = 1e5 #1e6
 ACT_BUF_LEN = 2
@@ -55,8 +55,6 @@ update_buffer_interval = 1000 #steps 1000
 update_model_interval = 1000 #steps 1000
 max_training_steps_per_env_step = 2.0
 start_training = 512 # waits for... 1000
-device = trainer_device
-MODEL_MODE = 2
 
 epochs = np.inf  # maximum number of epochs, usually set this to np.inf
 rounds = 4  # number of rounds per epoch (to print stuff)
@@ -65,6 +63,8 @@ update_buffer_interval = 10 #steps 1000
 update_model_interval = 10 #steps 1000
 max_training_steps_per_env_step = 2.0
 start_training = 12 # waits for... 1000
+
+device = trainer_device
 
 # === Networking parameters ============================================================================================
 
@@ -105,7 +105,7 @@ my_config["interface_kwargs"] = {
   'discSteer' : True,
   'contAccelOnly' : False,
   'discAccelOnly' : False,
-  'modelMode': MODEL_MODE,
+  'modelMode': 1,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : imgSize, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : imgSize,
@@ -118,33 +118,30 @@ my_config["interface_kwargs"] = {
 
 env_cls = partial(GenericGymEnv, id="real-time-gym-v1", gym_kwargs={"config": my_config})
 
+rState = spaces.Box(low=0, high=5, shape=(1,), dtype='int64')
+#rState = spaces.Discrete(2)
+#rState = spaces.Tuple(spaces.Discrete(2),)
 
-rState = spaces.Box(low=0, high=5, shape=(1,), dtype='uint8')
-eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='uint8')
-eSpeed = spaces.Box(low=0, high=10000, shape=(1,), dtype='int32') # 10000
-eBoost = spaces.Box(low=0, high=10000, shape=(1,), dtype='int32') # 10000
-eGear =  spaces.Box(low=0, high=6, shape=(1,), dtype='uint8') #6
-vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='int32') #500
-vSteer = spaces.Box(low=-1024, high=1024, shape=(1,), dtype='int32')        
-vDir = spaces.Box(low=0, high=1, shape=(1,), dtype='uint8')
-vColl = spaces.Box(low=0, high=12, shape=(1,), dtype='uint8')
-vPosition = spaces.Box(low=-3000000.0, high=3000000.0, shape=(2,), dtype='int32') 
-fLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int32') 
-fRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int32')
-rLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int32')
-rRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int32')         
-fLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int32')
-fRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int32')
-rLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int32')
-rRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int32')
-images = spaces.Box(low=0, high=255, shape=(4, imgSize, imgSize), dtype='uint8') #255`
-
-if MODEL_MODE == 1:
-    obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images))
-elif MODEL_MODE == 2:
-    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
-
+eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='int64')
+eSpeed = spaces.Box(low=0, high=10000, shape=(1,), dtype='int64') # 10000
+eBoost = spaces.Box(low=0, high=10000, shape=(1,), dtype='int64') # 10000
+eGear =  spaces.Box(low=0, high=6, shape=(1,), dtype='int64') #6
+vSpeed = spaces.Box(low=0, high=500, shape=(1,), dtype='int64') #500
+vSteer = spaces.Box(low=-1024, high=1024, shape=(1,), dtype='int64')        
+vDir = spaces.Box(low=0, high=1, shape=(1,), dtype='int64')
+vColl = spaces.Box(low=0, high=12, shape=(1,), dtype='int64')
+vPosition = spaces.Box(low=-3000000.0, high=3000000.0, shape=(2,), dtype='int64') 
+fLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int64') 
+fRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
+rLeftSlip  = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
+rRightSlip = spaces.Box(low=0, high=256, shape=(1,), dtype='int64')
+fLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
+fRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
+rLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')
+rRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='int64')        
+images = spaces.Box(low=0, high=255, shape=(4, 64, 64, 1), dtype='uint8') #255`
 act_space = spaces.Box(low=-1.0, high=1.0, shape=(2, ))
+obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images))
 
 print(f"action space: {act_space}")
 print(f"observation space: {obs_space}")
@@ -166,7 +163,6 @@ def mlp(sizes, activation, output_activation=torch.nn.Identity):
         act = activation if j < len(sizes) - 2 else output_activation
         layers += [torch.nn.Linear(sizes[j], sizes[j + 1]), act()]
     return torch.nn.Sequential(*layers)
-
 
 def num_flat_features(x):
     size = x.size()[1:]
@@ -206,20 +202,13 @@ class VanillaCNN(Module):
 
     def forward(self, x):
         #print("inQ", self.q_net, x)
-        if MODEL_MODE == 1:
-            if self.q_net:    
-                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2, act = x
-            else:
-                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2 = x         
-            rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0
-            
-        elif MODEL_MODE == 2:
-            if self.q_net:    
-                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2, act = x
-            else:
-                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2 = x           
-            rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0, rLeftSlip/256.0, rRightSlip/256.0, fLeftSlip/256.0, fRightSlip/256.0, fLWheel/4.0, fRWheel/4.0, rLWheel/4.0, rRWheel/4.0
         
+        if self.q_net:    
+            rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2, act = x
+        else:
+            rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2 = x
+        
+        rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0
         #print(">>>>>>>>>>>>>>>>>>>>", images.shape)    
         images = images.to(torch.float32)/255.0
 
@@ -230,18 +219,10 @@ class VanillaCNN(Module):
         flat_features = num_flat_features(x)
         assert flat_features == self.flat_features, f"x.shape:{x.shape}, flat_features:{flat_features}, self.out_channels:{self.out_channels}, self.h_out:{self.h_out}, self.w_out:{self.w_out}"
         x = x.view(-1, flat_features) #flatten out of the CNN
-        
-        if MODEL_MODE == 1:
-            if self.q_net:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2, act), -1) # concat
-            else:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat
-        elif MODEL_MODE == 2:
-            if self.q_net:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2, act), -1) # concat
-            else:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2), -1) # concat               
-                
+        if self.q_net:
+            x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2, act), -1) # concat
+        else:
+            x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat
         x = self.mlp(x)
         return x
 
@@ -348,7 +329,7 @@ actor_module_cls = partial(MyActorModule)
 #     prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod = prev_act, obs, rew, terminated, truncated, info
 #     obs_mod = obs_mod[:4]  # here we remove the action buffer from observations
 #     return prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod
-def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info):
+def get_local_buffer_sample_mode1_imgs(prev_act, obs, rew, terminated, truncated, info):
     """
     Sample compressor for MemoryTMFull
     Input:
@@ -361,25 +342,40 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
     CAUTION: prev_act is the action that comes BEFORE obs (i.e. prev_obs, prev_act(prev_obs), obs(prev_act))
     """
     prev_act_mod = prev_act
-    
-    for i in obs:
-        print(i.shape, i)
-    
-    if MODEL_MODE == 1: #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, images[latest]
-        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], (obs[9][-1]).astype(np.uint8))
-    elif MODEL_MODE == 2: 
-        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16] (obs[17][-1]).astype(np.uint8))
-                  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
+    #rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images[latest]
+    obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], (obs[9][-1]).astype(np.uint8))
     rew_mod = rew
     terminated_mod = terminated
     truncated_mod = truncated
     info_mod = info
     return prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod
 
-sample_compressor = get_local_buffer_sample_imgs
+def pre_processor_buffer_sample_mode1_imgs(prev_act, obs, rew, terminated, truncated, info):
+    prev_act_mod = prev_act
+    #rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images[latest]
+    obs_mod = obs[0], obs[1]/5.0, obs[2]/10000.0, obs[3]/10000.0, obs[4]/6.0, obs[5]/500.0, obs[6]/1024.0, obs[7], obs[8]/12.0, (obs[9][-1]).astype(np.float32) / 256.0
+    rew_mod = rew
+    terminated_mod = terminated
+    truncated_mod = truncated
+    info_mod = info
+    return prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod
+
+# sample_compressor = my_sample_compressor
+sample_compressor = get_local_buffer_sample_mode1_imgs
+#sample_compressor = pre_processor_buffer_sample_mode1_imgs
+
+
+#class MemoryTM(TorchMemory):
+
+
+# Device
+# device = "cpu"
+
 
 # Networking
+
 max_samples_per_episode = 10000000000
+
 
 # Model files
 
@@ -517,10 +513,7 @@ class MyMemory(TorchMemory):
         imgs_new_obs = imgs[1:]
 
         # if a reset transition has influenced the observation, special care must be taken
-        if MODEL_MODE == 1:
-            last_eoes = self.data[13][idx_now - self.min_samples:idx_now]  # self.min_samples values
-        elif MODEL_MODE == 2:
-            last_eoes = self.data[21][idx_now - self.min_samples:idx_now]  # self.min_samples values
+        last_eoes = self.data[13][idx_now - self.min_samples:idx_now]  # self.min_samples values
         last_eoe_idx = last_true_in_list(last_eoes)  # last occurrence of True
 
         assert last_eoe_idx is None or last_eoes[last_eoe_idx], f"last_eoe_idx:{last_eoe_idx}"
@@ -531,56 +524,39 @@ class MyMemory(TorchMemory):
             replace_hist_before_eoe(hist=imgs_new_obs, eoe_idx_in_hist=last_eoe_idx - self.start_imgs_offset - 1)
             replace_hist_before_eoe(hist=imgs_last_obs, eoe_idx_in_hist=last_eoe_idx - self.start_imgs_offset)
 
-        if MODEL_MODE == 1:
-            last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
-                        self.data[5][idx_last], self.data[6][idx_last], self.data[7][idx_last], 
-                        self.data[8][idx_last], self.data[9][idx_last], self.data[10][idx_last], 
-                        imgs_last_obs, *last_act_buf)
-            
-            new_act = self.data[1][idx_now]
-            #rew = np.float32(self.data[12][idx_now])
-            rew = self.data[12][idx_now]
-            
-            new_obs = (self.data[2][idx_now], self.data[3][idx_now], self.data[4][idx_now], 
-                        self.data[5][idx_now], self.data[6][idx_now], self.data[7][idx_now], 
-                        self.data[8][idx_now], self.data[9][idx_now], self.data[10][idx_now], 
-                        imgs_new_obs, *new_act_buf)
-            
-            terminated = self.data[14][idx_now]
-            truncated = self.data[15][idx_now]
-            info = self.data[16][idx_now]                 
+        last_obs = (self.data[2][idx_last], 
+                    self.data[3][idx_last], 
+                    self.data[4][idx_last], 
+                    self.data[5][idx_last], 
+                    self.data[6][idx_last], 
+                    self.data[7][idx_last], 
+                    self.data[8][idx_last], 
+                    self.data[9][idx_last], 
+                    self.data[10][idx_last], 
+                    imgs_last_obs, *last_act_buf)
         
-        elif MODEL_MODE == 2:
-            last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
-                        self.data[5][idx_last], self.data[6][idx_last], self.data[7][idx_last], 
-                        self.data[8][idx_last], self.data[9][idx_last], self.data[10][idx_last],
-                        self.data[11][idx_last], self.data[12][idx_last], self.data[13][idx_last], 
-                        self.data[14][idx_last], self.data[15][idx_last], self.data[16][idx_last], 
-                        self.data[17][idx_last], self.data[18][idx_last],  
-                        imgs_last_obs, *last_act_buf)
-            
-            new_act = self.data[1][idx_now]
-            rew = np.float32(self.data[20][idx_now])
-            
-            new_obs = (self.data[2][idx_now], self.data[3][idx_now], self.data[4][idx_now], 
-                        self.data[5][idx_now], self.data[6][idx_now], self.data[7][idx_now], 
-                        self.data[8][idx_now], self.data[9][idx_now], self.data[10][idx_now], 
-                        self.data[11][idx_now], self.data[12][idx_now], self.data[13][idx_now], 
-                        self.data[14][idx_now], self.data[15][idx_now], self.data[16][idx_now], 
-                        self.data[17][idx_now], self.data[18][idx_now],  
-                        imgs_new_obs, *new_act_buf)
-            
-            terminated = self.data[22][idx_now]
-            truncated = self.data[23][idx_now]
-            info = self.data[24][idx_now]           
-            
+        new_act = self.data[1][idx_now]
+        #rew = np.float32(self.data[12][idx_now])
+        rew = self.data[12][idx_now]
+        
+        new_obs = (self.data[2][idx_now], 
+                    self.data[3][idx_now], 
+                    self.data[4][idx_now], 
+                    self.data[5][idx_now], 
+                    self.data[6][idx_now], 
+                    self.data[7][idx_now], 
+                    self.data[8][idx_now], 
+                    self.data[9][idx_now], 
+                    self.data[10][idx_now], imgs_new_obs, *new_act_buf)
+        
+        terminated = self.data[14][idx_now]
+        truncated = self.data[15][idx_now]
+        info = self.data[16][idx_now]
         return last_obs, new_act, rew, new_obs, terminated, truncated, info
 
     def load_imgs(self, item):
-        if MODEL_MODE == 1:
-            res = self.data[11][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
-        elif MODEL_MODE == 2:
-            res = self.data[19][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+        res = self.data[11][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+        #return np.stack(res).astype(np.float32) / 256.0
         return np.stack(res).astype(np.uint8)
 
     def load_acts(self, item):
@@ -592,58 +568,85 @@ class MyMemory(TorchMemory):
         buffer is a list of samples ( act, obs, rew, terminated, truncated, info)
         don't forget to keep the info dictionary in the sample for CRC debugging
         """
-        data = [None] * 24
+
         first_data_idx = self.data[0][-1] + 1 if self.__len__() > 0 else 0
         #rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images
         #0: action 
-        data[0] = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
-        data[1] = [b[0] for b in buffer.memory]  # actions
-        data[2] = [b[1][0] for b in buffer.memory]  # rState
-        data[3] = [b[1][1] for b in buffer.memory]  # eClutch
-        data[4] = [b[1][2] for b in buffer.memory]  # eSpeed
-        data[5] = [b[1][3] for b in buffer.memory]  # eBoost
-        data[6] = [b[1][4] for b in buffer.memory]  # eGear
-        data[7] = [b[1][5] for b in buffer.memory]  # vSpeed
-        data[8] = [b[1][6] for b in buffer.memory]  # vSteer
-        data[9] = [b[1][7] for b in buffer.memory]  # vDir
-        data[10] = [b[1][8] for b in buffer.memory]  # vColl
-        
-        if MODEL_MODE == 1:
-            data[11] = [b[1][9] for b in buffer.memory]  # image            
-            data[12] = [b[2] for b in buffer.memory]  # rewards
-            data[13] = [b[3] or b[4] for b in buffer.memory]  # done
-            data[14] = [b[3] for b in buffer.memory]  # terminated
-            data[15] = [b[4] for b in buffer.memory]  # truncated
-            data[16] = [b[5] for b in buffer.memory]  # infos
-        
-        elif MODEL_MODE == 2:
-            data[11] = [b[1][9] for b in buffer.memory]  # Slip1
-            data[12] = [b[1][10] for b in buffer.memory]  # Slip2
-            data[13] = [b[1][11] for b in buffer.memory]  # Slip3
-            data[14] = [b[1][12] for b in buffer.memory]  # Slip4
-            data[15] = [b[1][13] for b in buffer.memory]  # contact
-            data[16] = [b[1][14] for b in buffer.memory]  # contact
-            data[17] = [b[1][15] for b in buffer.memory]  # contact
-            data[18] = [b[1][16] for b in buffer.memory]  # contact
-            data[19] = [b[1][17] for b in buffer.memory]  # image
-            data[20] = [b[2] for b in buffer.memory]  # rewards
-            data[21] = [b[3] or b[4] for b in buffer.memory]  # done
-            data[22] = [b[3] for b in buffer.memory]  # terminated
-            data[23] = [b[4] for b in buffer.memory]  # truncated
-            data[24] = [b[5] for b in buffer.memory]  # infos
-
+        d0 = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
+        d1 = [b[0] for b in buffer.memory]  # actions
+        d2 = [b[1][0] for b in buffer.memory]  # rState
+        d3 = [b[1][1] for b in buffer.memory]  # eClutch
+        d4 = [b[1][2] for b in buffer.memory]  # eSpeed
+        d5 = [b[1][3] for b in buffer.memory]  # eBoost
+        d6 = [b[1][4] for b in buffer.memory]  # eGear
+        d7 = [b[1][5] for b in buffer.memory]  # vSpeed
+        d8 = [b[1][6] for b in buffer.memory]  # vSteer
+        d9 = [b[1][7] for b in buffer.memory]  # vDir
+        d10 = [b[1][8] for b in buffer.memory]  # vColl
+        d11 = [b[1][9] for b in buffer.memory]  # image
+        d12 = [b[2] for b in buffer.memory]  # rewards
+        d13 = [b[3] or b[4] for b in buffer.memory]  # done
+        d14 = [b[3] for b in buffer.memory]  # terminated
+        d15 = [b[4] for b in buffer.memory]  # truncated
+        d16 = [b[5] for b in buffer.memory]  # infos
 
         if self.__len__() > 0:
-            for ind, data in enumerate(data):
-                self.data[ind] += data
+            self.data[0] += d0
+            self.data[1] += d1
+            self.data[2] += d2
+            self.data[3] += d3
+            self.data[4] += d4
+            self.data[5] += d5
+            self.data[6] += d6
+            self.data[7] += d7
+            self.data[8] += d8
+            self.data[9] += d9
+            self.data[10] += d10
+            self.data[11] += d11
+            self.data[12] += d12
+            self.data[13] += d13
+            self.data[14] += d14
+            self.data[15] += d15
+            self.data[16] += d16
         else:
-            for ind, data in enumerate(data):
-                self.data.append(data)          
+            self.data.append(d0)
+            self.data.append(d1)
+            self.data.append(d2)
+            self.data.append(d3)
+            self.data.append(d4)
+            self.data.append(d5)
+            self.data.append(d6)
+            self.data.append(d7)
+            self.data.append(d8)
+            self.data.append(d9)
+            self.data.append(d10)
+            self.data.append(d11)
+            self.data.append(d12)
+            self.data.append(d13)
+            self.data.append(d14)
+            self.data.append(d15)
+            self.data.append(d16)            
 
         to_trim = self.__len__() - self.memory_size
         if to_trim > 0:
-            for ind, data in enumerate(self.data): 
-                self.data[ind] = self.data[ind][to_trim:]
+            self.data[0] = self.data[0][to_trim:]
+            self.data[1] = self.data[1][to_trim:]
+            self.data[2] = self.data[2][to_trim:]
+            self.data[3] = self.data[3][to_trim:]
+            self.data[4] = self.data[4][to_trim:]
+            self.data[5] = self.data[5][to_trim:]
+            self.data[6] = self.data[6][to_trim:]
+            self.data[7] = self.data[7][to_trim:]
+            self.data[8] = self.data[8][to_trim:]
+            self.data[9] = self.data[9][to_trim:]
+            self.data[10] = self.data[10][to_trim:]
+            self.data[11] = self.data[11][to_trim:]
+            self.data[12] = self.data[12][to_trim:]
+            self.data[13] = self.data[13][to_trim:]
+            self.data[14] = self.data[14][to_trim:]
+            self.data[15] = self.data[15][to_trim:]
+            self.data[16] = self.data[16][to_trim:]
+
         return self
 
 memory_cls = partial(MyMemory,
@@ -654,6 +657,28 @@ memory_cls = partial(MyMemory,
                     #sample_preprocessor=SAMPLE_PREPROCESSOR,)
 
 # Training agent:
+
+
+# class MyCriticModule(torch.nn.Module):
+#     def __init__(self, observation_space, action_space, hidden_sizes=(256, 256), activation=torch.nn.ReLU):
+#         super().__init__()
+#         obs_dim = sum(prod(s for s in space.shape) for space in observation_space)
+#         act_dim = action_space.shape[0]
+#         self.q = mlp([obs_dim + act_dim] + list(hidden_sizes) + [1], activation)
+
+#     def forward(self, obs, act):
+#         x = torch.cat((*obs, act), -1)
+#         q = self.q(x)
+#         return torch.squeeze(q, -1)
+
+
+# class MyActorCriticModule(torch.nn.Module):
+#     def __init__(self, observation_space, action_space, hidden_sizes=(256, 256), activation=torch.nn.ReLU):
+#         super().__init__()
+#         self.actor = MyActorModule(observation_space, action_space, hidden_sizes, activation)  # our ActorModule :)
+#         self.q1 = MyCriticModule(observation_space, action_space, hidden_sizes, activation)  # Q network 1
+#         self.q2 = MyCriticModule(observation_space, action_space, hidden_sizes, activation)  # Q network 2
+
 
 import itertools
 

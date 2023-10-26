@@ -1,4 +1,4 @@
-from myRTClass_tmrl import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+from myRTClass_tmrl_V2 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
 import gymnasium
 from time import sleep
@@ -21,7 +21,7 @@ my_config["interface_kwargs"] = {
   'discSteer' : True,
   'contAccelOnly' : True,
   'discAccelOnly' : False,
-  'modelMode': 1,
+  'modelMode': 2,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : 64,
@@ -41,9 +41,9 @@ truncated = False
 # print("observation space:")
 # for i in obs_space:
 #     print(i)
-# print("observation:")
-# for i in obs:
-#     print("value:", i, "with shape:", i.shape, i.dtype)
+print("observation:")
+for i in obs:
+    print("value:", i, "with shape:", i.shape, i.dtype)
 
 while True:
     obs, info = env.reset()
