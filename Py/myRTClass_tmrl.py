@@ -144,7 +144,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # rState = spaces.Discrete(2) # starting, racing, finished
         # eClutch = spaces.Discrete(4)
 
-        rState = spaces.Box(low=0, high=1, shape=(1,), dtype='int64')
+        rState = spaces.Box(low=0, high=5, shape=(1,), dtype='int64')
         eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='int64')
         
         eSpeed = spaces.Box(low=0, high=10000, shape=(1,), dtype='int64') # 10000
@@ -234,7 +234,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                 for _ in range(self.img_hist_len):
                     self.img_hist.append(display)
                 displayHistory = np.array(list(self.img_hist), dtype='uint8')
-            
+        
         if self.modelMode == 1:
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
 
@@ -318,13 +318,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Optional method
     def render(self):
         # uncomment for debug env
-        if self.modelMode >= 1 and self.modelMode < 5:
-            #displayHistory = np.array(list(self.img_hist), dtype='uint8')
-            for index, img in enumerate(self.img_hist):
-                display = "display " + str(index)
-                cv2.imshow(display, img)
-        elif self.modelMode >= 5 and self.modelMode < 10:
-            cv2.imshow('Render Display', self.renderImage)
+        #displayHistory = np.array(list(self.img_hist), dtype='uint8')
+        for index, img in enumerate(self.img_hist):
+            display = "display " + str(index)
+            cv2.imshow(display, img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return
         

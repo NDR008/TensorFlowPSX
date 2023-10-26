@@ -28,6 +28,7 @@ class RewardFunction:
         self.steps = 0
         self.badDirectionSteps = 0
         self.maxBadDirectionSteps = 100
+        self.firstLoop = True
         x = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         with open('logging.csv', 'a', newline='') as file:
             writer = csv.writer(file)
@@ -35,7 +36,7 @@ class RewardFunction:
 
 
     # I think the reward needs to include speed        
-    def complexReward(self, pos, vColl, vSpeed):
+    def complexReward(self, pos, vColl, vSpeed, vDir):
               
         """
         Computes the current reward given the position pos
@@ -51,6 +52,10 @@ class RewardFunction:
         best_index = 0  # index best matching the target pos
         counter = 0
     
+        if self.firstLoop:
+            maxSearch = self.maxSearch * 10 # if things just started, maybe the car did not launch at the start line, so we should check more positions
+        else:
+            maxSearch = self.maxSearch
             
         while True:
             dist = np.linalg.norm(pos - self.data[index])  # distance of the current index to target pos
@@ -59,7 +64,7 @@ class RewardFunction:
                 best_index = index  # and a new best index
             index += 1  # now we will evaluate the next index in the trajectory
             counter += 1
-            if index >= self.datalen or counter > self.maxSearch:  # if trajectory complete or cuts counter depleted
+            if index >= self.datalen or counter > maxSearch:  # if trajectory complete or cuts counter depleted
                 # We check that we are not too far from the demo trajectory:
                 #if min_dist > self.max_dist_from_traj:
                     #best_index = self.cur_idx  # if so, consider we didn't move
@@ -74,7 +79,7 @@ class RewardFunction:
                 best_index = index  # and a new best index
             index -= 1  # now we will evaluate the next index in the trajectory
             counter += 1
-            if index <= 0 or counter > self.maxSearch:  # if trajectory complete or cuts counter depleted
+            if index <= 0 or counter > maxSearch:  # if trajectory complete or cuts counter depleted
                 # We check that we are not too far from the demo trajectory:
                 # if min_dist > self.max_dist_from_traj:
                     #best_index = self.cur_idx  # if so, consider we didn't move
@@ -82,17 +87,22 @@ class RewardFunction:
 
         # The reward is then proportional to the number of passed indexes (i.e., track distance):
         self.reward = (best_index - self.cur_idx) / self.fudgeFactor    
-        if self.reward < 0 or vColl > 0:
-            self.reward = -5             
-            self.badDirectionSteps = self.badDirectionSteps + 1
-          # finally, we save our new best matching index
+        if vColl > 0: # hit
+            self.reward = self.reward - 0.02
+        if vSpeed < 5 and vDir == 1: # going slow
+            self.reward = self.reward - 0.05
+        else: # going back
+            self.reward = self.reward -0.1
+          
         self.cur_idx = best_index
+        
+        if self.firstLoop: # hack just in case the car is not starting at index 0
+            self.reward = 0
+            self.firstLoop = False
                 
-        if self.badDirectionSteps > self.maxBadDirectionSteps:
-            terminated = True
-            
-        if DEBUG:
-            print(self.reward, self.cur_idx)
+        #if self.badDirectionSteps > self.maxBadDirectionSteps:
+            #terminated = True
+
 
         return self.reward, terminated
 
@@ -107,17 +117,19 @@ class RewardFunction:
         if self.badDirectionSteps > self.maxBadDirectionSteps:
             terminated = True
 
-        #print(reward)
         return reward, terminated
 
     def computeReward(self, pos=None, vColl=None, vDir=None, vSpeed = None, mode="complex"):
         if mode == "complex":
-            reward, terminated = self.complexReward(pos, vColl, vSpeed)
+            reward, terminated = self.complexReward(pos, vColl, vSpeed, vDir)
         else:
             reward, terminated = self.simplexReward(vSpeed, vDir)
         self.steps = self.steps + 1    
         self.totalReward = self.totalReward + reward
-        
+            
+        if DEBUG:
+            print(self.reward, self.cur_idx)
+                
         return reward, terminated
 
     def reset(self):
@@ -126,10 +138,11 @@ class RewardFunction:
         """
         with open('logging.csv', 'a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([self.episodeNumber, self.steps, self.totalReward])
+            writer.writerow([self.episodeNumber, int(self.steps), int(self.totalReward)])
         self.episodeNumber =self.episodeNumber + 1
         self.totalReward = 0
         self.cur_idx = 0
         self.steps = 0
         self.badDirectionSteps = 0
+        self.firstLoop = True
         

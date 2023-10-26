@@ -1,4 +1,9 @@
-from argparse import ArgumentParser, ArgumentTypeError
+import os
+os.environ['NUMEXPR_MAX_THREADS'] = '14'
+os.environ['NUMEXPR_NUM_THREADS'] = '14'
+import numexpr as ne 
+
+
 from myRTClass_tmrl import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import gymnasium.spaces as spaces
 import numpy as np
@@ -37,18 +42,19 @@ worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
 imgHist = 4
-maxEpLength = 600
-BATCH_SIZE = 512
-
+maxEpLength = 800
+BATCH_SIZE = 256
+MEMORY_SIZE = 1e5 #1e6
+ACT_BUF_LEN = 2
 # Training parameters:
 
 epochs = np.inf  # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
-steps = 1000  # number of training steps per round
-update_buffer_interval = 1000 #steps
-update_model_interval = 1000 #steps
+steps = 1000  # number of training steps per round 1000
+update_buffer_interval = 1000 #steps 1000
+update_model_interval = 1000 #steps 1000
 max_training_steps_per_env_step = 2.0
-start_training = 5 # waits for... 1000
+start_training = 512 # waits for... 1000
 device = trainer_device
 
 # === Networking parameters ============================================================================================
@@ -59,6 +65,11 @@ password = cfg.PASSWORD
 server_ip = "127.0.0.1"
 server_port = 6666
 
+
+# === Server ===========================================================================================================
+
+if __name__ == "__main__":
+    my_server = Server(security=security, password=password, port=server_port)
 
 
 # === Environment ======================================================================================================
@@ -73,7 +84,7 @@ my_config["time_step_duration"] = 0.05
 my_config["start_obs_capture"] = 0.05
 my_config["time_step_timeout_factor"] = 1.0
 my_config["ep_max_length"] = maxEpLength
-my_config["act_buf_len"] = 2
+my_config["act_buf_len"] = ACT_BUF_LEN  
 my_config["reset_act_buf"] = True
 my_config["benchmark"] = False
 my_config["benchmark_polyak"] = 0.2
@@ -90,7 +101,7 @@ my_config["interface_kwargs"] = {
   'imageWidth' : imgSize, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : imgSize,
   'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
-  'trackChoice' : 1, # 0 is HS, 1 is 400m
+  'trackChoice' : 0, # 0 is HS, 1 is 400m
   'rewardMode' : 'complex'
 }
 
@@ -98,7 +109,7 @@ my_config["interface_kwargs"] = {
 
 env_cls = partial(GenericGymEnv, id="real-time-gym-v1", gym_kwargs={"config": my_config})
 
-rState = spaces.Box(low=0, high=1, shape=(1,), dtype='int64')
+rState = spaces.Box(low=0, high=5, shape=(1,), dtype='int64')
 #rState = spaces.Discrete(2)
 #rState = spaces.Tuple(spaces.Discrete(2),)
 
@@ -230,6 +241,7 @@ class VanillaCNN(Module):
         else:
             rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2 = x
         
+        rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0
         #print(">>>>>>>>>>>>>>>>>>>>", images.shape)    
         images = images.to(torch.float32)/255.0
 
@@ -350,7 +362,7 @@ actor_module_cls = partial(MyActorModule)
 #     prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod = prev_act, obs, rew, terminated, truncated, info
 #     obs_mod = obs_mod[:4]  # here we remove the action buffer from observations
 #     return prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod
-def get_local_buffer_sample_tm20_imgs(prev_act, obs, rew, terminated, truncated, info):
+def get_local_buffer_sample_mode1_imgs(prev_act, obs, rew, terminated, truncated, info):
     """
     Sample compressor for MemoryTMFull
     Input:
@@ -371,8 +383,20 @@ def get_local_buffer_sample_tm20_imgs(prev_act, obs, rew, terminated, truncated,
     info_mod = info
     return prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod
 
+def pre_processor_buffer_sample_mode1_imgs(prev_act, obs, rew, terminated, truncated, info):
+    prev_act_mod = prev_act
+    #rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images[latest]
+    obs_mod = obs[0], obs[1]/5.0, obs[2]/10000.0, obs[3]/10000.0, obs[4]/6.0, obs[5]/500.0, obs[6]/1024.0, obs[7], obs[8]/12.0, (obs[9][-1]).astype(np.float32) / 256.0
+    rew_mod = rew
+    terminated_mod = terminated
+    truncated_mod = truncated
+    info_mod = info
+    return prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod
+
 # sample_compressor = my_sample_compressor
-sample_compressor = get_local_buffer_sample_tm20_imgs
+sample_compressor = get_local_buffer_sample_mode1_imgs
+#sample_compressor = pre_processor_buffer_sample_mode1_imgs
+
 
 #class MemoryTM(TorchMemory):
 
@@ -462,11 +486,11 @@ def replace_hist_before_eoe(hist, eoe_idx_in_hist):
 
 class MyMemory(TorchMemory):
     def __init__(self,
-                 memory_size=1e6,
+                 memory_size=MEMORY_SIZE,
                  batch_size=BATCH_SIZE,
                  dataset_path="",
                  imgs_obs=4,
-                 act_buf_len=1,
+                 act_buf_len=ACT_BUF_LEN,
                  nb_steps=1,
                  sample_preprocessor: callable = None,
                  crc_debug=CRC_DEBUG,
@@ -564,7 +588,7 @@ class MyMemory(TorchMemory):
 
     def load_imgs(self, item):
         res = self.data[11][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
-        #return np.stack(res).astype(np.float32)
+        #return np.stack(res).astype(np.float32) / 256.0
         return np.stack(res).astype(np.uint8)
 
     def load_acts(self, item):
@@ -658,9 +682,9 @@ class MyMemory(TorchMemory):
         return self
 
 memory_cls = partial(MyMemory,
-                    act_buf_len=2,
-                    memory_size=1e6,
-                    batch_size=64,
+                    act_buf_len=ACT_BUF_LEN,
+                    memory_size=MEMORY_SIZE,
+                    batch_size=BATCH_SIZE,
                     )
                     #sample_preprocessor=SAMPLE_PREPROCESSOR,)
 
@@ -836,34 +860,13 @@ if __name__ == "__main__":
 def run_worker(worker):
     worker.run(test_episode_interval=10)
 
-
 def run_trainer(trainer):
     trainer.run()
 
-def main(args):
-    if args.server:
-        my_server = Server(security=security, password=password, port=server_port)
-    elif args.worker:
-        daemon_thread_worker = Thread(target=run_worker, args=(my_worker, ), kwargs={}, daemon=True)
-        daemon_thread_worker.start()  # start the worker daemon thread
-    elif args.trainer:
-        run_trainer(my_trainer)
-                
-        
-
-# if __name__ == "__main__":
-#     daemon_thread_worker = Thread(target=run_worker, args=(my_worker, ), kwargs={}, daemon=True)
-#     daemon_thread_worker.start()  # start the worker daemon thread
-#     run_trainer(my_trainer)
-
-#     # the worker daemon thread will be killed here.
-
-
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument('--server', action='store_true', help='launches the server')
-    parser.add_argument('--trainer', action='store_true', help='launches the trainer')
-    parser.add_argument('--worker', action='store_true', help='launches a rollout worker')
-    arguments = parser.parse_args()
+    daemon_thread_worker = Thread(target=run_worker, args=(my_worker, ), kwargs={}, daemon=True)
+    daemon_thread_worker.start()  # start the worker daemon thread
 
-    main(arguments)
+    run_trainer(my_trainer)
+
+    # the worker daemon thread will be killed here.
