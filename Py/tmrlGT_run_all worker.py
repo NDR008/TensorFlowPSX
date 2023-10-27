@@ -66,10 +66,10 @@ server_ip = "127.0.0.1"
 server_port = 6666
 
 
-# === Server ===========================================================================================================
+# # === Server ===========================================================================================================
 
-if __name__ == "__main__":
-    my_server = Server(security=security, password=password, port=server_port)
+# if __name__ == "__main__":
+#     my_server = Server(security=security, password=password, port=server_port)
 
 
 # === Environment ======================================================================================================
@@ -809,13 +809,13 @@ if __name__ == "__main__":
 def run_worker(worker):
     worker.run(test_episode_interval=10)
 
-def run_trainer(trainer):
-    trainer.run()
+# def run_trainer(trainer):
+#     trainer.run()
 
 if __name__ == "__main__":
     daemon_thread_worker = Thread(target=run_worker, args=(my_worker, ), kwargs={}, daemon=True)
     daemon_thread_worker.start()  # start the worker daemon thread
 
-    run_trainer(my_trainer)
+    # run_trainer(my_trainer)
 
     # the worker daemon thread will be killed here.

@@ -775,9 +775,6 @@ training_agent_cls = partial(MyTrainingAgent,
                              target_entropy=-0.5) # only for learn_entrop_coef is True
 
 
-
-
-
 # Trainer instance:
 
 training_cls = partial(
@@ -803,19 +800,10 @@ if __name__ == "__main__":
         model_path=model_path,
         checkpoint_path=checkpoints_path)  # None for not saving training checkpoints
 
-
-# Separate threads for running the RolloutWorker and Trainer:
-
-def run_worker(worker):
-    worker.run(test_episode_interval=10)
-
 def run_trainer(trainer):
     trainer.run()
 
 if __name__ == "__main__":
-    daemon_thread_worker = Thread(target=run_worker, args=(my_worker, ), kwargs={}, daemon=True)
-    daemon_thread_worker.start()  # start the worker daemon thread
-
     run_trainer(my_trainer)
 
     # the worker daemon thread will be killed here.

@@ -102,7 +102,7 @@ class RewardFunction:
                 
         #if self.badDirectionSteps > self.maxBadDirectionSteps:
             #terminated = True
-        self.reward = np.int32(self.reward)
+        self.reward = self.reward  / 1.0
 
         return self.reward, terminated
 
