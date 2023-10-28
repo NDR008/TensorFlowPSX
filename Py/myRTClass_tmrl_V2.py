@@ -23,7 +23,7 @@ from threading import Thread
 from rewardGT import RewardFunction
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
-    def __init__(self, debugFlag=False, discreteAccel=True, accelAndBrake=False, discSteer=True, contAccelOnly=False, discAccelOnly=False, modelMode=1, imageHeight=64, imageWidth=64, trackChoice=1, carChoice=1, rewardMode="complex"):
+    def __init__(self, debugFlag=False, controlMode=2, modelMode=1, imageHeight=64, imageWidth=64, trackChoice=1, carChoice=1, rewardMode="complex"):
         """MyGranTurismoRTGYM returns an environment that contains a gym environment and a server session to receive data from PCSX Redux.
         Args:
             debugFlag (bool, optional): Makes the server do image rendinering (and not use the env.render()). Defaults to False.
@@ -60,18 +60,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.vColl = None # used to track the vehicle contact and for calculating rewards
         self.vSpeed = None
         self.vDir = None
-        self.controlChoice = 2
-        if discAccelOnly:
-            self.controlChoice = 7
-            print("Discrete Accel Only 7")
-
-        elif contAccelOnly:
-            self.controlChoice = 6
-            print("Cont Accel Only 6")
-            
-        elif discreteAccel and not accelAndBrake and discSteer: # discreteAccel & not accelAndBrake & discreteSteer
-            self.controlChoice = 2
-            print("Discrete Accel or Brake (cannot left foot) and Discrete Steering 2")
+        self.controlChoice = controlMode
         
     # Maybe needed (at least as a helper) wrong place?
     def getDataImage(self):  
@@ -127,10 +116,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.initControl()
         self.startServerToRedux()
         if self.trackChoice == 0:
-            self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX2\Py\hsSpaced.csv')
+            self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX\Py\hsSpaced.csv')
                 
         elif self.trackChoice == 1:
-            self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX2\Py\dragSpaced.csv')
+            self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX\Py\dragSpaced.csv')
         
     # Mandatory method        
     def get_observation_space(self):

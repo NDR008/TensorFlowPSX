@@ -43,9 +43,9 @@ trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
 imgHist = 4
 
-MEMORY_SIZE = 1e5 #1e6
+MEMORY_SIZE = 1e3 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 00
+maxEpLength = 500
 BATCH_SIZE = 256
 EPOCHS = 100 # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
@@ -56,6 +56,9 @@ max_training_steps_per_env_step = 2.0
 start_training = 512 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
+CONTROL_MODE = 2
+
+RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE)
 
 # === Networking parameters ============================================================================================
 
@@ -66,10 +69,10 @@ server_ip = "127.0.0.1"
 server_port = 6666
 
 
-# # === Server ===========================================================================================================
+# === Server ===========================================================================================================
 
-# if __name__ == "__main__":
-#     my_server = Server(security=security, password=password, port=server_port)
+if __name__ == "__main__":
+    my_server = Server(security=security, password=password, port=server_port)
 
 
 # === Environment ======================================================================================================
@@ -90,25 +93,21 @@ my_config["benchmark"] = False
 my_config["benchmark_polyak"] = 0.2
 
 my_config["interface_kwargs"] = {
-  'debugFlag': False, # do not use render() while True
-  'discreteAccel' : False,
-  'accelAndBrake' : False,
-  'discSteer' : True,
-  'contAccelOnly' : False,
-  'discAccelOnly' : False,
-  'modelMode': MODEL_MODE,
-  #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
-  'imageWidth' : imgSize, # there is a default Cov layer for PPO with 240 x 320
-  'imageHeight' : imgSize,
-  'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
-  'trackChoice' : 0, # 0 is HS, 1 is 400m
-  'rewardMode' : 'complex'
+    'debugFlag': False, # do not use render() while True
+    'controlMode' : CONTROL_MODE,
+    'modelMode': MODEL_MODE,
+    #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
+    'imageWidth' : imgSize, # there is a default Cov layer for PPO with 240 x 320
+    'imageHeight' : imgSize,
+    'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
+    'trackChoice' : 0, # 0 is HS, 1 is 400m
+    'rewardMode' : 'complex'
 }
 
 # Environment class:
+#env_cls = partial(GenericGymEnv, id="real-time-gym-v1", gym_kwargs={"config": my_config})
 
-env_cls = partial(GenericGymEnv, id="real-time-gym-v1", gym_kwargs={"config": my_config})
-
+# Define obs_space and act_space
 
 rState = spaces.Box(low=0, high=5, shape=(1,), dtype='uint8')
 eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='uint8')
@@ -321,30 +320,6 @@ actor_module_cls = partial(MyActorModule)
 
 # Sample compression
 
-# def my_sample_compressor(prev_act, obs, rew, terminated, truncated, info):
-#     """
-#     Compresses samples before sending over network.
-
-#     This function creates the sample that will actually be stored in local buffers for networking.
-#     This is to compress the sample before sending it over the Internet/local network.
-#     Buffers of such samples will be given as input to the append() method of the memory.
-#     When you implement such compressor, you must implement a corresponding decompressor.
-#     This decompressor is the append() or get_transition() method of the memory.
-
-#     Args:
-#         prev_act: action computed from a previous observation and applied to yield obs in the transition
-#         obs, rew, terminated, truncated, info: outcome of the transition
-#     Returns:
-#         prev_act_mod: compressed prev_act
-#         obs_mod: compressed obs
-#         rew_mod: compressed rew
-#         terminated_mod: compressed terminated
-#         truncated_mod: compressed truncated
-#         info_mod: compressed info
-#     """
-#     prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod = prev_act, obs, rew, terminated, truncated, info
-#     obs_mod = obs_mod[:4]  # here we remove the action buffer from observations
-#     return prev_act_mod, obs_mod, rew_mod, terminated_mod, truncated_mod, info_mod
 def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info):
     """
     Sample compressor for MemoryTMFull
@@ -383,30 +358,7 @@ model_path = str(weights_folder / (my_run_name + ".tmod"))
 model_path_history = str(weights_folder / (my_run_name + "_"))
 model_history = -1 # save every n_th model
 
-
-# Instantiation of the RolloutWorker object:
-
-if __name__ == "__main__":
-    my_worker = RolloutWorker(
-        env_cls=env_cls,
-        actor_module_cls=actor_module_cls,
-        sample_compressor=sample_compressor,
-        device=worker_device,
-        server_ip=server_ip,
-        server_port=server_port,
-        password=password,
-        max_samples_per_episode=max_samples_per_episode,
-        model_path=model_path,
-        model_path_history=model_path_history,
-        model_history=model_history,
-        crc_debug=CRC_DEBUG)
-
-    # my_worker.run(test_episode_interval=10)  # this would block the script here!
-
-
-# === Trainer ==========================================================================================================
-
-# --- Networking and files ---
+# --- Files ---
 
 weights_folder = cfg.WEIGHTS_FOLDER  # path to the weights folder
 checkpoints_folder = cfg.CHECKPOINTS_FOLDER
@@ -414,14 +366,6 @@ checkpoints_folder = cfg.CHECKPOINTS_FOLDER
 
 model_path = str(weights_folder / (my_run_name + "_t.tmod"))
 checkpoints_path = str(checkpoints_folder / (my_run_name + "_t.tcpt"))
-
-# --- TrainingOffline ---
-
-# Dummy environment:
-
-env_cls = partial(GenericGymEnv, id="real-time-gym-v1", gym_kwargs={"config": my_config})
-# env_cls = (observation_space, action_space)
-
 
 # Memory:
 
@@ -474,9 +418,6 @@ class MyMemory(TorchMemory):
                          crc_debug=crc_debug,
                          device=device)
 
-    # def append_buffer(self, buffer):
-    #     raise NotImplementedError
-
     def __len__(self):
         if len(self.data) == 0:
             return 0
@@ -485,9 +426,6 @@ class MyMemory(TorchMemory):
             return 0
         else:
             return res
-
-    # def get_transition(self, item):
-    #     raise NotImplementedError
     
     def get_transition(self, item):
         """
@@ -579,6 +517,11 @@ class MyMemory(TorchMemory):
     def load_acts(self, item):
         res = self.data[1][(item + self.start_acts_offset):(item + self.start_acts_offset + self.act_buf_len + 1)]
         return res
+    
+    def trim(self, to_trim, qty):
+        print("to trim is..........", qty)
+        for i in range(qty):
+            self.data[i] = self.data[i][to_trim:]
 
     def append_buffer(self, buffer):
         """
@@ -616,10 +559,9 @@ class MyMemory(TorchMemory):
                 for d in d_values:
                     self.data.append(d)         
 
-        to_trim = self.__len__() - self.memory_size
-        if to_trim > 0:
-                for i in range(17):
-                    self.data[i] = self.data[i][to_trim:]
+            to_trim = int(self.__len__() - self.memory_size)
+            if to_trim > 0:
+                self.trim(to_trim, len(d_values))
             
         elif MODEL_MODE == 2:
             d11 = [b[1][9] for b in buffer.memory]  # Slip1
@@ -639,17 +581,16 @@ class MyMemory(TorchMemory):
 
             d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24]
             if self.__len__() > 0:
-                for i in range(25):
+                for i in range(len(d_values)):
                     self.data[i] += d_values[i]
                 
             else:
                 for d in d_values:
                     self.data.append(d) 
  
-            to_trim = self.__len__() - self.memory_size
+            to_trim = int(self.__len__() - self.memory_size)
             if to_trim > 0:
-                for i in range(25):
-                    self.data[i] = self.data[i][to_trim:]
+                self.trim(to_trim, len(d_values))
         return self
 
 memory_cls = partial(MyMemory,
@@ -658,6 +599,7 @@ memory_cls = partial(MyMemory,
                     batch_size=BATCH_SIZE,
                     )
                     #sample_preprocessor=SAMPLE_PREPROCESSOR,)
+
 
 # Training agent:
 
@@ -775,9 +717,6 @@ training_agent_cls = partial(MyTrainingAgent,
                              target_entropy=-0.5) # only for learn_entrop_coef is True
 
 
-
-
-
 # Trainer instance:
 
 training_cls = partial(
@@ -803,19 +742,9 @@ if __name__ == "__main__":
         model_path=model_path,
         checkpoint_path=checkpoints_path)  # None for not saving training checkpoints
 
-
-# Separate threads for running the RolloutWorker and Trainer:
-
-def run_worker(worker):
-    worker.run(test_episode_interval=10)
-
-# def run_trainer(trainer):
-#     trainer.run()
+def run_trainer(trainer):
+    trainer.run()
 
 if __name__ == "__main__":
-    daemon_thread_worker = Thread(target=run_worker, args=(my_worker, ), kwargs={}, daemon=True)
-    daemon_thread_worker.start()  # start the worker daemon thread
+    run_trainer(my_trainer)
 
-    # run_trainer(my_trainer)
-
-    # the worker daemon thread will be killed here.

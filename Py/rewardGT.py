@@ -87,12 +87,12 @@ class RewardFunction:
 
         # The reward is then proportional to the number of passed indexes (i.e., track distance):
         self.reward = (best_index - self.cur_idx) / self.fudgeFactor    
-        if vColl > 0: # hit
+        #if vColl > 0: # hit
+            #self.reward = self.reward - 0.02
+        if vSpeed < 20 and vDir == 1: # going slow
             self.reward = self.reward - 0.02
-        if vSpeed < 5 and vDir == 1: # going slow
-            self.reward = self.reward - 0.05
         else: # going back
-            self.reward = self.reward -0.1
+            self.reward = self.reward -0.05
           
         self.cur_idx = best_index
         
