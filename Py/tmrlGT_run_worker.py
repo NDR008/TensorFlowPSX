@@ -20,7 +20,7 @@ device = trainer_device
 MODEL_MODE = 2
 CONTROL_MODE = 2
 
-RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE)
+RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_MultipleWorkers(3)"
 
 
 import os
