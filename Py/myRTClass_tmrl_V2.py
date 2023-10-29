@@ -228,7 +228,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     def render(self):
         # uncomment for debug env
         #displayHistory = np.array(list(self.img_hist), dtype='uint8')
-        for index, img in enumerate(self.img_hist):
+        for index, img in enumerate(list(self.img_hist)): #list to avoid mutation whilst rendering
             display = "display " + str(index)
             cv2.imshow(display, img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
