@@ -2,7 +2,9 @@ hasPal = false
 hasUs = false
 hasJap = false
 forPlay = true
-setTCP = false
+setTCP1 = false
+setTCP2 = false
+setTCP3 = false
 dumpTrack = false
 hi_res = false
 smoke = false
@@ -361,14 +363,14 @@ end
 
 function pythonStuff()
     if (imgui.CollapsingHeader("Python", ImGuiTreeNodeFlags_None)) then
-        toggledTCP, setTCP = imgui.Checkbox("TCP1", setTCP)
-        netTCP(toggledTCP, setTCP, 9999)
+        toggledTCP1, setTCP1 = imgui.Checkbox("TCP1", setTCP1)
+        netTCP(toggledTCP1, setTCP1, 9999)
 
-        toggledTCP, setTCP = imgui.Checkbox("TCP2", setTCP)
-        netTCP(toggledTCP, setTCP, 10000)
+        toggledTCP2, setTCP2 = imgui.Checkbox("TCP2", setTCP2)
+        netTCP(toggledTCP2, setTCP2, 10000)
 
-        toggledTCP, setTCP = imgui.Checkbox("TCP2", setTCP)
-        netTCP(toggledTCP, setTCP, 10001)
+        toggledTCP3, setTCP3 = imgui.Checkbox("TCP3", setTCP3)
+        netTCP(toggledTCP3, setTCP3, 10001)
 
         trackChanged, dumpTrack = imgui.Checkbox("Dump Track X-Y", dumpTrack)
         if trackChanged then
