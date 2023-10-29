@@ -7,9 +7,9 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 500
+maxEpLength = 1000
 BATCH_SIZE = 256
-EPOCHS = 100 # maximum number of epochs, usually set this to np.inf
+EPOCHS = 15 # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
 steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 1000 #steps 1000
