@@ -66,7 +66,7 @@ from tmrl.memory import TorchMemory
 security = None
 password = cfg.PASSWORD
 
-server_ip = "127.0.0.1"
+server_ip = "192.168.188.86"
 server_port = 6666
 
 
