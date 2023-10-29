@@ -16,11 +16,6 @@ my_config["benchmark_polyak"] = 0.2
 
 my_config["interface_kwargs"] = {
   'debugFlag': False, # do not use render() while True
-  'discreteAccel' : False,
-  'accelAndBrake' : False,
-  'discSteer' : True,
-  'contAccelOnly' : True,
-  'discAccelOnly' : False,
   'modelMode': 2,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320

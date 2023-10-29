@@ -136,12 +136,12 @@ function grabGameData()
     GlobalData = assert(pb.encode("GT.Observation", obs))
 end
 
-function netTCP(netChanged, netStatus)
+function netTCP(netChanged, netStatus, port)
     -- this seciton is messy
     local turnOn = (reconnectTry or netChanged)
     if turnOn then
         if netStatus then
-            client = Support.File.uvFifo("127.0.0.1", 9999)
+            client = Support.File.uvFifo("127.0.0.1", port)
             frames = 0
             reconnectTry = false
         else

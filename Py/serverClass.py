@@ -51,14 +51,19 @@ class server():
     def connect(self):
         """Starts up the server ready for a single connection
         """
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serverAddress = (self.ip, self.port)
-        self.sock.setblocking(True)
-        self.sock.bind(serverAddress)
-        self.sock.listen(1)
-        print('starting up on {} port {}'.format(*serverAddress))
-        self.receiveClient()
-        # self.lostPing = False
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            serverAddress = (self.ip, self.port)
+            self.sock.setblocking(True)
+            self.sock.bind(serverAddress)
+            self.sock.listen(1)
+            print('starting up on {} port {}'.format(*serverAddress))
+            self.receiveClient()
+            # self.lostPing = False
+        except:
+            self.port = self.port+1
+            self.connect()
+        
 
     def recvall(self, expectedSize):
         """Returns an expected number of bytes from the socket connection
