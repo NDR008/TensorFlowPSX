@@ -361,14 +361,14 @@ end
 
 function pythonStuff()
     if (imgui.CollapsingHeader("Python", ImGuiTreeNodeFlags_None)) then
-        toggledTCP, setTCP = imgui.Checkbox("TCP1", setTCP, 9999)
-        netTCP(toggledTCP, setTCP)
+        toggledTCP, setTCP = imgui.Checkbox("TCP1", setTCP)
+        netTCP(toggledTCP, setTCP, 9999)
 
-        toggledTCP, setTCP = imgui.Checkbox("TCP2", setTCP, 10000)
-        netTCP(toggledTCP, setTCP)
+        toggledTCP, setTCP = imgui.Checkbox("TCP2", setTCP)
+        netTCP(toggledTCP, setTCP, 10000)
 
-        toggledTCP, setTCP = imgui.Checkbox("TCP2", setTCP, 10001)
-        netTCP(toggledTCP, setTCP)
+        toggledTCP, setTCP = imgui.Checkbox("TCP2", setTCP)
+        netTCP(toggledTCP, setTCP, 10001)
 
         trackChanged, dumpTrack = imgui.Checkbox("Dump Track X-Y", dumpTrack)
         if trackChanged then
