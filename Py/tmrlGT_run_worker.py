@@ -1,3 +1,28 @@
+# Training parameters:
+CRC_DEBUG = False
+worker_device = "cpu"
+trainer_device = "cuda"
+imgSize = 64 #assuming 64 x 64
+imgHist = 4
+
+MEMORY_SIZE = 5e5 #1e6
+ACT_BUF_LEN = 2
+maxEpLength = 1000
+BATCH_SIZE = 256
+EPOCHS = 15 # maximum number of epochs, usually set this to np.inf
+rounds = 10  # number of rounds per epoch (to print stuff)
+steps = 1000  # number of training steps per round 1000
+update_buffer_interval = 1000 #steps 1000
+update_model_interval = 1000 #steps 1000
+max_training_steps_per_env_step = 2.0
+start_training = 512 # waits for... 1000
+device = trainer_device
+MODEL_MODE = 2
+CONTROL_MODE = 2
+
+RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE)
+
+
 import os
 os.environ['NUMEXPR_MAX_THREADS'] = '14'
 os.environ['NUMEXPR_NUM_THREADS'] = '14'
@@ -36,30 +61,6 @@ from torch.nn import Conv2d, Module, ModuleList
 
 from tmrl.memory import TorchMemory
 
-# Training parameters:
-CRC_DEBUG = False
-worker_device = "cpu"
-trainer_device = "cuda"
-imgSize = 64 #assuming 64 x 64
-imgHist = 4
-
-MEMORY_SIZE = 1e3 #1e6
-ACT_BUF_LEN = 2
-maxEpLength = 500
-BATCH_SIZE = 256
-EPOCHS = 100 # maximum number of epochs, usually set this to np.inf
-rounds = 10  # number of rounds per epoch (to print stuff)
-steps = 1000  # number of training steps per round 1000
-update_buffer_interval = 1000 #steps 1000
-update_model_interval = 1000 #steps 1000
-max_training_steps_per_env_step = 2.0
-start_training = 512 # waits for... 1000
-device = trainer_device
-MODEL_MODE = 2
-CONTROL_MODE = 2
-
-RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE)
-
 # === Networking parameters ============================================================================================
 
 security = None
@@ -69,10 +70,10 @@ server_ip = "127.0.0.1"
 server_port = 6666
 
 
-# === Server ===========================================================================================================
+# # === Server ===========================================================================================================
 
-if __name__ == "__main__":
-    my_server = Server(security=security, password=password, port=server_port)
+# if __name__ == "__main__":
+#     my_server = Server(security=security, password=password, port=server_port)
 
 
 # === Environment ======================================================================================================
@@ -91,6 +92,7 @@ my_config["act_buf_len"] = ACT_BUF_LEN
 my_config["reset_act_buf"] = True
 my_config["benchmark"] = False
 my_config["benchmark_polyak"] = 0.2
+
 
 my_config["interface_kwargs"] = {
     'debugFlag': False, # do not use render() while True
@@ -537,6 +539,7 @@ class MyMemory(TorchMemory):
     def trim(self, to_trim, qty):
         print("to trim is..........", qty)
         for i in range(qty):
+            print(i, self.data[i])
             self.data[i] = self.data[i][to_trim:]
 
     def append_buffer(self, buffer):
