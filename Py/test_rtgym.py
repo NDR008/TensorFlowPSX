@@ -13,6 +13,7 @@ my_config["act_buf_len"] = 2
 my_config["reset_act_buf"] = True
 my_config["benchmark"] = False
 my_config["benchmark_polyak"] = 0.2
+my_config["wait_on_done"] = True
 
 my_config["interface_kwargs"] = {
   'debugFlag': False, # do not use render() while True
