@@ -8,19 +8,19 @@ imgHist = 4
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
 maxEpLength = 1000
-BATCH_SIZE = 256
-EPOCHS = 15 # maximum number of epochs, usually set this to np.inf
+BATCH_SIZE = 1024
+EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
 steps = 1000  # number of training steps per round 1000
-update_buffer_interval = 1000 #steps 1000
-update_model_interval = 1000 #steps 1000
+update_buffer_interval = 2000 #steps 1000
+update_model_interval = 2000 #steps 1000
 max_training_steps_per_env_step = 2.0
-start_training = 512 # waits for... 1000
+start_training = 2000 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
 CONTROL_MODE = 2
 
-RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_MultipleWorkers(3)"
+RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_RemoteWorker(2)"
 
 
 import os
