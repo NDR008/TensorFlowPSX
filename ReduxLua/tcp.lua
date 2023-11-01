@@ -7,7 +7,7 @@ local obs = {}
 local client = nil
 local reconnectTry = false
 local CurrentPos = 0
-local maxLostPings = 500
+local maxLostPings = 50000
 local currentMissedPings = 0
 
 local function read_file_as_string(filename)
@@ -128,16 +128,20 @@ function grabGameData()
     obs['VS'] = vehicleState
     obs['frame'] = frames
     obs['posVect'] = posVect
-    obs['drivingDir'] = readValue(mem, 0x800b6e74, 'int16_t*')
+    local vDir = readValue(mem, 0x800b6e74, 'int16_t*')
+    if vDir >= 1 then
+        vDir = 1
+    end
+    obs['drivingDir'] = vDir
     GlobalData = assert(pb.encode("GT.Observation", obs))
 end
 
-function netTCP(netChanged, netStatus)
+function netTCP(netChanged, netStatus, port)
     -- this seciton is messy
     local turnOn = (reconnectTry or netChanged)
     if turnOn then
         if netStatus then
-            client = Support.File.uvFifo("127.0.0.1", 9999)
+            client = Support.File.uvFifo("127.0.0.1", port)
             frames = 0
             reconnectTry = false
         else
@@ -152,19 +156,19 @@ function netTCP(netChanged, netStatus)
             ready = true
             currentMissedPings = 0
         -- 2 is for loading a savestate    
-        elseif readVal == 8+1 then -- MR2 at Drag
+        elseif readVal == 8 + 64 then -- MR2 at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("mr2_1_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 24+1 then -- Supra at Drag
+        elseif readVal == 24 + 64 then -- Supra at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("Sup_1_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 0+1 then -- MR2 at HS
+        elseif readVal == 0 + 64 then -- MR2 at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("mr2_0_0_0_0.slice", "READ")

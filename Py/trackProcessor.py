@@ -58,4 +58,4 @@ def respaceTrackData(filename, spacing=50000):
     newTable = processData(originalTable, spacing)
     saveData(filename, newTable)
     
-respaceTrackData('Py/hs.csv',spacing=10000)
+respaceTrackData('Py/hs.csv',spacing=700)

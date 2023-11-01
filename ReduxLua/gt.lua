@@ -2,7 +2,9 @@ hasPal = false
 hasUs = false
 hasJap = false
 forPlay = true
-setTCP = false
+setTCP1 = false
+setTCP2 = false
+setTCP3 = false
 dumpTrack = false
 hi_res = false
 smoke = false
@@ -11,6 +13,7 @@ HeldCollState = 0
 loadfile("memory.lua")()
 loadfile("tcp.lua")()
 loadfile("track.lua")()
+loadfile("drive_record.lua")()
 -- loadfile("track_prog.lua")() -- to be deleted
 
 local function reload()
@@ -19,6 +22,7 @@ local function reload()
     loadfile("gt.lua")()
     loadfile("tcp.lua")()
     loadfile("track.lua")()
+    loadfile("drive_record.lua")()
     -- loadfile("track_prog.lua")() -- to be deleted
 end
 
@@ -359,8 +363,14 @@ end
 
 function pythonStuff()
     if (imgui.CollapsingHeader("Python", ImGuiTreeNodeFlags_None)) then
-        toggledTCP, setTCP = imgui.Checkbox("TCP", setTCP)
-        netTCP(toggledTCP, setTCP)
+        toggledTCP1, setTCP1 = imgui.Checkbox("TCP1", setTCP1)
+        netTCP(toggledTCP1, setTCP1, 9999)
+
+        toggledTCP2, setTCP2 = imgui.Checkbox("TCP2", setTCP2)
+        netTCP(toggledTCP2, setTCP2, 10000)
+
+        toggledTCP3, setTCP3 = imgui.Checkbox("TCP3", setTCP3)
+        netTCP(toggledTCP3, setTCP3, 10001)
 
         trackChanged, dumpTrack = imgui.Checkbox("Dump Track X-Y", dumpTrack)
         if trackChanged then
@@ -371,6 +381,17 @@ function pythonStuff()
             end
         else
             if dumpTrack then writeTrack() end
+        end
+
+        driveChange, dumpDrive = imgui.Checkbox("Record Drive", dumpDrive)
+        if driveChange then
+            if dumpDrive then
+                openRecord()
+            else
+                closeRecord()
+            end
+        else
+            if dumpDrive then writeRecord() end
         end
     end
 end
