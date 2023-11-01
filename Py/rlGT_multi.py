@@ -7,7 +7,7 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 1000
+maxEpLength = 1500
 BATCH_SIZE = 256
 EPOCHS = 15 # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
@@ -19,7 +19,7 @@ start_training = 512 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
 CONTROL_MODE = 2
-RUN_NAME = "DEBUG_" + "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE)
+RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE)
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
