@@ -9,7 +9,7 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 1000
+maxEpLength = 3000
 BATCH_SIZE = 1024
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
@@ -192,8 +192,6 @@ class MyActorModule(TorchActorModule):
         self.mu_layer = nn.Linear(256, dim_act)
         self.log_std_layer = nn.Linear(256, dim_act)
         self.act_limit = act_limit
-
-
 
     def forward(self, obs, test=False, with_logprob=True):
         net_out = self.net(obs)
