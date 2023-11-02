@@ -20,7 +20,7 @@ max_training_steps_per_env_step = 1.0
 start_training = 200 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
-CONTROL_MODE = 0
+CONTROL_MODE = 2
 
 RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_RemoteWorker_x2_Early_Term"
 
@@ -134,13 +134,13 @@ class VanillaCNN(Module):
         # act, # 9 + 4
         if MODEL_MODE == 1:
             if CONTROL_MODE == 0:
-                self.mlp_input_features = self.flat_features + 16 if self.q_net else self.flat_features + 14
-            if CONTROL_MODE == 2:
+                self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
+            elif CONTROL_MODE == 2:
                 self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
         elif MODEL_MODE == 2:
             if CONTROL_MODE == 0:
-                self.mlp_input_features = self.flat_features + 24 if self.q_net else self.flat_features + 22
-            if CONTROL_MODE == 2:
+                self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
+            elif CONTROL_MODE == 2:
                 self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
         
         self.mlp_layers = [256, 256, 1] if self.q_net else [256, 256]
