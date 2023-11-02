@@ -18,6 +18,7 @@ my_config["wait_on_done"] = True
 my_config["interface_kwargs"] = {
   'debugFlag': False, # do not use render() while True
   'modelMode': 2,
+  'controlMode' : 0,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : 64,
@@ -34,9 +35,9 @@ obs_space = env.observation_space
 #act_space = env.action_space
 truncated = False
 
-# print("observation space:")
-# for i in obs_space:
-#     print(i)
+print("observation space:")
+for i in obs_space:
+    print(i)
 print("observation:")
 for i in obs:
     print("value:", i, "with shape:", i.shape, i.dtype)

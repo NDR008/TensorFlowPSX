@@ -17,7 +17,7 @@ steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 2000 #steps 1000
 update_model_interval = 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
-start_training = 2000 # waits for... 1000
+start_training = 200 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
 CONTROL_MODE = 2
@@ -79,7 +79,10 @@ if MODEL_MODE == 1:
 elif MODEL_MODE == 2:
     obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
 
-act_space = spaces.Box(low=-1.0, high=1.0, shape=(2, ))
+if CONTROL_MODE == 0:
+    act_space = spaces.Box(low=-1.0, high=1.0, shape=(3, ))
+elif CONTROL_MODE == 2:
+    act_space = spaces.Box(low=-1.0, high=1.0, shape=(2, ))
 
 print(f"action space: {act_space}")
 print(f"observation space: {obs_space}")

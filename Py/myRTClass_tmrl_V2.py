@@ -155,11 +155,17 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                 
     # Mandatory method
     def get_action_space(self):
-        return spaces.Box(low=-1.0, high=1.0, shape=(2, ))
+        if self.controlChoice==0:
+            return spaces.Box(low=-1.0, high=1.0, shape=(3, ))
+        elif self.controlChoice==2:
+            return spaces.Box(low=-1.0, high=1.0, shape=(2, ))
     
     # Mandatory method
     def get_default_action(self):
-        return np.array([0.0 ,0.0], dtype='float32')
+        if self.controlChoice==0:
+            return np.array([0.0 ,0.0, 0.0], dtype='float32')
+        elif self.controlChoice==2:
+            return np.array([0.0 ,0.0], dtype='float32')
     
     
     def getObs(self, reset):
@@ -219,7 +225,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     
     # Mandatory method
     def send_control(self, control):
-        controlGamepad(self.gamepad, control, 2)
+        controlGamepad(self.gamepad, control, self.controlChoice)
 
     # Optional method
     def wait(self):
