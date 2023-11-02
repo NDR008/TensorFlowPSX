@@ -93,6 +93,7 @@ class RewardFunction:
             self.reward = self.reward - 0.02
         else: # going back
             self.reward = self.reward -0.05
+            self.badDirectionSteps = self.badDirectionSteps + 1
           
         self.cur_idx = best_index
         
@@ -100,8 +101,8 @@ class RewardFunction:
             self.reward = 0.0
             self.firstLoop = False
                 
-        #if self.badDirectionSteps > self.maxBadDirectionSteps:
-            #terminated = True
+        if self.badDirectionSteps > self.maxBadDirectionSteps:
+            terminated = True
         self.reward = self.reward  / 1.0
 
         return self.reward, terminated

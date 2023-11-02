@@ -9,7 +9,7 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 3100
+maxEpLength = 200
 BATCH_SIZE = 1024
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
@@ -20,9 +20,9 @@ max_training_steps_per_env_step = 1.0
 start_training = 200 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
-CONTROL_MODE = 2
+CONTROL_MODE = 0
 
-RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_RemoteWorker(2)"
+RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_RemoteWorker_x2_Early_Term"
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
