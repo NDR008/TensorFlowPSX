@@ -701,7 +701,7 @@ def main(args):
             model_path_history=model_path_history,
             model_history=model_history,
             crc_debug=CRC_DEBUG,
-            local_port=3000+args.worker_port,
+            local_port=6666+args.worker_port,
             standalone=args.test)
         my_worker.run() 
         
