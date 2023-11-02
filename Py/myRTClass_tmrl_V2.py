@@ -21,6 +21,7 @@ import logging
 from collections import deque
 from threading import Thread
 from rewardGT import RewardFunction
+from time import sleep
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
     def __init__(self, debugFlag=False, controlMode=2, modelMode=1, imageHeight=64, imageWidth=64, trackChoice=1, carChoice=1, rewardMode="complex"):
@@ -222,6 +223,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
 
     # Optional method
     def wait(self):
+        sleep(50)
         self.send_control(self.get_default_action())
         
     # Optional method
