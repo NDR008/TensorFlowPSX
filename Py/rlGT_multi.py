@@ -701,6 +701,7 @@ def main(args):
             model_path_history=model_path_history,
             model_history=model_history,
             crc_debug=CRC_DEBUG,
+            local_port=3000+args.worker_port,
             standalone=args.test)
         my_worker.run() 
         
@@ -758,6 +759,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--trainer', action='store_true', help='launches the trainer and server')
     parser.add_argument('--worker', action='store_true', help='launches a rollout worker')
+    parser.add_argument('--worker_port', type=int, default=0, help='port for rollout worker')
     parser.add_argument('--local', action='store_true', help='trainer will not use wandb')
     parser.add_argument('--test', action='store_true', help='trainer in test mode')
     arguments = parser.parse_args()
