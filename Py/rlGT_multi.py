@@ -133,9 +133,15 @@ class VanillaCNN(Module):
         self.flat_features = self.out_channels * self.h_out * self.w_out
         # act, # 9 + 4
         if MODEL_MODE == 1:
-            self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
+            if CONTROL_MODE == 0:
+                self.mlp_input_features = self.flat_features + 16 if self.q_net else self.flat_features + 14
+            if CONTROL_MODE == 2:
+                self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
         elif MODEL_MODE == 2:
-            self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
+            if CONTROL_MODE == 0:
+                self.mlp_input_features = self.flat_features + 24 if self.q_net else self.flat_features + 22
+            if CONTROL_MODE == 2:
+                self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
         
         self.mlp_layers = [256, 256, 1] if self.q_net else [256, 256]
         self.mlp = mlp([self.mlp_input_features] + self.mlp_layers, nn.ReLU)
