@@ -20,7 +20,7 @@ max_training_steps_per_env_step = 1.0
 start_training = 200 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
-CONTROL_MODE = 2
+CONTROL_MODE = 2.5
 
 RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xWorkers_Early_Term"
 
