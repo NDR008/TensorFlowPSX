@@ -157,14 +157,14 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     def get_action_space(self):
         if self.controlChoice==0:
             return spaces.Box(low=-1.0, high=1.0, shape=(3, ))
-        elif self.controlChoice==2:
+        elif self.controlChoice >=2 and self.controlChoice < 3:
             return spaces.Box(low=-1.0, high=1.0, shape=(2, ))
     
     # Mandatory method
     def get_default_action(self):
         if self.controlChoice==0:
             return np.array([0.0 ,0.0, 0.0], dtype='float32')
-        elif self.controlChoice==2:
+        elif self.controlChoice >=2 and self.controlChoice < 3:
             return np.array([0.0 ,0.0], dtype='float32')
     
     

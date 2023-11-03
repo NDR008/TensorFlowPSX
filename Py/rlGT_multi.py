@@ -9,7 +9,7 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 200
+maxEpLength = 3200
 BATCH_SIZE = 1024
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
@@ -22,7 +22,7 @@ device = trainer_device
 MODEL_MODE = 2
 CONTROL_MODE = 2
 
-RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_RemoteWorker_x2_Early_Term"
+RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xWorkers_Early_Term"
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
@@ -81,7 +81,7 @@ elif MODEL_MODE == 2:
 
 if CONTROL_MODE == 0:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(3, ))
-elif CONTROL_MODE == 2:
+elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(2, ))
 
 print(f"action space: {act_space}")
@@ -135,12 +135,12 @@ class VanillaCNN(Module):
         if MODEL_MODE == 1:
             if CONTROL_MODE == 0:
                 self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
-            elif CONTROL_MODE == 2:
+            elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
                 self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
         elif MODEL_MODE == 2:
             if CONTROL_MODE == 0:
                 self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
-            elif CONTROL_MODE == 2:
+            elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
                 self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
         
         self.mlp_layers = [256, 256, 1] if self.q_net else [256, 256]
