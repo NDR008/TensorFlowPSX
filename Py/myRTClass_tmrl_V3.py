@@ -213,9 +213,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def get_obs_rew_terminated_info(self):       
         obs = self.getObs(reset=False)
-        if obs[0][0] > 0:
+        if obs[0][0] == 2:
             reward, terminated = self.rewardFunction.computeReward(pos=self.vPosition, vColl=self.vColl, vDir=self.vDir, vSpeed=self.vSpeed, mode=self.rewardMode)     
-        reward, terminated = self.rewardFunction.computeRewardPreStart(obs[2], obs[3])
+        else:
+            reward, terminated = self.rewardFunction.computeRewardPreStart(obs[2], obs[3])
 
         info = {}
 
