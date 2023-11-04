@@ -24,11 +24,11 @@ CONTROL_MODE = 2
 CARCHOICE = 1
 
 if CARCHOICE == 1:
-    car = "Supra_"
+    car = "_Supra_mode_"
 else:
-    car = "MR2_"
+    car = "_MR2_mode_"
 
-RUN_NAME = "GTAI_mode" + car + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xWorkers_Early_Term" 
+RUN_NAME = "GTAI" + car + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xWorkers_Early_Term" 
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
