@@ -89,13 +89,15 @@ class RewardFunction:
         self.reward = (best_index - self.cur_idx) / self.fudgeFactor    
         #if vColl > 0: # hit
             #self.reward = self.reward - 0.02
-        print(vDir,self.badDirectionSteps)
+        # print(vDir,self.badDirectionSteps)
         if vDir == 1:
             self.badDirectionSteps = self.badDirectionSteps + 1
-        if vSpeed < 20 and vDir == 1: # going slow
+        if vSpeed < 20 and vDir == 1: # actual going back (almost useless)
             self.reward = self.reward - 0.02
-        else: # going back
-            self.reward = self.reward -0.05
+        else: # constant penalty
+            self.reward = self.reward -0.05 #may be encouraging to drive too fast
+            
+        # maybe add a reward for reaching the finish?
             
           
         self.cur_idx = best_index

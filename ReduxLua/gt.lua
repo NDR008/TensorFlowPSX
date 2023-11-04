@@ -52,29 +52,16 @@ end
 saveList1 = {
     -- Car_Dr_Ds-Da-Cpu
     { "MR2 400m Digital All",          "mr2_1_0_0_0.slice" }, -- Done
-    { "MR2 400m Cont Steer",           "mr2_1_1_0_0.slice" },
-    { "MR2 400m Cont Accel",           "mr2_1_0_1_0.slice" },
-    { "MR2 400m Cont All",             "mr2_1_1_1_0.slice" },
+    { "MR2 HS Digital All",            "mr2_0_0_0_0.slice" },            -- Done
     --{ "MR2 400m Digital All (x2 CPU)", "mr2_1_0_0_1.slice" },
 }
 
 saveList2 = {
     -- Car_Dr_Ds-Da-Cpu
     { "Supra 400m Digital All",         "Sup_1_0_0_0.slice" }, -- Done
-    { "Supra 400m Cont Steer",          "Sup_1_1_0_0.slice" },
-    { "Supra 400m Cont Accel",          "Sup_1_0_1_0.slice" },
-    { "Supra 400m Cont All",            "Sup_1_1_1_0.slice" },
-    ---{ "Supra 400m Digital All (x2 CPU)","Sup_1_0_0_1.slice" },
+    { "Supra HS Digital All",           "Sup_0_0_0_0.slice" },         -- Done
 }
 
-saveList3 = {
-    -- Car_Dr_Ds-Da-Cpu
-    { "MR2 HS Digital All",          "mr2_0_0_0_0.slice" },          -- Done
-    { "MR2 HS Cont Steer",           "mr2_0_1_0_0.slice" },
-    { "MR2 HS Cont Accel",           "mr2_0_0_1_0.slice" },
-    { "MR2 HS Cont All",             "mr2_0_1_1_0.slice" },
-    ---{ "MR2 HS Digital All (x2 CPU)", "mr2_0_0_0_1.slice" },
-}
 
 
 mem = PCSX.getMemPtr()
@@ -350,14 +337,11 @@ function drawTable(listOfSaves)
 end
 
 function saveMenu()
-    if (imgui.CollapsingHeader("MR2 Drag", ImGuiTreeNodeFlags_None)) then
+    if (imgui.CollapsingHeader("MR2", ImGuiTreeNodeFlags_None)) then
         drawTable(saveList1)
     end
-    if (imgui.CollapsingHeader("Supra Drag", ImGuiTreeNodeFlags_None)) then
+    if (imgui.CollapsingHeader("Supra", ImGuiTreeNodeFlags_None)) then
         drawTable(saveList2)
-    end
-    if (imgui.CollapsingHeader("MR2 HS", ImGuiTreeNodeFlags_None)) then
-        drawTable(saveList3)
     end
 end
 

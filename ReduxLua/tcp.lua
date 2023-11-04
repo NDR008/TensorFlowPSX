@@ -174,6 +174,12 @@ function netTCP(netChanged, netStatus, port)
             local file = Support.File.open("mr2_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
+        elseif readVal == 16 + 64 then         -- Supra at HS
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print("lapt_time ", lapTime)
+            local file = Support.File.open("sup_0_0_0_0.slice", "READ")
+            PCSX.loadSaveState(file)
+            file:close()
         -- elseif readVal == 1 then
         --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
         --     print(lapTime)

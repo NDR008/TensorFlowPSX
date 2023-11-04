@@ -9,7 +9,7 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 3200
+maxEpLength = 3400
 BATCH_SIZE = 1024
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
@@ -17,12 +17,18 @@ steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 2000 #steps 1000
 update_model_interval = 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
-start_training = 200 # waits for... 1000
+start_training = 20 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
-CONTROL_MODE = 2.5
+CONTROL_MODE = 2
+CARCHOICE = 1
 
-RUN_NAME = "GTAI_mode" + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xWorkers_Early_Term"
+if CARCHOICE == 1:
+    car = "Supra_"
+else:
+    car = "MR2_"
+
+RUN_NAME = "GTAI_mode" + car + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xWorkers_Early_Term" 
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
@@ -134,12 +140,12 @@ class VanillaCNN(Module):
         # act, # 9 + 4
         if MODEL_MODE == 1:
             if CONTROL_MODE == 0:
-                self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
+                self.mlp_input_features = self.flat_features + 20 if self.q_net else self.flat_features + 17
             elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
                 self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
         elif MODEL_MODE == 2:
             if CONTROL_MODE == 0:
-                self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
+                self.mlp_input_features = self.flat_features + 26 if self.q_net else self.flat_features + 23
             elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
                 self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
         
@@ -158,7 +164,6 @@ class VanillaCNN(Module):
         elif MODEL_MODE == 2:
             if self.q_net:    
                 rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2, act = x
-                
             else:
                 rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2 = x           
             
@@ -682,7 +687,7 @@ def main(args):
         #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
         'imageWidth' : imgSize, # there is a default Cov layer for PPO with 240 x 320
         'imageHeight' : imgSize,
-        'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
+        'carChoice' : CARCHOICE, # 0 is MR2, 1 is Supra, 2 is Civic
         'trackChoice' : 0, # 0 is HS, 1 is 400m
         'rewardMode' : 'complex'
     }

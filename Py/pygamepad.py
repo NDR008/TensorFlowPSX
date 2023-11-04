@@ -21,9 +21,9 @@ def disAccelandBrakeDiscSteer(gamepad, control):  # control0
     else:
         gamepad.release_button(button = 1 << 4) # release brake
         
-    if control[2] > 0.2:  # right
+    if control[2] > 0:  # right
         gamepad.directional_pad(direction = 0x2) # press right 
-    elif control[2] < -0.2: #left
+    elif control[2] < 0: #left
         gamepad.directional_pad(direction = 0x6) # press left
     else:
         gamepad.directional_pad(direction = 0x8) # nothing
