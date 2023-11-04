@@ -91,9 +91,7 @@ class RewardFunction:
             self.badDirectionSteps = self.badDirectionSteps + 1
             self.reward = self.reward -0.02
         elif vSpeed < 15:  # going slow is a bit bad
-            self.reward = self.reward - (15-vSpeed)/300 - 0.01
-        elif vSpeed > 5: # going forward is good
-            self.reward = self.reward + 0.05
+            self.reward = self.reward - 0.02
           
         self.cur_idx = best_index
         
@@ -104,7 +102,7 @@ class RewardFunction:
         if self.badDirectionSteps > self.maxBadDirectionSteps:
             terminated = True
         self.reward = self.reward  / 1.0
-
+        print(self.reward)
         return self.reward, terminated
 
     def simplexReward(self, vSpeed, vDir):

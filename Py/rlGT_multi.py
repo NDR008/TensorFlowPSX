@@ -17,7 +17,7 @@ steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 2000 #steps 1000
 update_model_interval = 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
-start_training = 10 # waits for... 1000
+start_training = 8000 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
 CONTROL_MODE = 2
@@ -29,7 +29,7 @@ else:
     car = "_MR2_mode_"
 
 #RUN_NAME = "GTAI" + car + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xW_ET_v3(NewReward)" 
-RUN_NAME = "DEBUG2" 
+RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
