@@ -102,7 +102,7 @@ class RewardFunction:
         if self.badDirectionSteps > self.maxBadDirectionSteps:
             terminated = True
         self.reward = self.reward  / 1.0
-        print(self.reward)
+        #print(self.reward)
         return self.reward, terminated
 
     def simplexReward(self, vSpeed, vDir):
