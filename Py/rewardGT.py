@@ -29,10 +29,10 @@ class RewardFunction:
         self.badDirectionSteps = 0
         self.maxBadDirectionSteps = 100
         self.firstLoop = True
-        x = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-        with open('logging.csv', 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([x])
+        # x = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        # with open('logging.csv', 'a', newline='') as file:
+        #     writer = csv.writer(file)
+        #     writer.writerow([x])
 
 
     # I think the reward needs to include speed        
@@ -139,7 +139,7 @@ class RewardFunction:
         # but encourage at least 5000rpm, and encourage max boost
         self.reward = rpm[0] / 20000 +  boost[0]/ 20000 - abs(steer[0])/(1024*2)
         self.reward = self.reward / 1.0
-        # print(self.reward)
+        print(self.reward)
         terminated = False
         return self.reward, terminated
 
