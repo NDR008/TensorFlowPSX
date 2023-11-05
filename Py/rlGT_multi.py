@@ -21,7 +21,7 @@ start_training = 1000 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
 CONTROL_MODE = 2
-CARCHOICE = 1
+CARCHOICE = 0
 
 if CARCHOICE == 1:
     car = "_Supra_mode_"
