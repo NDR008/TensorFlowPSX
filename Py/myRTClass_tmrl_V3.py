@@ -216,7 +216,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         if obs[0][0] == 2:
             reward, terminated = self.rewardFunction.computeReward(pos=self.vPosition, vColl=self.vColl, vDir=self.vDir, vSpeed=self.vSpeed, mode=self.rewardMode)     
         else:
-            reward, terminated = self.rewardFunction.computeRewardPreStart(obs[2], obs[3])
+            reward, terminated = self.rewardFunction.computeRewardPreStart(obs[2], obs[3], obs[6])
 
         info = {}
 

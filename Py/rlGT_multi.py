@@ -28,7 +28,7 @@ if CARCHOICE == 1:
 else:
     car = "_MR2_mode_"
 
-RUN_NAME = "GTAI" + car + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xW_ET_v3(Rewardv3)" 
+RUN_NAME = "GTAI" + car + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xW_ET_v3(Rewardv3.5)" 
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2

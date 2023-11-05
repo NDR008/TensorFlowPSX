@@ -132,12 +132,12 @@ class RewardFunction:
                 
         return reward, terminated
     
-    # had to use to support high powered cars
-    def computeRewardPreStart(self, rpm, boost):
+    # had to use to support high powered cars and reduce steering v3.5
+    def computeRewardPreStart(self, rpm, boost, steer):
         # reward for higher RPMs and high Boost
         # feels like a cheat
         # but encourage at least 5000rpm, and encourage max boost
-        self.reward = min(rpm[0], 5000) / 10000 +  boost[0]/20000 
+        self.reward = rpm[0] / 20000 +  boost[0]/ 20000 - abs(steer[0])/(1024*2)
         self.reward = self.reward / 1.0
         # print(self.reward)
         terminated = False
