@@ -147,9 +147,9 @@ class RewardFunction:
         """
         Resets the reward function for a new episode.
         """
-        with open('logging.csv', 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([self.episodeNumber, int(self.steps), int(self.totalReward)])
+        # with open('logging.csv', 'a', newline='') as file:
+        #     writer = csv.writer(file)
+        #     writer.writerow([self.episodeNumber, int(self.steps), int(self.totalReward)])
         self.episodeNumber =self.episodeNumber + 1
         self.totalReward = 0.0
         self.cur_idx = 0
