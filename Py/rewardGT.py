@@ -91,6 +91,7 @@ class RewardFunction:
             self.badDirectionSteps = self.badDirectionSteps + 1
             self.reward = self.reward -0.02
         elif vSpeed < 15:  # going slow is a bit bad
+            self.badDirectionSteps = self.badDirectionSteps + 0.5 # new for v3
             self.reward = self.reward - 0.02
           
         self.cur_idx = best_index
