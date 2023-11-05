@@ -1,4 +1,4 @@
-from myRTClass_tmrl_V3 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+from myRTClass_tmrl_V4 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
 import gymnasium
 from time import sleep
@@ -17,12 +17,12 @@ my_config["wait_on_done"] = False
 
 my_config["interface_kwargs"] = {
   'debugFlag': False, # do not use render() while True
-  'modelMode': 2,
+  'modelMode': 3,
   'controlMode' : 2,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : 64,
-  'carChoice' : 1, # 0 is MR2, 1 is Supra, 2 is Civic
+  'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
   'trackChoice' : 0, # 0 is HS, 1 is 400m
   'rewardMode' : 'complex'
 }
@@ -40,10 +40,12 @@ for i in obs_space:
     print(i)
 print("observation:")
 for i in obs:
-    print("value:", i, "with shape:", i.shape, i.dtype)
-
+    print("value1:", i, "with shape:", i.shape, i.dtype)
+act = env.action_space.sample()
+obs, rew, terminated, truncated, info = env.step(act)
+for i in obs:
+    print("value2:", i, "with shape:", i.shape, i.dtype)
 while True:
-    obs, info = env.reset()
     terminated = False
     while not terminated:
         act = env.action_space.sample()
