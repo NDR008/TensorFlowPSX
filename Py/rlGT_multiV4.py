@@ -28,7 +28,7 @@ if CARCHOICE == 1:
 else:
     car = "_MR2_mode_"
 
-RUN_NAME = "GTAI" + car + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xW_ET_v3(Rewardv3.5)" 
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_2xW_(Rew3.5+modelV4)" 
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2
@@ -80,17 +80,30 @@ fRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
 rLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
 rRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
 
+coll1= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
+coll2= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
+coll3= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
+coll4= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
+
+
 images = spaces.Box(low=0, high=255, shape=(4, imgSize, imgSize), dtype='uint8') #255`
 
 if MODEL_MODE == 1:
-    obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images))
+    obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl ,images))
+    NUMBER_1D_PARAMS = 9
 elif MODEL_MODE == 2:
     obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
+    NUMBER_1D_PARAMS = 17
+elif MODEL_MODE == 3:
+    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, coll1, coll2, coll3, coll4, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
+    NUMBER_1D_PARAMS = 20
 
 if CONTROL_MODE == 0:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(3, ))
+    NUMBER_ACTION_DIMS = 3
 elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(2, ))
+    NUMBER_ACTION_DIMS = 2
 
 print(f"action space: {act_space}")
 print(f"observation space: {obs_space}")
@@ -140,17 +153,10 @@ class VanillaCNN(Module):
         self.out_channels = self.conv4.out_channels
         self.flat_features = self.out_channels * self.h_out * self.w_out
         # act, # 9 + 4
-        if MODEL_MODE == 1:
-            if CONTROL_MODE == 0:
-                self.mlp_input_features = self.flat_features + 20 if self.q_net else self.flat_features + 17
-            elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
-                self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
-        elif MODEL_MODE == 2:
-            if CONTROL_MODE == 0:
-                self.mlp_input_features = self.flat_features + 26 if self.q_net else self.flat_features + 23
-            elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
-                self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
-        
+
+        # generalised
+        self.mlp_input_features = self.flat_features + NUMBER_1D_PARAMS + NUMBER_ACTION_DIMS * 3 if self.q_net else self.flat_features + NUMBER_1D_PARAMS + NUMBER_ACTION_DIMS * 2
+
         self.mlp_layers = [256, 256, 1] if self.q_net else [256, 256]
         self.mlp = mlp([self.mlp_input_features] + self.mlp_layers, nn.ReLU)
 
@@ -179,10 +185,11 @@ class VanillaCNN(Module):
                 rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  images, act1, act2 = x           
             
             # "Normalise" parameters [0,1]
-            rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0, rLeftSlip/255.0, rRightSlip/255.0, fLeftSlip/255.0, fRightSlip/255.0, fLWheel/4.0, fRWheel/4.0, rLWheel/4.0, rRWheel/4.0
+            rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip/255.0, rRightSlip/255.0, fLeftSlip/255.0, fRightSlip/255.0, fLWheel/4.0, fRWheel/4.0, rLWheel/4.0, rRWheel/4.0
         
         #print(">>>>>>>>>>>>>>>>>>>>", images.shape)    
         images = images.to(torch.float32)/255.0
+
 
         x = F.relu(self.conv1(images))
         x = F.relu(self.conv2(x))
@@ -304,6 +311,10 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
     elif MODEL_MODE == 2: 
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], (obs[17][-1]).astype(np.uint8))
                   #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
+    elif MODEL_MODE == 2: 
+        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], obs[17], obs[18], obs[19], obs[20], (obs[21][-1]).astype(np.uint8))
+                  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, col1, col2, col3, col4, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
+
     rew_mod = rew
     terminated_mod = terminated
     truncated_mod = truncated
@@ -511,7 +522,7 @@ class MyMemory(TorchMemory):
         elif MODEL_MODE == 2:
             res = self.data[19][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 3:
-            res = self.data[23][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+            res = self.data[22][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         return np.stack(res).astype(np.uint8)
 
     def load_acts(self, item):
@@ -765,8 +776,7 @@ def main(args):
         'debugFlag': False, # do not use render() while True
         'controlMode' : CONTROL_MODE,
         'modelMode': MODEL_MODE,
-        #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
-        'imageWidth' : imgSize, # there is a default Cov layer for PPO with 240 x 320
+        'imageWidth' : imgSize,
         'imageHeight' : imgSize,
         'carChoice' : CARCHOICE, # 0 is MR2, 1 is Supra, 2 is Civic
         'trackChoice' : 0, # 0 is HS, 1 is 400m
