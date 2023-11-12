@@ -150,13 +150,21 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
 
         # 3 images    
         if self.modelMode == 1:
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, 
+                                 images))
         
         elif self.modelMode == 2:
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, 
+                                 rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
+                                 fLWheel, fRWheel, rLWheel, rRWheel, 
+                                 images))
         
         elif self.modelMode == 3:
-            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
+            return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, 
+                                 fLColl, fRColl, rRColl, rLColl, 
+                                 rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
+                                 fLWheel, fRWheel, rLWheel, rRWheel, 
+                                 images))
                 
     # Mandatory method
     def get_action_space(self):
@@ -187,11 +195,15 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
 
         elif self.modelMode == 2:
-            print(displayHistory.shape)
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, displayHistory]
+            #print(displayHistory.shape)
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, 
+                   rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
+                   fLWheel, fRWheel, rLWheel, rRWheel, 
+                   displayHistory]
             
         elif self.modelMode == 3:
-            print(displayHistory.shape)
+            #print(displayHistory.shape)
+            # Extra work to convert back the collision int into 4 bits
             tmpColl = bin(self.vColl[0])
             tmpColl = tmpColl[2:]
             # 1s, 2s, 4s, 8s
@@ -199,7 +211,12 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             pars = np.array([zero,zero,zero,zero], dtype='uint8')
             for i in range(len(tmpColl)):
                 pars[i] = np.array(int(tmpColl[-(i+1)]), dtype='uint8')
-            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, pars[0], pars[1], pars[2], pars[3], rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, displayHistory]            
+                
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, 
+                   pars[0], pars[1], pars[2], pars[3], 
+                   rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
+                   fLWheel, fRWheel, rLWheel, rRWheel, 
+                   displayHistory]            
             
         return obs    
     
@@ -239,6 +256,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         if self.raceState == 3:
             terminated = True
             # reward = reward + 500 # a new idea
+        
+        reward = np.float32(reward)
         
         return obs, reward, terminated, info
     

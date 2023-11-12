@@ -1,7 +1,7 @@
 import numpy as np
 
 # Training parameters:
-CRC_DEBUG = True
+CRC_DEBUG = False
 worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
@@ -9,18 +9,18 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 100 # 3500
-BATCH_SIZE = 64 # 1024
+maxEpLength = 3500
+BATCH_SIZE = 1024
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
-steps = 10  # number of training steps per round 1000
-update_buffer_interval = 20 #steps 1000
-update_model_interval = 20 #steps 1000
+steps = 1000  # number of training steps per round 1000
+update_buffer_interval = 2000 #steps 1000
+update_model_interval = 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
 start_training = 1 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 3
-CONTROL_MODE = 2
+CONTROL_MODE = 0
 CARCHOICE = 0
 
 if CARCHOICE == 1:
@@ -90,13 +90,21 @@ coll4= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
 images = spaces.Box(low=0, high=255, shape=(4, imgSize, imgSize), dtype='uint8') #255`
 
 if MODEL_MODE == 1:
-    obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl ,images))
+    obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
+                              images))
     NUMBER_1D_PARAMS = 9
 elif MODEL_MODE == 2:
-    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
+    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
+                             rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, #4
+                             fLWheel, fRWheel, rLWheel, rRWheel, #4
+                             images))
     NUMBER_1D_PARAMS = 17
 elif MODEL_MODE == 3:
-    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, coll1, coll2, coll3, coll4, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
+    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, #8
+                             coll1, coll2, coll3, coll4, #4
+                             rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, #4
+                             fLWheel, fRWheel, rLWheel, rRWheel, #4
+                             images))
     NUMBER_1D_PARAMS = 20
 
 if CONTROL_MODE == 0:
@@ -207,14 +215,14 @@ class VanillaCNN(Module):
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat
         elif MODEL_MODE == 2:
             if self.q_net:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2, act), -1) # concat
+                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2, act), -1) # concat
             else:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2), -1) # concat               
+                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2), -1) # concat               
         elif MODEL_MODE == 3:
             if self.q_net:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2, act), -1) # concat
+                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2, act), -1) # concat
             else:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2), -1) # concat               
+                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2), -1) # concat               
                 
         x = self.mlp(x)
         return x
@@ -309,12 +317,13 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
     prev_act_mod = prev_act   
     if MODEL_MODE == 1: #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, images[latest]
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], (obs[9][-1]).astype(np.uint8))
-    elif MODEL_MODE == 2: 
+    
+    elif MODEL_MODE == 2:  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], (obs[17][-1]).astype(np.uint8))
-                  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
-    elif MODEL_MODE == 3: 
-        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], obs[17], obs[18], obs[19], obs[20], (obs[21][-1]).astype(np.uint8))           
-                  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, col1, col2, col3, col4, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
+    
+    elif MODEL_MODE == 3:# rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, cola8, colb9, colc10, cold11, rLeftSlip12, rRightSlip13, fLeftSlip14, fRightSlip15, fLWheel16, fRWheel17, rLWheel18, rRWheel19, images[latest]
+        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], obs[17], obs[18], obs[19], (obs[20][-1]).astype(np.uint8))           
+                  
 
     rew_mod = rew
     terminated_mod = terminated
