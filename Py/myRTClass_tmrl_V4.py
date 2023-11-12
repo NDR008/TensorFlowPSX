@@ -92,14 +92,11 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         # trackID = self.server.myData.trackID
 
         # mode 1 to 15 resizes and
-        if self.modelMode >= 1 and self.modelMode < 10:       
-            tmp = cv2.resize(self.server.pic, (self.imageSize[0], self.imageSize[1]))
-            tmp = cv2.cvtColor(tmp, cv2.COLOR_BGR2GRAY)
-            #tmp = tmp[:,:,np.newaxis]
-            self.renderImage = tmp
-            # print(tmp.shape)
-        else:
-            self.renderImage = self.server.pic
+        tmp = cv2.resize(self.server.pic, (self.imageSize[0], self.imageSize[1]))
+        tmp = cv2.cvtColor(tmp, cv2.COLOR_BGR2GRAY)
+        #tmp = tmp[:,:,np.newaxis]
+        self.renderImage = tmp
+        # print(tmp.shape)
         return rState, eClutch, eSpeed, eBoost, eGear, vSteer, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, self.renderImage
 
     def startServerToRedux(self):
@@ -178,22 +175,23 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     
     def getObs(self, reset):
         rState, eClutch, eSpeed, eBoost, eGear, vSteer, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, display = self.getDataImage()
-        if self.modelMode >= 1 and self.modelMode < 5:
-            if not reset:          
+        if not reset:          
+            self.img_hist.append(display)
+            displayHistory = np.array(list(self.img_hist), dtype='uint8')
+        else:
+            for _ in range(self.img_hist_len):
                 self.img_hist.append(display)
-                displayHistory = np.array(list(self.img_hist), dtype='uint8')
-            else:
-                for _ in range(self.img_hist_len):
-                    self.img_hist.append(display)
-                displayHistory = np.array(list(self.img_hist), dtype='uint8')
+            displayHistory = np.array(list(self.img_hist), dtype='uint8')
         
         if self.modelMode == 1:
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
 
         elif self.modelMode == 2:
+            print(displayHistory.shape)
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, displayHistory]
             
         elif self.modelMode == 3:
+            print(displayHistory.shape)
             tmpColl = bin(self.vColl[0])
             tmpColl = tmpColl[2:]
             # 1s, 2s, 4s, 8s

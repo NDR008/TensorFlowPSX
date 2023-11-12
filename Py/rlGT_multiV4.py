@@ -1,7 +1,7 @@
 import numpy as np
 
 # Training parameters:
-CRC_DEBUG = False
+CRC_DEBUG = True
 worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
@@ -9,17 +9,17 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 3500
-BATCH_SIZE = 1024
+maxEpLength = 100 # 3500
+BATCH_SIZE = 64 # 1024
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
-steps = 1000  # number of training steps per round 1000
-update_buffer_interval = 2000 #steps 1000
-update_model_interval = 2000 #steps 1000
+steps = 10  # number of training steps per round 1000
+update_buffer_interval = 20 #steps 1000
+update_model_interval = 20 #steps 1000
 max_training_steps_per_env_step = 1.0
-start_training = 1000 # waits for... 1000
+start_training = 1 # waits for... 1000
 device = trainer_device
-MODEL_MODE = 2
+MODEL_MODE = 3
 CONTROL_MODE = 2
 CARCHOICE = 0
 
@@ -28,7 +28,7 @@ if CARCHOICE == 1:
 else:
     car = "_MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_2xW_(Rew3.5+modelV4)" 
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_12.11.23" 
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2
@@ -181,9 +181,9 @@ class VanillaCNN(Module):
             
         elif MODEL_MODE == 3:
             if self.q_net:    
-                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  images, act1, act2, act = x
+                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2, act = x
             else:
-                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  images, act1, act2 = x           
+                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2 = x           
             
             # "Normalise" parameters [0,1]
             rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip/255.0, rRightSlip/255.0, fLeftSlip/255.0, fRightSlip/255.0, fLWheel/4.0, fRWheel/4.0, rLWheel/4.0, rRWheel/4.0
@@ -312,8 +312,8 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
     elif MODEL_MODE == 2: 
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], (obs[17][-1]).astype(np.uint8))
                   #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
-    elif MODEL_MODE == 2: 
-        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], obs[17], obs[18], obs[19], obs[20], (obs[21][-1]).astype(np.uint8))
+    elif MODEL_MODE == 3: 
+        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], obs[17], obs[18], obs[19], obs[20], (obs[21][-1]).astype(np.uint8))           
                   #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, col1, col2, col3, col4, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
 
     rew_mod = rew
@@ -615,22 +615,21 @@ class MyMemory(TorchMemory):
             to_trim = int(self.__len__() - self.memory_size)
             if to_trim > 0:
                 self.trim(to_trim, len(d_values))
-
-        # need to implement mode 3                
+             
         elif MODEL_MODE == 3:
-            d10 = [b[1][10] for b in buffer.memory]  # coll1
-            d11 = [b[1][11] for b in buffer.memory]  # coll2
-            d12 = [b[1][12] for b in buffer.memory]  # coll3
-            d13 = [b[1][13] for b in buffer.memory]  # coll4
-            d14 = [b[1][14] for b in buffer.memory]  # Slip1
-            d15 = [b[1][15] for b in buffer.memory]  # Slip2
-            d16 = [b[1][16] for b in buffer.memory]  # Slip3
-            d17 = [b[1][17] for b in buffer.memory]  # Slip4
-            d18 = [b[1][18] for b in buffer.memory]  # contact
-            d19 = [b[1][19] for b in buffer.memory]  # contact
-            d20 = [b[1][20] for b in buffer.memory]  # contact
-            d21 = [b[1][21] for b in buffer.memory]  # contact
-            d22 = [b[1][22] for b in buffer.memory]  # image
+            d10 = [b[1][8] for b in buffer.memory]  # coll1
+            d11 = [b[1][9] for b in buffer.memory]  # coll2
+            d12 = [b[1][10] for b in buffer.memory]  # coll3
+            d13 = [b[1][11] for b in buffer.memory]  # coll4
+            d14 = [b[1][12] for b in buffer.memory]  # Slip1
+            d15 = [b[1][13] for b in buffer.memory]  # Slip2
+            d16 = [b[1][14] for b in buffer.memory]  # Slip3
+            d17 = [b[1][15] for b in buffer.memory]  # Slip4
+            d18 = [b[1][16] for b in buffer.memory]  # contact
+            d19 = [b[1][17] for b in buffer.memory]  # contact
+            d20 = [b[1][18] for b in buffer.memory]  # contact
+            d21 = [b[1][19] for b in buffer.memory]  # contact
+            d22 = [b[1][20] for b in buffer.memory]  # image <--- something wrong
             d23 = [b[2] for b in buffer.memory]  # rewards
             d24 = [b[3] or b[4] for b in buffer.memory]  # done
             d25 = [b[3] for b in buffer.memory]  # terminated
@@ -770,7 +769,7 @@ def main(args):
     sample_compressor = get_local_buffer_sample_imgs
     max_samples_per_episode = 10000000000
     # RTGYM Env
-    from myRTClass_tmrl_V3 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+    from myRTClass_tmrl_V4 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
     
     my_config = DEFAULT_CONFIG_DICT
     my_config["interface"] = MyGranTurismoRTGYM
