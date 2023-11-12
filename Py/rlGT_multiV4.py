@@ -60,6 +60,7 @@ from torch.distributions.normal import Normal
 from math import floor, sqrt
 from torch.nn import Conv2d, Module
 from tmrl.memory import TorchMemory
+import random
 
 rState = spaces.Box(low=0, high=5, shape=(1,), dtype='uint8')
 eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='uint8')
@@ -417,6 +418,17 @@ class MyMemory(TorchMemory):
         So we load 5 images from here...
         Don't forget the info dict for CRC debugging
         """
+        
+        if self.data[4][item + self.min_samples - 1]:
+            if item == 0:  # if fist item of the buffer
+                item += 1
+            elif item == self.__len__() - 1:  # if last item of the buffer
+                item -= 1
+            elif random.random() < 0.5:  # otherwise, sample randomly
+                item += 1
+            else:
+                item -= 1
+        
         idx_last = item + self.min_samples - 1
         idx_now = item + self.min_samples
 
