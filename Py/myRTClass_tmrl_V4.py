@@ -20,8 +20,8 @@ import numpy as np
 import logging
 from collections import deque
 from threading import Thread
-from rewardGT import RewardFunction
-#from rewardGTV4_2 import RewardFunction
+#from rewardGT import RewardFunction
+from rewardGTV4_2 import RewardFunction
 from time import sleep
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
