@@ -1,7 +1,7 @@
 import numpy as np
 
 # Training parameters:
-CRC_DEBUG = False
+CRC_DEBUG = True
 worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
@@ -19,7 +19,7 @@ update_model_interval = 500 #2000 #steps 1000
 max_training_steps_per_env_step = 1.0
 start_training = 1 # waits for... 1000
 device = trainer_device
-MODEL_MODE = 3
+MODEL_MODE = 0
 CONTROL_MODE = 0
 CARCHOICE = 0
 
@@ -89,7 +89,11 @@ coll4= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
 
 images = spaces.Box(low=0, high=255, shape=(4, imgSize, imgSize), dtype='uint8') #255`
 
-if MODEL_MODE == 1:
+if MODEL_MODE == 0:
+    obs_space = spaces.Tuple((images,))
+    NUMBER_1D_PARAMS = 0
+
+elif MODEL_MODE == 1:
     obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
                               images))
     NUMBER_1D_PARAMS = 9
@@ -171,7 +175,13 @@ class VanillaCNN(Module):
 
     def forward(self, x):
         #print("inQ", self.q_net, x)
-        if MODEL_MODE == 1:
+        if MODEL_MODE == 0:
+            if self.q_net:    
+                images, act1, act2, act = x
+            else:
+                images, act1, act2 = x         
+        
+        elif MODEL_MODE == 1:
             if self.q_net:    
                 rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2, act = x
             else:
@@ -207,8 +217,15 @@ class VanillaCNN(Module):
         flat_features = num_flat_features(x)
         assert flat_features == self.flat_features, f"x.shape:{x.shape}, flat_features:{flat_features}, self.out_channels:{self.out_channels}, self.h_out:{self.h_out}, self.w_out:{self.w_out}"
         x = x.view(-1, flat_features) #flatten out of the CNN
+
+
+        if MODEL_MODE == 0:
+            if self.q_net:
+                x = torch.cat((x, act1, act2, act), -1) # c
+            else:
+                x = torch.cat((x, act1, act2), -1) # concat
         
-        if MODEL_MODE == 1:
+        elif MODEL_MODE == 1:
             if self.q_net:
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2, act), -1) # concat
             else:
@@ -314,8 +331,11 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
     the user must define both this function and the append() method of the memory
     CAUTION: prev_act is the action that comes BEFORE obs (i.e. prev_obs, prev_act(prev_obs), obs(prev_act))
     """
-    prev_act_mod = prev_act   
-    if MODEL_MODE == 1: #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, images[latest]
+    prev_act_mod = prev_act
+    if MODEL_MODE == 0: #images[latest]
+        obs_mod = ((obs[0][-1]).astype(np.uint8))    
+       
+    elif MODEL_MODE == 1: #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, images[latest]
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], (obs[9][-1]).astype(np.uint8))
     
     elif MODEL_MODE == 2:  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
@@ -450,7 +470,9 @@ class MyMemory(TorchMemory):
         imgs_new_obs = imgs[1:]
 
         # if a reset transition has influenced the observation, special care must be taken
-        if MODEL_MODE == 1:
+        if MODEL_MODE == 0:
+            last_eoes = self.data[4][idx_now - self.min_samples:idx_now]  # self.min_samples values
+        elif MODEL_MODE == 1:
             last_eoes = self.data[13][idx_now - self.min_samples:idx_now]  # self.min_samples values
         elif MODEL_MODE == 2:
             last_eoes = self.data[21][idx_now - self.min_samples:idx_now]  # self.min_samples values
@@ -466,15 +488,23 @@ class MyMemory(TorchMemory):
             replace_hist_before_eoe(hist=imgs_new_obs, eoe_idx_in_hist=last_eoe_idx - self.start_imgs_offset - 1)
             replace_hist_before_eoe(hist=imgs_last_obs, eoe_idx_in_hist=last_eoe_idx - self.start_imgs_offset)
 
-        if MODEL_MODE == 1:
+        if MODEL_MODE == 0:
+            last_obs = (imgs_last_obs, *last_act_buf)
+            new_act = self.data[1][idx_now]
+            rew = np.float32(self.data[3][idx_now])
+            new_obs = (imgs_new_obs, *new_act_buf)
+            terminated = self.data[5][idx_now]
+            truncated = self.data[6][idx_now]
+            info = self.data[7][idx_now]     
+
+        elif MODEL_MODE == 1:
             last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
                         self.data[5][idx_last], self.data[6][idx_last], self.data[7][idx_last], 
                         self.data[8][idx_last], self.data[9][idx_last], self.data[10][idx_last], 
                         imgs_last_obs, *last_act_buf)
             
             new_act = self.data[1][idx_now]
-            #rew = np.float32(self.data[12][idx_now])
-            rew = self.data[12][idx_now]
+            rew = np.float32(self.data[12][idx_now])
             
             new_obs = (self.data[2][idx_now], self.data[3][idx_now], self.data[4][idx_now], 
                         self.data[5][idx_now], self.data[6][idx_now], self.data[7][idx_now], 
@@ -538,7 +568,9 @@ class MyMemory(TorchMemory):
         return last_obs, new_act, rew, new_obs, terminated, truncated, info
 
     def load_imgs(self, item):
-        if MODEL_MODE == 1:
+        if MODEL_MODE == 0:
+            res = self.data[2][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+        elif MODEL_MODE == 1:
             res = self.data[11][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 2:
             res = self.data[19][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
@@ -562,28 +594,18 @@ class MyMemory(TorchMemory):
         """
         first_data_idx = self.data[0][-1] + 1 if self.__len__() > 0 else 0
         #rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images
-        #0: action 
-        d0 = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
-        d1 = [b[0] for b in buffer.memory]  # actions
-        d2 = [b[1][0] for b in buffer.memory]  # rState
-        d3 = [b[1][1] for b in buffer.memory]  # eClutch
-        d4 = [b[1][2] for b in buffer.memory]  # eSpeed
-        d5 = [b[1][3] for b in buffer.memory]  # eBoost
-        d6 = [b[1][4] for b in buffer.memory]  # eGear
-        d7 = [b[1][5] for b in buffer.memory]  # vSpeed
-        d8 = [b[1][6] for b in buffer.memory]  # vSteer
-        d9 = [b[1][7] for b in buffer.memory]  # vDir
-        
-        if MODEL_MODE == 1:
-            d10 = [b[1][8] for b in buffer.memory]  # vColl
-            d11 = [b[1][9] for b in buffer.memory]  # image
-            d12 = [b[2] for b in buffer.memory]  # rewards
-            d13 = [b[3] or b[4] for b in buffer.memory]  # done
-            d14 = [b[3] for b in buffer.memory]  # terminated
-            d15 = [b[4] for b in buffer.memory]  # truncated
-            d16 = [b[5] for b in buffer.memory]  # infos
+        #0: action
+        if MODEL_MODE==0:
+            d0 = [first_data_idx + i for i,_ in enumerate(buffer.memory)]  # indexes
+            d1 = [b[0] for b in buffer.memory]  # actions
+            d2 = [b[1] for b in buffer.memory]  # image
+            d3 = [b[2] for b in buffer.memory]  # rewards
+            d4 = [b[3] or b[4] for b in buffer.memory]  # done
+            d5 = [b[3] for b in buffer.memory]  # terminated
+            d6 = [b[4] for b in buffer.memory]  # truncated
+            d7 = [b[5] for b in buffer.memory]  # infos
             
-            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16]
+            d_values = [d0, d1, d2, d3, d4, d5, d6, d7]
             if self.__len__() > 0:
                 for i in range(len(d_values)):
                     self.data[i] += d_values[i]
@@ -595,68 +617,101 @@ class MyMemory(TorchMemory):
             if to_trim > 0:
                 self.trim(to_trim, len(d_values))
             
-        elif MODEL_MODE == 2:
-            d10 = [b[1][8] for b in buffer.memory]  # vColl
-            d11 = [b[1][9] for b in buffer.memory]  # Slip1
-            d12 = [b[1][10] for b in buffer.memory]  # Slip2
-            d13 = [b[1][11] for b in buffer.memory]  # Slip3
-            d14 = [b[1][12] for b in buffer.memory]  # Slip4
-            d15 = [b[1][13] for b in buffer.memory]  # contact
-            d16 = [b[1][14] for b in buffer.memory]  # contact
-            d17 = [b[1][15] for b in buffer.memory]  # contact
-            d18 = [b[1][16] for b in buffer.memory]  # contact
-            d19 = [b[1][17] for b in buffer.memory]  # image
-            d20 = [b[2] for b in buffer.memory]  # rewards
-            d21 = [b[3] or b[4] for b in buffer.memory]  # done
-            d22 = [b[3] for b in buffer.memory]  # terminated
-            d23 = [b[4] for b in buffer.memory]  # truncated
-            d24 = [b[5] for b in buffer.memory]  # infos
-
-            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24]
-            if self.__len__() > 0:
-                for i in range(len(d_values)):
-                    self.data[i] += d_values[i]
+        else: 
+            d0 = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
+            d1 = [b[0] for b in buffer.memory]  # actions
+            d2 = [b[1][0] for b in buffer.memory]  # rState
+            d3 = [b[1][1] for b in buffer.memory]  # eClutch
+            d4 = [b[1][2] for b in buffer.memory]  # eSpeed
+            d5 = [b[1][3] for b in buffer.memory]  # eBoost
+            d6 = [b[1][4] for b in buffer.memory]  # eGear
+            d7 = [b[1][5] for b in buffer.memory]  # vSpeed
+            d8 = [b[1][6] for b in buffer.memory]  # vSteer
+            d9 = [b[1][7] for b in buffer.memory]  # vDir
+        
+            if MODEL_MODE == 1:
+                d10 = [b[1][8] for b in buffer.memory]  # vColl
+                d11 = [b[1][9] for b in buffer.memory]  # image
+                d12 = [b[2] for b in buffer.memory]  # rewards
+                d13 = [b[3] or b[4] for b in buffer.memory]  # done
+                d14 = [b[3] for b in buffer.memory]  # terminated
+                d15 = [b[4] for b in buffer.memory]  # truncated
+                d16 = [b[5] for b in buffer.memory]  # infos
                 
-            else:
-                for d in d_values:
-                    self.data.append(d) 
- 
-            to_trim = int(self.__len__() - self.memory_size)
-            if to_trim > 0:
-                self.trim(to_trim, len(d_values))
-             
-        elif MODEL_MODE == 3:
-            d10 = [b[1][8] for b in buffer.memory]  # coll1
-            d11 = [b[1][9] for b in buffer.memory]  # coll2
-            d12 = [b[1][10] for b in buffer.memory]  # coll3
-            d13 = [b[1][11] for b in buffer.memory]  # coll4
-            d14 = [b[1][12] for b in buffer.memory]  # Slip1
-            d15 = [b[1][13] for b in buffer.memory]  # Slip2
-            d16 = [b[1][14] for b in buffer.memory]  # Slip3
-            d17 = [b[1][15] for b in buffer.memory]  # Slip4
-            d18 = [b[1][16] for b in buffer.memory]  # contact
-            d19 = [b[1][17] for b in buffer.memory]  # contact
-            d20 = [b[1][18] for b in buffer.memory]  # contact
-            d21 = [b[1][19] for b in buffer.memory]  # contact
-            d22 = [b[1][20] for b in buffer.memory]  # image <--- something wrong
-            d23 = [b[2] for b in buffer.memory]  # rewards
-            d24 = [b[3] or b[4] for b in buffer.memory]  # done
-            d25 = [b[3] for b in buffer.memory]  # terminated
-            d26 = [b[4] for b in buffer.memory]  # truncated
-            d27 = [b[5] for b in buffer.memory]  # infos
+                d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16]
+                if self.__len__() > 0:
+                    for i in range(len(d_values)):
+                        self.data[i] += d_values[i]
+                else:
+                    for d in d_values:
+                        self.data.append(d)         
 
-            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25, d26, d27]
-            if self.__len__() > 0:
-                for i in range(len(d_values)):
-                    self.data[i] += d_values[i]
+                to_trim = int(self.__len__() - self.memory_size)
+                if to_trim > 0:
+                    self.trim(to_trim, len(d_values))
                 
-            else:
-                for d in d_values:
-                    self.data.append(d) 
- 
-            to_trim = int(self.__len__() - self.memory_size)
-            if to_trim > 0:
-                self.trim(to_trim, len(d_values))        
+            elif MODEL_MODE == 2:
+                d10 = [b[1][8] for b in buffer.memory]  # vColl
+                d11 = [b[1][9] for b in buffer.memory]  # Slip1
+                d12 = [b[1][10] for b in buffer.memory]  # Slip2
+                d13 = [b[1][11] for b in buffer.memory]  # Slip3
+                d14 = [b[1][12] for b in buffer.memory]  # Slip4
+                d15 = [b[1][13] for b in buffer.memory]  # contact
+                d16 = [b[1][14] for b in buffer.memory]  # contact
+                d17 = [b[1][15] for b in buffer.memory]  # contact
+                d18 = [b[1][16] for b in buffer.memory]  # contact
+                d19 = [b[1][17] for b in buffer.memory]  # image
+                d20 = [b[2] for b in buffer.memory]  # rewards
+                d21 = [b[3] or b[4] for b in buffer.memory]  # done
+                d22 = [b[3] for b in buffer.memory]  # terminated
+                d23 = [b[4] for b in buffer.memory]  # truncated
+                d24 = [b[5] for b in buffer.memory]  # infos
+
+                d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24]
+                if self.__len__() > 0:
+                    for i in range(len(d_values)):
+                        self.data[i] += d_values[i]
+                    
+                else:
+                    for d in d_values:
+                        self.data.append(d) 
+    
+                to_trim = int(self.__len__() - self.memory_size)
+                if to_trim > 0:
+                    self.trim(to_trim, len(d_values))
+                
+            elif MODEL_MODE == 3:
+                d10 = [b[1][8] for b in buffer.memory]  # coll1
+                d11 = [b[1][9] for b in buffer.memory]  # coll2
+                d12 = [b[1][10] for b in buffer.memory]  # coll3
+                d13 = [b[1][11] for b in buffer.memory]  # coll4
+                d14 = [b[1][12] for b in buffer.memory]  # Slip1
+                d15 = [b[1][13] for b in buffer.memory]  # Slip2
+                d16 = [b[1][14] for b in buffer.memory]  # Slip3
+                d17 = [b[1][15] for b in buffer.memory]  # Slip4
+                d18 = [b[1][16] for b in buffer.memory]  # contact
+                d19 = [b[1][17] for b in buffer.memory]  # contact
+                d20 = [b[1][18] for b in buffer.memory]  # contact
+                d21 = [b[1][19] for b in buffer.memory]  # contact
+                d22 = [b[1][20] for b in buffer.memory]  # image <--- something wrong
+                d23 = [b[2] for b in buffer.memory]  # rewards
+                d24 = [b[3] or b[4] for b in buffer.memory]  # done
+                d25 = [b[3] for b in buffer.memory]  # terminated
+                d26 = [b[4] for b in buffer.memory]  # truncated
+                d27 = [b[5] for b in buffer.memory]  # infos
+
+                d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25, d26, d27]
+                if self.__len__() > 0:
+                    for i in range(len(d_values)):
+                        self.data[i] += d_values[i]
+                    
+                else:
+                    for d in d_values:
+                        self.data.append(d) 
+    
+                to_trim = int(self.__len__() - self.memory_size)
+                if to_trim > 0:
+                    self.trim(to_trim, len(d_values))        
 
         return self
 

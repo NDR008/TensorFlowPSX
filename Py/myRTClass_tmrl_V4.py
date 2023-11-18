@@ -149,8 +149,12 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
         images = spaces.Box(low=0, high=255, shape=(self.img_hist_len, self.imageSize[1], self.imageSize[0]), dtype='uint8') #255`
 
-        # 3 images    
-        if self.modelMode == 1:
+        # 3 images   
+        if self.modelMode == 0:
+            return spaces.Tuple((images,))
+        
+         
+        elif self.modelMode == 1:
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, 
                                  images))
         
@@ -192,7 +196,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                 self.img_hist.append(display)
             displayHistory = np.array(list(self.img_hist), dtype='uint8')
         
-        if self.modelMode == 1:
+        if self.modelMode == 0:
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
+            
+        elif self.modelMode == 1:
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
 
         elif self.modelMode == 2:
@@ -241,6 +248,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         self.rewardFunction.reset()         
         self.server.reloadSave(choice) # loads the save state
         obs = self.getObs(reset=True)
+        if self.modelMode == 0:
+            del obs[:9]
         
         return obs, {}
             
@@ -259,6 +268,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             # reward = reward + 500 # a new idea
         
         reward = np.float32(reward)
+        if self.modelMode == 0:
+            del obs[:9]
         
         return obs, reward, terminated, info
     
