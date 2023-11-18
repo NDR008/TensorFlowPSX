@@ -1,7 +1,7 @@
 import numpy as np
 
 # Training parameters:
-CRC_DEBUG = True
+CRC_DEBUG = False
 worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
