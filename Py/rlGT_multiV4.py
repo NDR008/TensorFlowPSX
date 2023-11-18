@@ -10,7 +10,7 @@ imgHist = 4
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
 maxEpLength = 3500
-BATCH_SIZE = 1024
+BATCH_SIZE = 1024 * 4
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
 steps = 1000  # number of training steps per round 1000
@@ -20,7 +20,7 @@ max_training_steps_per_env_step = 1.0
 start_training = 1 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 0
-CONTROL_MODE = 0
+CONTROL_MODE = 2
 CARCHOICE = 0
 
 if CARCHOICE == 1:
