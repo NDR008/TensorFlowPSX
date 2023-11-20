@@ -28,7 +28,7 @@ if CARCHOICE == 1:
 else:
     car = "_MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_3W_Reward4.2" 
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_2W_Reward4.2" 
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2
