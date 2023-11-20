@@ -1,4 +1,4 @@
-from myRTClass_tmrl_V4 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+from myRTClass_tmrl_V4_3 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
 import gymnasium
 from time import sleep
@@ -50,6 +50,7 @@ while True:
     while not terminated:
         act = env.action_space.sample()
         obs, rew, terminated, truncated, info = env.step(act)
+        print(rew)
         #print(obs)
         env.render()
     
