@@ -19,7 +19,7 @@ update_model_interval = 500 #2000 #steps 1000
 max_training_steps_per_env_step = 1.0
 start_training = 1 # waits for... 1000
 device = trainer_device
-MODEL_MODE = 1
+MODEL_MODE = 3
 CONTROL_MODE = 0
 CARCHOICE = 0
 
