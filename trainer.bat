@@ -1,1 +1,1 @@
-python Py/rlGT_multiV4_3.py --trainer
+python Py/rlGT_multiV4_3.py --trainer --local
