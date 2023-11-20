@@ -9,7 +9,7 @@ imgHist = 4
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 3500
+maxEpLength = 500
 BATCH_SIZE = 1024 * 4
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
@@ -28,7 +28,7 @@ if CARCHOICE == 1:
 else:
     car = "_MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_2W_Reward4.2" 
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_3W_Rew4.3"
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2

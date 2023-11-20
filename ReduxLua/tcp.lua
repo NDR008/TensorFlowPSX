@@ -6,7 +6,6 @@ local frames_needed = 1
 local obs = {}
 local client = nil
 local reconnectTry = false
-local CurrentPos = 0
 local maxLostPings = 50000
 local currentMissedPings = 0
 
@@ -172,6 +171,12 @@ function netTCP(netChanged, netStatus, port)
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("mr2_0_0_0_0.slice", "READ")
+            PCSX.loadSaveState(file)
+            file:close()
+        elseif readVal == 0 + 64 + 10 then         -- MR2 at HS
+            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+            print("lapt_time ", lapTime)
+            local file = Support.File.open("mr2_0_0_0_0_b.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
         elseif readVal == 16 + 64 then         -- Supra at HS

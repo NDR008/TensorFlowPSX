@@ -27,7 +27,7 @@ class RewardFunction:
         self.episodeNumber = 0
         self.steps = 0
         self.badDirectionSteps = 0
-        self.maxBadDirectionSteps = 100
+        self.maxBadDirectionSteps = 40
         self.firstLoop = True
         # x = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         # with open('logging.csv', 'a', newline='') as file:
