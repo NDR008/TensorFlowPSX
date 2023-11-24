@@ -30,8 +30,8 @@ def disAccelandBrakeDiscSteer(gamepad, control):  # control0
     gamepad.update()
 
 # discreteAccel or discBrakeBrake & discreteSteer
-# 1 controls
-def disAccelnotBrakeDiscSteer(gamepad, control):  # control2
+# 2 controls
+def disAccelorBrakeDiscSteer(gamepad, control):  # control1
     # print(control)
     if control[0] > 0:  # gas
         gamepad.press_button(button=1 << 5)  # accel
@@ -68,7 +68,8 @@ def disAccelorBrakeDiscSteer(gamepad, control): # control2
         gamepad.directional_pad(direction = 0x8) # nothing
     gamepad.update()        
 
-def disAccelnotBrakeDiscSteer2(gamepad, control): # control2.5
+
+def disAccelnotBrakeDiscSteer2(gamepad, control):  # control2.5
     #print(control)
     if control[0] > 0:  # gas
         gamepad.press_button(button = 1 << 5) # accel

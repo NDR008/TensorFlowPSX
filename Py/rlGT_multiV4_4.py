@@ -9,7 +9,7 @@ imgHist = 4
 
 ENTROPCOEFF = 0.2 #0.2
 
-MEMORY_SIZE = 5e6 #1e6
+MEMORY_SIZE = 1e6 #1e6
 ACT_BUF_LEN = 2
 maxEpLength = 3500
 BATCH_SIZE = 1024 * 2
@@ -30,7 +30,7 @@ if CARCHOICE == 1:
 else:
     car = "_MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_3W_Rew4.4"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_2W_Rew4.4"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
