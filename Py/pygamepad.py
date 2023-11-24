@@ -103,8 +103,7 @@ def contAccelOnly(gamepad, control): # control6
     gamepad.update()          
          
 
-def controlGamepad(gamepad, control, choice):
-    print(choice)      
+def controlGamepad(gamepad, control, choice): 
     if choice==0: 
         disAccelandBrakeDiscSteer(gamepad, control)
         
