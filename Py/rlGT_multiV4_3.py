@@ -7,7 +7,9 @@ trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
 imgHist = 4
 
-MEMORY_SIZE = 5e5 #1e6
+ENTROPCOEFF = 0.5 #0.2
+
+MEMORY_SIZE = 5e6 #1e6
 ACT_BUF_LEN = 2
 maxEpLength = 3500
 BATCH_SIZE = 1024 * 2
@@ -17,7 +19,7 @@ steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 500 #2000 #steps 1000
 update_model_interval = 500  # 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
-start_training = maxEpLength * 2e5 # waits for... 1000
+start_training = 0 #2e5 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 3
 CONTROL_MODE = 0
@@ -28,7 +30,8 @@ if CARCHOICE == 1:
 else:
     car = "_MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_3W_Rew4.3_(start_past_weights)"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_3W_Rew4.3_(EntropCoeff0.5)"
+#RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2
@@ -729,7 +732,7 @@ class MyTrainingAgent(TrainingAgent):
                  model_cls=MyActorCriticModule,  # an actor-critic module, encapsulating our ActorModule
                  gamma=0.99,  # discount factor
                  polyak=0.995,  # exponential averaging factor for the target critic
-                 alpha=0.2,  # fixed (SAC v1) or initial (SAC v2) value of the entropy coefficient
+                 alpha=ENTROPCOEFF,  # fixed (SAC v1) or initial (SAC v2) value of the entropy coefficient
                  lr_actor=1e-3,  # learning rate for the actor
                  lr_critic=1e-3,  # learning rate for the critic
                  lr_entropy=1e-3,  # entropy autotuning coefficient (SAC v2)
