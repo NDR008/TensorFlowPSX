@@ -89,14 +89,14 @@ class RewardFunction:
         self.reward = (best_index - self.cur_idx) / self.fudgeFactor   
         if vDir == 1: # going back is bad
             self.badDirectionSteps = self.badDirectionSteps + 1
-            self.reward = self.reward -0.005
+            self.reward = self.reward -0.005 #tuned for v4.4
         elif vSpeed < 2:  # going slow is a bit bad Changed from 15 to 2
             self.badDirectionSteps = self.badDirectionSteps + 0.5 # new for v3
-            self.reward = self.reward - 0.002
+            self.reward = self.reward - 0.002  # tuned for v4.4
         
         #v4.3
         elif vColl > 0:
-            self.reward = -0.05
+            self.reward = -0.5
           
         self.cur_idx = best_index
         

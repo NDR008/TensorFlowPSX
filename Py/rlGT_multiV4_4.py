@@ -114,7 +114,7 @@ elif MODEL_MODE == 3:
                              images))
     NUMBER_1D_PARAMS = 20
 
-if CONTROL_MODE == 0:
+if CONTROL_MODE > 0 and CONTROL_MODE < 2:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(3, ))
     NUMBER_ACTION_DIMS = 3
 elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
