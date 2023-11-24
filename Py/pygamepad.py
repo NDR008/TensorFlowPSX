@@ -28,11 +28,32 @@ def disAccelandBrakeDiscSteer(gamepad, control):  # control0
     else:
         gamepad.directional_pad(direction = 0x8) # nothing
     gamepad.update()
-        
+
+# discreteAccel or discBrakeBrake & discreteSteer
+# 1 controls
+def disAccelnotBrakeDiscSteer(gamepad, control):  # control2
+    # print(control)
+    if control[0] > 0:  # gas
+        gamepad.press_button(button=1 << 5)  # accel
+        gamepad.release_button(button = 1 << 4) # release brake
+    elif control[0] <0 :
+        gamepad.release_button(button = 1 << 5) # release accel
+        gamepad.press_button(button=1 << 4)  # brake
+    else:
+        gamepad.release_button(button=1 << 5)  # release accel
+        gamepad.release_button(button=1 << 4)  # release brake
+
+    if control[1] > 0:  # right
+        gamepad.directional_pad(direction=0x2)  # press right
+    elif control[1] < 0:  # left
+        gamepad.directional_pad(direction=0x6)  # press left
+    else:
+        gamepad.directional_pad(direction=0x8)  # nothing
+    gamepad.update()
             
 # discreteAccel & not accelAndBrake & discreteSteer
 # 2 controls
-def disAccelnotBrakeDiscSteer(gamepad, control): # control2
+def disAccelorBrakeDiscSteer(gamepad, control): # control2
     #print(control)
     if control[0] > 0:  # gas
         gamepad.press_button(button = 1 << 5) # accel
@@ -83,7 +104,10 @@ def contAccelOnly(gamepad, control): # control6
 
 def controlGamepad(gamepad, control, choice):      
     if choice==0: 
-        disAccelandBrakeDiscSteer(gamepad, control)   
+        disAccelandBrakeDiscSteer(gamepad, control)
+        
+    elif choice == 1:
+        disAccelorBrakeDiscSteer
         
     elif choice==2: 
         disAccelnotBrakeDiscSteer(gamepad, control)     
