@@ -175,16 +175,16 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                 
     # Mandatory method
     def get_action_space(self):
-        if self.controlChoice == 0 or self.controlChoice == 1:
+        if self.controlChoice == 0:
             return spaces.Box(low=-1.0, high=1.0, shape=(3, ))
-        elif self.controlChoice >=2 and self.controlChoice < 3:
+        elif self.controlChoice >=1:
             return spaces.Box(low=-1.0, high=1.0, shape=(2, ))
     
     # Mandatory method
     def get_default_action(self):
-        if self.controlChoice==0 or self.controlChoice==1:
+        if self.controlChoice == 0:
             return np.array([0.0 ,0.0, 0.0], dtype='float32')
-        elif self.controlChoice >=2 and self.controlChoice < 3:
+        elif self.controlChoice >= 1:
             return np.array([0.0 ,0.0], dtype='float32')
     
     
@@ -247,6 +247,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             c = None
             
         choice = choiceA + choiceB + 64 # hack to avoid missed ping as a load
+        if self.controlChoice == 1.5:
+            choice = choice + 10
         self.rewardFunction.reset()         
         self.server.reloadSave(choice) # loads the save state
         obs = self.getObs(reset=True)

@@ -50,10 +50,19 @@ def disAccelorBrakeDiscSteer(gamepad, control):  # control1
     else:
         gamepad.directional_pad(direction=0x8)  # nothing
     gamepad.update()
-            
-# discreteAccel & not accelAndBrake & discreteSteer
+    
+# discreteAccel or discBrakeBrake & discreteSteer
 # 2 controls
+def contAccelorBrakeContSteer(gamepad, control):  # control1.5
+    accelBrake = min(control[0], 1)
+    accelBrake = max(accelBrake, -1)
+    gamepad.right_joystick_float(x_value_float=0, y_value_float=accelBrake)
 
+    steer = min(control[1], 1)
+    steer = max(steer, -1)
+    gamepad.left_joystick_float(x_value_float=steer, y_value_float=0)
+    gamepad.update()
+            
 
 def disAccelnotBrakeDiscSteer(gamepad, control):  # control2
     #print(control)
@@ -111,6 +120,9 @@ def controlGamepad(gamepad, control, choice):
         
     elif choice == 1:
         disAccelorBrakeDiscSteer(gamepad, control)
+        
+    elif choice == 1.5:
+        contAccelorBrakeContSteer(gamepad, control)
         
     elif choice==2: 
         disAccelnotBrakeDiscSteer2(gamepad, control)

@@ -53,6 +53,7 @@ saveList1 = {
     -- Car_Dr_Ds-Da-Cpu
     { "MR2 400m Digital All",          "mr2_1_0_0_0.slice" }, -- Done
     { "MR2 HS Digital All",            "mr2_0_0_0_0.slice" },            -- Done
+    { "MR2 HS Cont All",      "mr2_0_0_0_0_cont.slice" },           -- Done
     --{ "MR2 400m Digital All (x2 CPU)", "mr2_1_0_0_1.slice" },
 }
 

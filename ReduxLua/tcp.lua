@@ -176,7 +176,7 @@ function netTCP(netChanged, netStatus, port)
         elseif readVal == 0 + 64 + 10 then         -- MR2 at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
-            local file = Support.File.open("mr2_0_0_0_0_b.slice", "READ")
+            local file = Support.File.open("mr2_0_0_0_0_cont.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
         elseif readVal == 16 + 64 then         -- Supra at HS
