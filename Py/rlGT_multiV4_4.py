@@ -22,7 +22,7 @@ max_training_steps_per_env_step = 1.0
 start_training = 0 #2e5 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 3
-CONTROL_MODE = 1
+CONTROL_MODE = 1.5
 CARCHOICE = 0
 
 if CARCHOICE == 1:
@@ -114,10 +114,10 @@ elif MODEL_MODE == 3:
                              images))
     NUMBER_1D_PARAMS = 20
 
-if CONTROL_MODE > 0 and CONTROL_MODE < 2:
+if CONTROL_MODE == 0:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(3, ))
     NUMBER_ACTION_DIMS = 3
-elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
+else:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(2, ))
     NUMBER_ACTION_DIMS = 2
 
