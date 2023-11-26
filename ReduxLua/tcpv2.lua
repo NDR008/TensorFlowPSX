@@ -8,10 +8,6 @@ local client = nil
 local reconnectTry = false
 local maxLostPings = 50000
 local currentMissedPings = 0
-local v_x = 0
-local v_y = 0
-local accel_x = 0
-local accel_Y = 0
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -76,14 +72,14 @@ local function readVehicleState()
     vehicleState['steer'] = readValue(mem, 0x800b66d6, "int16_t*")
     vehicleState['pos'] = readValue(mem, 0x800b6d69, "int16_t*")
     vehicleState['eClutch'] = readValue(mem, 0x800b6d63, "uint16_t*")
-    vehicleState['fLeftSlip '] =readValue(mem, 0x800b674e,'uint8_t*')
-    vehicleState['fRightSlip'] =readValue(mem, 0x800b6792,'uint8_t*')
-    vehicleState['rLeftSlip'] = readValue(mem, 0x800b67d6,'uint8_t*')
-    vehicleState['rRightSlip']= readValue(mem, 0x800b681a,'uint8_t*')
-    vehicleState['fLWheel'] =readValue(mem, 0x800b6778, 'int8_t*')
-    vehicleState['fRWheel'] =readValue(mem, 0x800b67bc, 'int8_t*')
-    vehicleState['rLWheel'] =readValue(mem, 0x800b6800, 'int8_t*')
-    vehicleState['rRWheel'] =readValue(mem, 0x800b6844, 'int8_t*')
+    vehicleState['fLeftSlip '] = readValue(mem, 0x800b674e, 'uint8_t*')
+    vehicleState['fRightSlip'] = readValue(mem, 0x800b6792, 'uint8_t*')
+    vehicleState['rLeftSlip'] = readValue(mem, 0x800b67d6, 'uint8_t*')
+    vehicleState['rRightSlip'] = readValue(mem, 0x800b681a, 'uint8_t*')
+    vehicleState['fLWheel'] = readValue(mem, 0x800b6778, 'int8_t*')
+    vehicleState['fRWheel'] = readValue(mem, 0x800b67bc, 'int8_t*')
+    vehicleState['rLWheel'] = readValue(mem, 0x800b6800, 'int8_t*')
+    vehicleState['rRWheel'] = readValue(mem, 0x800b6844, 'int8_t*')
     vehicleState['vColl'] = readCollission()
     return vehicleState
 end
@@ -106,7 +102,6 @@ function grabGameData()
     local gameState = readGameState()
     local vehicleState = readVehicleState()
     local posVect = readVehiclePositon()
-    
 
     -- will offload the track position calculations to Python
     --[[
@@ -125,7 +120,8 @@ function grabGameData()
     else
         obs['trackID'] = 0
     end
-    ]]--
+    ]]
+       --
 
     obs['SS'] = screen
     obs['GS'] = gameState
@@ -151,7 +147,7 @@ function netTCP(netChanged, netStatus, port)
         else
             client:close()
         end
-    -- main loop    
+        -- main loop
     elseif netStatus then
         local readVal = client:readU32() -- receive a 1 or 2 had a bug till U32 not U16 14.10!
         local ready = false
@@ -159,7 +155,7 @@ function netTCP(netChanged, netStatus, port)
         if readVal == 1 then
             ready = true
             currentMissedPings = 0
-        -- 2 is for loading a savestate    
+            -- 2 is for loading a savestate
         elseif readVal == 8 + 64 then -- MR2 at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
@@ -178,43 +174,18 @@ function netTCP(netChanged, netStatus, port)
             local file = Support.File.open("mr2_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 0 + 64 + 10 then         -- MR2 at HS
+        elseif readVal == 0 + 64 + 10 then -- MR2 at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
-            local file = Support.File.open("mr2_0_0_0_0_b.slice", "READ")
+            local file = Support.File.open("mr2_0_0_0_0_cont.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 16 + 64 then         -- Supra at HS
+        elseif readVal == 16 + 64 then -- Supra at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("sup_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        -- elseif readVal == 1 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("arc5.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 3 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("mr2_400.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 4 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("sim5.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 5 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("sim6.slice", "READ")
-        --     print("loaded sim6.slice")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
         else
             currentMissedPings = currentMissedPings + 1
         end
@@ -231,10 +202,10 @@ function netTCP(netChanged, netStatus, port)
 
         -- if this is the nth frame and we have previously received a 1
         if (frames % frames_needed) == 0 and ready then
-            grabGameData() -- take screenshot, encode it with protobuf and get ready to send it
-            client:write("P") -- send "P" for the python server to know we are ready
+            grabGameData()               -- take screenshot, encode it with protobuf and get ready to send it
+            client:write("P")            -- send "P" for the python server to know we are ready
             client:writeU32(#GlobalData) -- send the size of the chunk of data
-            client:write(GlobalData) -- send the actual chunk of data
+            client:write(GlobalData)     -- send the actual chunk of data
             client:write("D")            -- send "P" for the python server to know we are ready
         end
     end

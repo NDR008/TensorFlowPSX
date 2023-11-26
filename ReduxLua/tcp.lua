@@ -185,31 +185,6 @@ function netTCP(netChanged, netStatus, port)
             local file = Support.File.open("sup_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        -- elseif readVal == 1 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("arc5.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 3 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("mr2_400.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 4 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("sim5.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 5 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("sim6.slice", "READ")
-        --     print("loaded sim6.slice")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
         else
             currentMissedPings = currentMissedPings + 1
         end
