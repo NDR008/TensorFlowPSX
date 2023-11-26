@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+// Not necessary for Python but should still be declared to avoid name collisions 
+// in the Protocol Buffers namespace and non-Python languages
+package GT;
+
+enum BPP {
+    BPP_16 = 0;
+    BPP_24 = 1;
+}
+
+message PosVect {
+    int32 x = 1;
+    int32 y = 2;
+    int32 z = 3;
+}
+
+message GameState {
+    int32 raceState = 1;
+}
+
+message Vehicle {
+    int32 engSpeed = 1;
+    int32 engBoost = 2;
+    int32 engGear = 3;
+    int32 speed = 4;
+    sint32 steer = 5;
+    int32 pos = 6;
+    int32 fLeftSlip = 7;
+    int32 fRightSlip = 8;
+    int32 rLeftSlip = 9;
+    int32 rRightSlip = 10;
+    int32 eClutch = 11;
+    int32 fLWheel = 12;
+    int32 fRWheel = 13;
+    int32 rLWheel = 14;
+    int32 rRWheel = 15;
+    int32 vColl = 16;
+}
+
+message Screen {
+    bytes data = 1;
+    int32 width = 2;
+    int32 height = 3;
+    BPP bpp = 4;
+}
+
+message Observation {
+    Screen SS = 1;
+    GameState GS = 2;
+    Vehicle VS = 3;
+    int32 frame = 4;
+    PosVect posVect = 5;
+    int32 trackID = 6;
+    int32 drivingDir = 7;
+    PosVect velVect = 8;  // posVect2 - postVect1
+    PosVect accelVect = 9;  // velVect2 - velVect1
+}

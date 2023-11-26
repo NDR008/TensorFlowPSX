@@ -1,4 +1,4 @@
-from myRTClass_tmrl_V4 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+from myRTClass_tmrl_V4_4 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
 import gymnasium
 from time import sleep
@@ -17,8 +17,8 @@ my_config["wait_on_done"] = False
 
 my_config["interface_kwargs"] = {
   'debugFlag': False, # do not use render() while True
-  'modelMode': 3,
-  'controlMode' : 2,
+  'modelMode': 0,
+  'controlMode' : 1.5,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : 64,
@@ -50,6 +50,7 @@ while True:
     while not terminated:
         act = env.action_space.sample()
         obs, rew, terminated, truncated, info = env.step(act)
+        print(rew)
         #print(obs)
         env.render()
     

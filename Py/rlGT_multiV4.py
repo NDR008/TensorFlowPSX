@@ -10,16 +10,16 @@ imgHist = 4
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
 maxEpLength = 3500
-BATCH_SIZE = 1024
+BATCH_SIZE = 1024 * 4
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
 steps = 1000  # number of training steps per round 1000
-update_buffer_interval = 2000 #steps 1000
-update_model_interval = 2000 #steps 1000
+update_buffer_interval = 500 #2000 #steps 1000
+update_model_interval = 500 #2000 #steps 1000
 max_training_steps_per_env_step = 1.0
-start_training = 1000 # waits for... 1000
+start_training = 1 # waits for... 1000
 device = trainer_device
-MODEL_MODE = 2
+MODEL_MODE = 0
 CONTROL_MODE = 2
 CARCHOICE = 0
 
@@ -28,7 +28,7 @@ if CARCHOICE == 1:
 else:
     car = "_MR2_mode_"
 
-RUN_NAME = "GTAI" + car + str(MODEL_MODE) + "_control_" + str(CONTROL_MODE) + "_2xW_ET_v3(Rewardv3.5)" 
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_3W_Reward4.2" 
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2
@@ -60,6 +60,7 @@ from torch.distributions.normal import Normal
 from math import floor, sqrt
 from torch.nn import Conv2d, Module
 from tmrl.memory import TorchMemory
+import random
 
 rState = spaces.Box(low=0, high=5, shape=(1,), dtype='uint8')
 eClutch = spaces.Box(low=0, high=3, shape=(1,), dtype='uint8')
@@ -80,17 +81,42 @@ fRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
 rLWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
 rRWheel= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
 
+coll1= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
+coll2= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
+coll3= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
+coll4= spaces.Box(low=0, high=4, shape=(1,), dtype='uint8')
+
+
 images = spaces.Box(low=0, high=255, shape=(4, imgSize, imgSize), dtype='uint8') #255`
 
-if MODEL_MODE == 1:
-    obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images))
+if MODEL_MODE == 0:
+    obs_space = spaces.Tuple((images,))
+    NUMBER_1D_PARAMS = 0
+
+elif MODEL_MODE == 1:
+    obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
+                              images))
+    NUMBER_1D_PARAMS = 9
 elif MODEL_MODE == 2:
-    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images))
+    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
+                             rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, #4
+                             fLWheel, fRWheel, rLWheel, rRWheel, #4
+                             images))
+    NUMBER_1D_PARAMS = 17
+elif MODEL_MODE == 3:
+    obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, #8
+                             coll1, coll2, coll3, coll4, #4
+                             rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, #4
+                             fLWheel, fRWheel, rLWheel, rRWheel, #4
+                             images))
+    NUMBER_1D_PARAMS = 20
 
 if CONTROL_MODE == 0:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(3, ))
+    NUMBER_ACTION_DIMS = 3
 elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(2, ))
+    NUMBER_ACTION_DIMS = 2
 
 print(f"action space: {act_space}")
 print(f"observation space: {obs_space}")
@@ -140,23 +166,22 @@ class VanillaCNN(Module):
         self.out_channels = self.conv4.out_channels
         self.flat_features = self.out_channels * self.h_out * self.w_out
         # act, # 9 + 4
-        if MODEL_MODE == 1:
-            if CONTROL_MODE == 0:
-                self.mlp_input_features = self.flat_features + 20 if self.q_net else self.flat_features + 17
-            elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
-                self.mlp_input_features = self.flat_features + 15 if self.q_net else self.flat_features + 13
-        elif MODEL_MODE == 2:
-            if CONTROL_MODE == 0:
-                self.mlp_input_features = self.flat_features + 26 if self.q_net else self.flat_features + 23
-            elif CONTROL_MODE >= 2 and CONTROL_MODE < 3:
-                self.mlp_input_features = self.flat_features + 23 if self.q_net else self.flat_features + 21
-        
+
+        # generalised
+        self.mlp_input_features = self.flat_features + NUMBER_1D_PARAMS + NUMBER_ACTION_DIMS * 3 if self.q_net else self.flat_features + NUMBER_1D_PARAMS + NUMBER_ACTION_DIMS * 2
+
         self.mlp_layers = [256, 256, 1] if self.q_net else [256, 256]
         self.mlp = mlp([self.mlp_input_features] + self.mlp_layers, nn.ReLU)
 
     def forward(self, x):
         #print("inQ", self.q_net, x)
-        if MODEL_MODE == 1:
+        if MODEL_MODE == 0:
+            if self.q_net:    
+                images, act1, act2, act = x
+            else:
+                images, act1, act2 = x         
+        
+        elif MODEL_MODE == 1:
             if self.q_net:    
                 rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2, act = x
             else:
@@ -174,15 +199,16 @@ class VanillaCNN(Module):
             
         elif MODEL_MODE == 3:
             if self.q_net:    
-                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  images, act1, act2, act = x
+                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2, act = x
             else:
-                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  images, act1, act2 = x           
+                rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2 = x           
             
             # "Normalise" parameters [0,1]
-            rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0, rLeftSlip/255.0, rRightSlip/255.0, fLeftSlip/255.0, fRightSlip/255.0, fLWheel/4.0, fRWheel/4.0, rLWheel/4.0, rRWheel/4.0
+            rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip/255.0, rRightSlip/255.0, fLeftSlip/255.0, fRightSlip/255.0, fLWheel/4.0, fRWheel/4.0, rLWheel/4.0, rRWheel/4.0
         
         #print(">>>>>>>>>>>>>>>>>>>>", images.shape)    
         images = images.to(torch.float32)/255.0
+
 
         x = F.relu(self.conv1(images))
         x = F.relu(self.conv2(x))
@@ -191,22 +217,29 @@ class VanillaCNN(Module):
         flat_features = num_flat_features(x)
         assert flat_features == self.flat_features, f"x.shape:{x.shape}, flat_features:{flat_features}, self.out_channels:{self.out_channels}, self.h_out:{self.h_out}, self.w_out:{self.w_out}"
         x = x.view(-1, flat_features) #flatten out of the CNN
+
+
+        if MODEL_MODE == 0:
+            if self.q_net:
+                x = torch.cat((x, act1, act2, act), -1) # c
+            else:
+                x = torch.cat((x, act1, act2), -1) # concat
         
-        if MODEL_MODE == 1:
+        elif MODEL_MODE == 1:
             if self.q_net:
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2, act), -1) # concat
             else:
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat
         elif MODEL_MODE == 2:
             if self.q_net:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2, act), -1) # concat
+                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2, act), -1) # concat
             else:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2), -1) # concat               
+                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2), -1) # concat               
         elif MODEL_MODE == 3:
             if self.q_net:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2, act), -1) # concat
+                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2, act), -1) # concat
             else:
-                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel,  x, act1, act2), -1) # concat               
+                x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2), -1) # concat               
                 
         x = self.mlp(x)
         return x
@@ -298,12 +331,20 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
     the user must define both this function and the append() method of the memory
     CAUTION: prev_act is the action that comes BEFORE obs (i.e. prev_obs, prev_act(prev_obs), obs(prev_act))
     """
-    prev_act_mod = prev_act   
-    if MODEL_MODE == 1: #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, images[latest]
+    prev_act_mod = prev_act
+    if MODEL_MODE == 0: #images[latest]
+        obs_mod = ((obs[0][-1]).astype(np.uint8))    
+       
+    elif MODEL_MODE == 1: #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, images[latest]
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], (obs[9][-1]).astype(np.uint8))
-    elif MODEL_MODE == 2: 
+    
+    elif MODEL_MODE == 2:  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], (obs[17][-1]).astype(np.uint8))
-                  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
+    
+    elif MODEL_MODE == 3:# rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, cola8, colb9, colc10, cold11, rLeftSlip12, rRightSlip13, fLeftSlip14, fRightSlip15, fLWheel16, fRWheel17, rLWheel18, rRWheel19, images[latest]
+        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], obs[17], obs[18], obs[19], (obs[20][-1]).astype(np.uint8))           
+                  
+
     rew_mod = rew
     terminated_mod = terminated
     truncated_mod = truncated
@@ -406,6 +447,17 @@ class MyMemory(TorchMemory):
         So we load 5 images from here...
         Don't forget the info dict for CRC debugging
         """
+        
+        if self.data[4][item + self.min_samples - 1]:
+            if item == 0:  # if fist item of the buffer
+                item += 1
+            elif item == self.__len__() - 1:  # if last item of the buffer
+                item -= 1
+            elif random.random() < 0.5:  # otherwise, sample randomly
+                item += 1
+            else:
+                item -= 1
+        
         idx_last = item + self.min_samples - 1
         idx_now = item + self.min_samples
 
@@ -418,7 +470,9 @@ class MyMemory(TorchMemory):
         imgs_new_obs = imgs[1:]
 
         # if a reset transition has influenced the observation, special care must be taken
-        if MODEL_MODE == 1:
+        if MODEL_MODE == 0:
+            last_eoes = self.data[4][idx_now - self.min_samples:idx_now]  # self.min_samples values
+        elif MODEL_MODE == 1:
             last_eoes = self.data[13][idx_now - self.min_samples:idx_now]  # self.min_samples values
         elif MODEL_MODE == 2:
             last_eoes = self.data[21][idx_now - self.min_samples:idx_now]  # self.min_samples values
@@ -434,15 +488,23 @@ class MyMemory(TorchMemory):
             replace_hist_before_eoe(hist=imgs_new_obs, eoe_idx_in_hist=last_eoe_idx - self.start_imgs_offset - 1)
             replace_hist_before_eoe(hist=imgs_last_obs, eoe_idx_in_hist=last_eoe_idx - self.start_imgs_offset)
 
-        if MODEL_MODE == 1:
+        if MODEL_MODE == 0:
+            last_obs = (imgs_last_obs, *last_act_buf)
+            new_act = self.data[1][idx_now]
+            rew = np.float32(self.data[3][idx_now])
+            new_obs = (imgs_new_obs, *new_act_buf)
+            terminated = self.data[5][idx_now]
+            truncated = self.data[6][idx_now]
+            info = self.data[7][idx_now]     
+
+        elif MODEL_MODE == 1:
             last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
                         self.data[5][idx_last], self.data[6][idx_last], self.data[7][idx_last], 
                         self.data[8][idx_last], self.data[9][idx_last], self.data[10][idx_last], 
                         imgs_last_obs, *last_act_buf)
             
             new_act = self.data[1][idx_now]
-            #rew = np.float32(self.data[12][idx_now])
-            rew = self.data[12][idx_now]
+            rew = np.float32(self.data[12][idx_now])
             
             new_obs = (self.data[2][idx_now], self.data[3][idx_now], self.data[4][idx_now], 
                         self.data[5][idx_now], self.data[6][idx_now], self.data[7][idx_now], 
@@ -506,12 +568,14 @@ class MyMemory(TorchMemory):
         return last_obs, new_act, rew, new_obs, terminated, truncated, info
 
     def load_imgs(self, item):
-        if MODEL_MODE == 1:
+        if MODEL_MODE == 0:
+            res = self.data[2][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+        elif MODEL_MODE == 1:
             res = self.data[11][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 2:
             res = self.data[19][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 3:
-            res = self.data[23][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+            res = self.data[22][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         return np.stack(res).astype(np.uint8)
 
     def load_acts(self, item):
@@ -530,28 +594,18 @@ class MyMemory(TorchMemory):
         """
         first_data_idx = self.data[0][-1] + 1 if self.__len__() > 0 else 0
         #rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images
-        #0: action 
-        d0 = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
-        d1 = [b[0] for b in buffer.memory]  # actions
-        d2 = [b[1][0] for b in buffer.memory]  # rState
-        d3 = [b[1][1] for b in buffer.memory]  # eClutch
-        d4 = [b[1][2] for b in buffer.memory]  # eSpeed
-        d5 = [b[1][3] for b in buffer.memory]  # eBoost
-        d6 = [b[1][4] for b in buffer.memory]  # eGear
-        d7 = [b[1][5] for b in buffer.memory]  # vSpeed
-        d8 = [b[1][6] for b in buffer.memory]  # vSteer
-        d9 = [b[1][7] for b in buffer.memory]  # vDir
-        
-        if MODEL_MODE == 1:
-            d10 = [b[1][8] for b in buffer.memory]  # vColl
-            d11 = [b[1][9] for b in buffer.memory]  # image
-            d12 = [b[2] for b in buffer.memory]  # rewards
-            d13 = [b[3] or b[4] for b in buffer.memory]  # done
-            d14 = [b[3] for b in buffer.memory]  # terminated
-            d15 = [b[4] for b in buffer.memory]  # truncated
-            d16 = [b[5] for b in buffer.memory]  # infos
+        #0: action
+        if MODEL_MODE==0:
+            d0 = [first_data_idx + i for i,_ in enumerate(buffer.memory)]  # indexes
+            d1 = [b[0] for b in buffer.memory]  # actions
+            d2 = [b[1] for b in buffer.memory]  # image
+            d3 = [b[2] for b in buffer.memory]  # rewards
+            d4 = [b[3] or b[4] for b in buffer.memory]  # done
+            d5 = [b[3] for b in buffer.memory]  # terminated
+            d6 = [b[4] for b in buffer.memory]  # truncated
+            d7 = [b[5] for b in buffer.memory]  # infos
             
-            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16]
+            d_values = [d0, d1, d2, d3, d4, d5, d6, d7]
             if self.__len__() > 0:
                 for i in range(len(d_values)):
                     self.data[i] += d_values[i]
@@ -563,69 +617,101 @@ class MyMemory(TorchMemory):
             if to_trim > 0:
                 self.trim(to_trim, len(d_values))
             
-        elif MODEL_MODE == 2:
-            d10 = [b[1][8] for b in buffer.memory]  # vColl
-            d11 = [b[1][9] for b in buffer.memory]  # Slip1
-            d12 = [b[1][10] for b in buffer.memory]  # Slip2
-            d13 = [b[1][11] for b in buffer.memory]  # Slip3
-            d14 = [b[1][12] for b in buffer.memory]  # Slip4
-            d15 = [b[1][13] for b in buffer.memory]  # contact
-            d16 = [b[1][14] for b in buffer.memory]  # contact
-            d17 = [b[1][15] for b in buffer.memory]  # contact
-            d18 = [b[1][16] for b in buffer.memory]  # contact
-            d19 = [b[1][17] for b in buffer.memory]  # image
-            d20 = [b[2] for b in buffer.memory]  # rewards
-            d21 = [b[3] or b[4] for b in buffer.memory]  # done
-            d22 = [b[3] for b in buffer.memory]  # terminated
-            d23 = [b[4] for b in buffer.memory]  # truncated
-            d24 = [b[5] for b in buffer.memory]  # infos
-
-            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24]
-            if self.__len__() > 0:
-                for i in range(len(d_values)):
-                    self.data[i] += d_values[i]
+        else: 
+            d0 = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
+            d1 = [b[0] for b in buffer.memory]  # actions
+            d2 = [b[1][0] for b in buffer.memory]  # rState
+            d3 = [b[1][1] for b in buffer.memory]  # eClutch
+            d4 = [b[1][2] for b in buffer.memory]  # eSpeed
+            d5 = [b[1][3] for b in buffer.memory]  # eBoost
+            d6 = [b[1][4] for b in buffer.memory]  # eGear
+            d7 = [b[1][5] for b in buffer.memory]  # vSpeed
+            d8 = [b[1][6] for b in buffer.memory]  # vSteer
+            d9 = [b[1][7] for b in buffer.memory]  # vDir
+        
+            if MODEL_MODE == 1:
+                d10 = [b[1][8] for b in buffer.memory]  # vColl
+                d11 = [b[1][9] for b in buffer.memory]  # image
+                d12 = [b[2] for b in buffer.memory]  # rewards
+                d13 = [b[3] or b[4] for b in buffer.memory]  # done
+                d14 = [b[3] for b in buffer.memory]  # terminated
+                d15 = [b[4] for b in buffer.memory]  # truncated
+                d16 = [b[5] for b in buffer.memory]  # infos
                 
-            else:
-                for d in d_values:
-                    self.data.append(d) 
- 
-            to_trim = int(self.__len__() - self.memory_size)
-            if to_trim > 0:
-                self.trim(to_trim, len(d_values))
+                d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16]
+                if self.__len__() > 0:
+                    for i in range(len(d_values)):
+                        self.data[i] += d_values[i]
+                else:
+                    for d in d_values:
+                        self.data.append(d)         
 
-        # need to implement mode 3                
-        elif MODEL_MODE == 3:
-            d10 = [b[1][10] for b in buffer.memory]  # coll1
-            d11 = [b[1][11] for b in buffer.memory]  # coll2
-            d12 = [b[1][12] for b in buffer.memory]  # coll3
-            d13 = [b[1][13] for b in buffer.memory]  # coll4
-            d14 = [b[1][14] for b in buffer.memory]  # Slip1
-            d15 = [b[1][15] for b in buffer.memory]  # Slip2
-            d16 = [b[1][16] for b in buffer.memory]  # Slip3
-            d17 = [b[1][17] for b in buffer.memory]  # Slip4
-            d18 = [b[1][18] for b in buffer.memory]  # contact
-            d19 = [b[1][19] for b in buffer.memory]  # contact
-            d20 = [b[1][20] for b in buffer.memory]  # contact
-            d21 = [b[1][21] for b in buffer.memory]  # contact
-            d22 = [b[1][22] for b in buffer.memory]  # image
-            d23 = [b[2] for b in buffer.memory]  # rewards
-            d24 = [b[3] or b[4] for b in buffer.memory]  # done
-            d25 = [b[3] for b in buffer.memory]  # terminated
-            d26 = [b[4] for b in buffer.memory]  # truncated
-            d27 = [b[5] for b in buffer.memory]  # infos
-
-            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25, d26, d27]
-            if self.__len__() > 0:
-                for i in range(len(d_values)):
-                    self.data[i] += d_values[i]
+                to_trim = int(self.__len__() - self.memory_size)
+                if to_trim > 0:
+                    self.trim(to_trim, len(d_values))
                 
-            else:
-                for d in d_values:
-                    self.data.append(d) 
- 
-            to_trim = int(self.__len__() - self.memory_size)
-            if to_trim > 0:
-                self.trim(to_trim, len(d_values))        
+            elif MODEL_MODE == 2:
+                d10 = [b[1][8] for b in buffer.memory]  # vColl
+                d11 = [b[1][9] for b in buffer.memory]  # Slip1
+                d12 = [b[1][10] for b in buffer.memory]  # Slip2
+                d13 = [b[1][11] for b in buffer.memory]  # Slip3
+                d14 = [b[1][12] for b in buffer.memory]  # Slip4
+                d15 = [b[1][13] for b in buffer.memory]  # contact
+                d16 = [b[1][14] for b in buffer.memory]  # contact
+                d17 = [b[1][15] for b in buffer.memory]  # contact
+                d18 = [b[1][16] for b in buffer.memory]  # contact
+                d19 = [b[1][17] for b in buffer.memory]  # image
+                d20 = [b[2] for b in buffer.memory]  # rewards
+                d21 = [b[3] or b[4] for b in buffer.memory]  # done
+                d22 = [b[3] for b in buffer.memory]  # terminated
+                d23 = [b[4] for b in buffer.memory]  # truncated
+                d24 = [b[5] for b in buffer.memory]  # infos
+
+                d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24]
+                if self.__len__() > 0:
+                    for i in range(len(d_values)):
+                        self.data[i] += d_values[i]
+                    
+                else:
+                    for d in d_values:
+                        self.data.append(d) 
+    
+                to_trim = int(self.__len__() - self.memory_size)
+                if to_trim > 0:
+                    self.trim(to_trim, len(d_values))
+                
+            elif MODEL_MODE == 3:
+                d10 = [b[1][8] for b in buffer.memory]  # coll1
+                d11 = [b[1][9] for b in buffer.memory]  # coll2
+                d12 = [b[1][10] for b in buffer.memory]  # coll3
+                d13 = [b[1][11] for b in buffer.memory]  # coll4
+                d14 = [b[1][12] for b in buffer.memory]  # Slip1
+                d15 = [b[1][13] for b in buffer.memory]  # Slip2
+                d16 = [b[1][14] for b in buffer.memory]  # Slip3
+                d17 = [b[1][15] for b in buffer.memory]  # Slip4
+                d18 = [b[1][16] for b in buffer.memory]  # contact
+                d19 = [b[1][17] for b in buffer.memory]  # contact
+                d20 = [b[1][18] for b in buffer.memory]  # contact
+                d21 = [b[1][19] for b in buffer.memory]  # contact
+                d22 = [b[1][20] for b in buffer.memory]  # image <--- something wrong
+                d23 = [b[2] for b in buffer.memory]  # rewards
+                d24 = [b[3] or b[4] for b in buffer.memory]  # done
+                d25 = [b[3] for b in buffer.memory]  # terminated
+                d26 = [b[4] for b in buffer.memory]  # truncated
+                d27 = [b[5] for b in buffer.memory]  # infos
+
+                d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25, d26, d27]
+                if self.__len__() > 0:
+                    for i in range(len(d_values)):
+                        self.data[i] += d_values[i]
+                    
+                else:
+                    for d in d_values:
+                        self.data.append(d) 
+    
+                to_trim = int(self.__len__() - self.memory_size)
+                if to_trim > 0:
+                    self.trim(to_trim, len(d_values))        
 
         return self
 
@@ -747,7 +833,7 @@ def main(args):
     sample_compressor = get_local_buffer_sample_imgs
     max_samples_per_episode = 10000000000
     # RTGYM Env
-    from myRTClass_tmrl_V3 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+    from myRTClass_tmrl_V4 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
     
     my_config = DEFAULT_CONFIG_DICT
     my_config["interface"] = MyGranTurismoRTGYM
@@ -765,8 +851,7 @@ def main(args):
         'debugFlag': False, # do not use render() while True
         'controlMode' : CONTROL_MODE,
         'modelMode': MODEL_MODE,
-        #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
-        'imageWidth' : imgSize, # there is a default Cov layer for PPO with 240 x 320
+        'imageWidth' : imgSize,
         'imageHeight' : imgSize,
         'carChoice' : CARCHOICE, # 0 is MR2, 1 is Supra, 2 is Civic
         'trackChoice' : 0, # 0 is HS, 1 is 400m
