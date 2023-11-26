@@ -27,11 +27,11 @@ CONTROL_MODE = 0
 CARCHOICE = 0
 
 if CARCHOICE == 1:
-    car = "_Supra_mode_"
+    car = "Supra_mode_"
 else:
-    car = "_MR2_mode_"
+    car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_3W_Rew4.4"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "4.5_AutoStart"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
