@@ -88,12 +88,12 @@ class RewardFunction:
         # The reward is then proportional to the number of passed indexes (i.e., track distance):
         self.reward = (best_index - self.cur_idx) / self.fudgeFactor   
         if vDir == 1: # going back is bad
-            self.badDirectionSteps = self.badDirectionSteps + 1
-            self.reward = self.reward -0.3
-        if vSpeed < 1:  # going slow is a bit bad Changed from 15 to 2
+            self.badDirectionSteps = self.badDirectionSteps + 5
+            self.reward = self.reward
+        if vSpeed < 15:  # going slow is a bit bad Changed from 15 to 2
             self.badDirectionSteps = self.badDirectionSteps + 0.2 # new for v3    
         if vColl > 0:
-            self.reward = self.reward - 0.2
+            self.reward = self.reward - 0.5
           
         self.cur_idx = best_index
         

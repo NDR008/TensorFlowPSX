@@ -1,5 +1,4 @@
-import numpy as np
-
+import numpy as np  
 # Training parameters:
 
 CRC_DEBUG = False
@@ -9,6 +8,9 @@ imgSize = 64 #assuming 64 x 64
 imgHist = 4
 LEARN_ENTROPY_COEF = True
 ENTROPCOEFF = 0.2 #0.2
+LR_ACT1 = 1e-3
+LR_CRIT = 1e-3
+LR_ENTR = 1e-3
 
 MEMORY_SIZE = 1e6 #1e6
 ACT_BUF_LEN = 2
@@ -37,12 +39,6 @@ RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "4.5_AutoStart
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
-
-
-import os
-os.environ['NUMEXPR_MAX_THREADS'] = '14'
-os.environ['NUMEXPR_NUM_THREADS'] = '14'
-import numexpr as ne 
 
 import gymnasium.spaces as spaces
 import torch
@@ -806,9 +802,9 @@ class MyTrainingAgent(TrainingAgent):
                  gamma=0.99,  # discount factor
                  polyak=0.995,  # exponential averaging factor for the target critic
                  alpha=ENTROPCOEFF,  # fixed (SAC v1) or initial (SAC v2) value of the entropy coefficient
-                 lr_actor=1e-3,  # learning rate for the actor
-                 lr_critic=1e-3,  # learning rate for the critic
-                 lr_entropy=1e-3,  # entropy autotuning coefficient (SAC v2)
+                 lr_actor=  LR_ACT,  # learning rate for the actor
+                 lr_critic= LR_CRIT,  # learning rate for the critic
+                 lr_entropy=LR_ENTR,  # entropy autotuning coefficient (SAC v2)
                  learn_entropy_coef=LEARN_ENTROPY_COEF,  # if True, SAC v2 is used, else, SAC v1 is used
                  target_entropy=None):  # if None, the target entropy for SAC v2 is set automatically
         super().__init__(observation_space=observation_space,
