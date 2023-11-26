@@ -102,10 +102,10 @@ elif MODEL_MODE == 1:
                               images))
     NUMBER_1D_PARAMS = 9
     
-elif MODEL_MODE == 1:
-    obs_space = spaces.Tuple((eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
+elif MODEL_MODE == 1.5:
+    obs_space = spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
                               images))
-    NUMBER_1D_PARAMS = 8    
+    NUMBER_1D_PARAMS = 7   
     
 elif MODEL_MODE == 2:
     obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
@@ -200,10 +200,10 @@ class VanillaCNN(Module):
 
         elif MODEL_MODE == 1.5:
             if self.q_net:    
-                eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2, act = x
+                eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2, act = x
             else:
-                eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2 = x         
-            eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl = eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0
+                eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2 = x         
+            eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl = eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0
             
         elif MODEL_MODE == 2:
             if self.q_net:    
@@ -249,9 +249,9 @@ class VanillaCNN(Module):
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat
         elif MODEL_MODE == 1.5:
             if self.q_net:
-                x = torch.cat((eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2, act), -1) # concat
+                x = torch.cat((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2, act), -1) # concat
             else:
-                x = torch.cat((eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat                
+                x = torch.cat((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat                
         elif MODEL_MODE == 2:
             if self.q_net:
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2, act), -1) # concat
@@ -360,8 +360,8 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
     elif MODEL_MODE == 1: #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, images[latest]
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], (obs[9][-1]).astype(np.uint8))
     
-    elif MODEL_MODE == 1.5: #eClutch0, eSpeed1, eBoost2, eGear3, vSpeed4, vSteer5, vDir6, vColl7, images[latest]
-        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], (obs[8][-1]).astype(np.uint8))
+    elif MODEL_MODE == 1.5: #eSpeed0, eBoost1, eGear2, vSpeed3, vSteer4, vDir5, vColl6, images[latest]
+        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], (obs[7][-1]).astype(np.uint8))
     
     elif MODEL_MODE == 2:  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], (obs[17][-1]).astype(np.uint8))
@@ -500,7 +500,7 @@ class MyMemory(TorchMemory):
         elif MODEL_MODE == 1:
             last_eoes = self.data[13][idx_now - self.min_samples:idx_now]  # self.min_samples values
         elif MODEL_MODE == 1.5:
-            last_eoes = self.data[12][idx_now - self.min_samples:idx_now]  # self.min_samples values
+            last_eoes = self.data[11][idx_now - self.min_samples:idx_now]  # self.min_samples values
         elif MODEL_MODE == 2:
             last_eoes = self.data[21][idx_now - self.min_samples:idx_now]  # self.min_samples values
         elif MODEL_MODE == 3:
@@ -545,7 +545,7 @@ class MyMemory(TorchMemory):
         elif MODEL_MODE == 1.5:
             last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
                         self.data[5][idx_last], self.data[6][idx_last], self.data[7][idx_last], 
-                        self.data[8][idx_last], self.data[9][idx_last], 
+                        self.data[8][idx_last],
                         imgs_last_obs, *last_act_buf)
             
             new_act = self.data[1][idx_now]
@@ -553,12 +553,12 @@ class MyMemory(TorchMemory):
             
             new_obs = (self.data[2][idx_now], self.data[3][idx_now], self.data[4][idx_now], 
                         self.data[5][idx_now], self.data[6][idx_now], self.data[7][idx_now], 
-                        self.data[8][idx_now], self.data[9][idx_now], 
+                        self.data[8][idx_now], 
                         imgs_new_obs, *new_act_buf)
             
-            terminated = self.data[13][idx_now]
-            truncated = self.data[14][idx_now]
-            info = self.data[15][idx_now]                      
+            terminated = self.data[12][idx_now]
+            truncated = self.data[13][idx_now]
+            info = self.data[14][idx_now]                      
         
         elif MODEL_MODE == 2:
             last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
@@ -618,7 +618,7 @@ class MyMemory(TorchMemory):
         elif MODEL_MODE == 1:
             res = self.data[11][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 1.5:
-            res = self.data[10][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+            res = self.data[9][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 2:
             res = self.data[19][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 3:
@@ -665,24 +665,23 @@ class MyMemory(TorchMemory):
                 self.trim(to_trim, len(d_values))
                 
         elif MODEL_MODE==1.5:
-            d0 = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
-            d1 = [b[0] for b in buffer.memory]  # actions
-            d2 = [b[1][0] for b in buffer.memory]  # eClutch
-            d3 = [b[1][1] for b in buffer.memory]  # eSpeed
-            d4 = [b[1][2] for b in buffer.memory]  # eBoost
-            d5 = [b[1][3] for b in buffer.memory]  # eGear
-            d6 = [b[1][4] for b in buffer.memory]  # vSpeed
-            d7 = [b[1][5] for b in buffer.memory]  # vSteer
-            d8 = [b[1][6] for b in buffer.memory]  # vDir
-            d9 = [b[1][7] for b in buffer.memory]  # vColl
-            d10 = [b[1][8] for b in buffer.memory]  # image
-            d11 = [b[2] for b in buffer.memory]  # rewards
-            d12 = [b[3] or b[4] for b in buffer.memory]  # done
-            d13 = [b[3] for b in buffer.memory]  # terminated
-            d14 = [b[4] for b in buffer.memory]  # truncated
-            d15 = [b[5] for b in buffer.memory]  # infos
+            d0  = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
+            d1  = [b[0] for b in buffer.memory]  # actions
+            d2  = [b[1][0] for b in buffer.memory]  # eSpeed
+            d3  = [b[1][1] for b in buffer.memory]  # eBoost
+            d4  = [b[1][2] for b in buffer.memory]  # eGear
+            d5  = [b[1][3] for b in buffer.memory]  # vSpeed
+            d6  = [b[1][4] for b in buffer.memory]  # vSteer
+            d7  = [b[1][5] for b in buffer.memory]  # vDir
+            d8  = [b[1][6] for b in buffer.memory]  # vColl
+            d9  = [b[1][7] for b in buffer.memory]  # image
+            d10 = [b[2] for b in buffer.memory]  # rewards
+            d11 = [b[3] or b[4] for b in buffer.memory]  # done
+            d12 = [b[3] for b in buffer.memory]  # terminated
+            d13 = [b[4] for b in buffer.memory]  # truncated
+            d14 = [b[5] for b in buffer.memory]  # infos
             
-            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15]
+            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14]
             if self.__len__() > 0:
                 for i in range(len(d_values)):
                     self.data[i] += d_values[i]

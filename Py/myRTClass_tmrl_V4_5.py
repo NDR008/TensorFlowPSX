@@ -208,7 +208,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
             
         elif self.modelMode == 1.5: 
-            obs = [eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
+            obs = [eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
 
         elif self.modelMode == 2:
             #print(displayHistory.shape)
