@@ -198,10 +198,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                 self.img_hist.append(display)
             displayHistory = np.array(list(self.img_hist), dtype='uint8')
         
-        if self.modelMode == 0:
+        if self.modelMode == 0: #for CNN
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
             
-        elif self.modelMode == 1:
+        elif self.modelMode == 1: 
             obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, self.vColl, displayHistory]
 
         elif self.modelMode == 2:

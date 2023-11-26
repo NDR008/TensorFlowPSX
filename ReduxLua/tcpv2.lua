@@ -6,8 +6,7 @@ local frames_needed = 1
 local obs = {}
 local client = nil
 local reconnectTry = false
-local maxLostPings = 50000
-local currentMissedPings = 0
+local takeControl = false
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -103,26 +102,6 @@ function grabGameData()
     local vehicleState = readVehicleState()
     local posVect = readVehiclePositon()
 
-    -- will offload the track position calculations to Python
-    --[[
-    if gameState['raceState'] < 6 then
-        vehicleState = readVehicleState()
-        lap = readValue(mem, 0x800b6700, 'int8_t*')
-        if lap == 0 and gameState['raceState'] == 1 then
-            CurrentPos = 0
-            obs['trackID'] = CurrentPos
-        else
-            local x = readValue(mem, 0x800b6704, 'int32_t*')
-            local y = readValue(mem, 0x800b6708, 'int32_t*')
-            CurrentPos = closestPoints(Xc, Yc, x, y) + (lap - 1) * TrackMaxID
-            obs['trackID'] = CurrentPos
-        end
-    else
-        obs['trackID'] = 0
-    end
-    ]]
-       --
-
     obs['SS'] = screen
     obs['GS'] = gameState
     obs['VS'] = vehicleState
@@ -152,9 +131,8 @@ function netTCP(netChanged, netStatus, port)
         local readVal = client:readU32() -- receive a 1 or 2 had a bug till U32 not U16 14.10!
         local ready = false
         -- 1 is the main loop for frame capture
-        if readVal == 1 then
+        if readVal == 1 and takeControl then
             ready = true
-            currentMissedPings = 0
             -- 2 is for loading a savestate
         elseif readVal == 8 + 64 then -- MR2 at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
@@ -186,27 +164,28 @@ function netTCP(netChanged, netStatus, port)
             local file = Support.File.open("sup_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        else
-            currentMissedPings = currentMissedPings + 1
-        end
-
-        if currentMissedPings > maxLostPings then
-            currentMissedPings = 0
-            reconnectTry = true
-            print("Retry to connect to server")
-            ready = false
-            client:close()
         end
         -- keep track of the number of frames rendered
         frames = frames + 1
-
+        local tmp = readGameState()
+        if tmp['raceState'] == 1 then
+            setValue(mem, 0x800b6d61, 2, 'int16_t*')
+            takeControl = false
+        elseif tmp['raceState'] == 2 and not takeControl then
+            print("agent has control")
+            setValue(mem, 0x800b6d61, 0, 'int16_t*')
+            takeControl = true
+        end
+        print("read", ready, "      race state is...", tmp['raceState'], "      take control...", takeControl)
         -- if this is the nth frame and we have previously received a 1
-        if (frames % frames_needed) == 0 and ready then
-            grabGameData()               -- take screenshot, encode it with protobuf and get ready to send it
-            client:write("P")            -- send "P" for the python server to know we are ready
-            client:writeU32(#GlobalData) -- send the size of the chunk of data
-            client:write(GlobalData)     -- send the actual chunk of data
-            client:write("D")            -- send "P" for the python server to know we are ready
+        if (frames % frames_needed) == 0 and takeControl then
+            grabGameData()                   -- take screenshot, encode it with protobuf and get ready to send it
+            if takeControl then
+                client:write("P")            -- send "P" for the python server to know we are ready
+                client:writeU32(#GlobalData) -- send the size of the chunk of data
+                client:write(GlobalData)     -- send the actual chunk of data
+                client:write("D")            -- send "P" for the python server to know we are ready
+            end
         end
     end
 end

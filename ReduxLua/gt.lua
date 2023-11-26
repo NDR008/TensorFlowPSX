@@ -11,18 +11,18 @@ smoke = false
 HeldCollState = 0
 
 loadfile("memory.lua")()
-loadfile("tcp.lua")()
+loadfile("tcpv2.lua")()
 loadfile("track.lua")()
 loadfile("drive_record.lua")()
 -- loadfile("track_prog.lua")() -- to be deleted
 
 local function reload()
     PCSX.pauseEmulator()
-    loadfile("memory.lua")()
+    --loadfile("memory.lua")()
     loadfile("gt.lua")()
-    loadfile("tcp.lua")()
-    loadfile("track.lua")()
-    loadfile("drive_record.lua")()
+    --loadfile("tcpv2.lua")()
+    --loadfile("track.lua")()
+    --loadfile("drive_record.lua")()
     -- loadfile("track_prog.lua")() -- to be deleted
 end
 
@@ -395,12 +395,10 @@ function DrawImguiFrame()
         if (imgui.Button("Reload")) then
             reload()
         end
-        imgui.BeginTable("TopTable", 2, imgui.constant.TableFlags.Resizable)
+        imgui.BeginTable("TopTable", 1, imgui.constant.TableFlags.Resizable)
         imgui.TableNextRow()
         imgui.TableSetColumnIndex(0)
         saveMenu()
-        imgui.TableSetColumnIndex(1)
-        pythonStuff()
         imgui.EndTable()
 
         imgui.BeginTable("VehicleTable", 2, imgui.constant.TableFlags.Resizable)
@@ -413,6 +411,7 @@ function DrawImguiFrame()
         raceCondition()
         position()
         simulation()
+        pythonStuff()
         imgui.EndTable()
         funkyStuff()
     end

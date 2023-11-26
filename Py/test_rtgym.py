@@ -50,7 +50,7 @@ while True:
     while not terminated:
         act = env.action_space.sample()
         obs, rew, terminated, truncated, info = env.step(act)
-        print(rew)
+        #print(rew)
         #print(obs)
         env.render()
     
