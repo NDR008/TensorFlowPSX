@@ -8,7 +8,7 @@ imgSize = 64 #assuming 64 x 64
 imgHist = 4
 LEARN_ENTROPY_COEF = True
 ENTROPCOEFF = 0.2 #0.2
-LR_ACT1 = 1e-3
+LR_ACT = 1e-3
 LR_CRIT = 1e-3
 LR_ENTR = 1e-3
 
