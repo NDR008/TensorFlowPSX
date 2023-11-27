@@ -125,7 +125,7 @@ def controlGamepad(gamepad, control, choice):
         contAccelorBrakeContSteer(gamepad, control)
         
     elif choice==2: 
-        disAccelnotBrakeDiscSteer2(gamepad, control)
+        disAccelnotBrakeDiscSteer(gamepad, control)
         
     elif choice==2.5: 
         disAccelnotBrakeDiscSteer2(gamepad, control)     

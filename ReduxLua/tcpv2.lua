@@ -6,12 +6,7 @@ local frames_needed = 1
 local obs = {}
 local client = nil
 local reconnectTry = false
-local maxLostPings = 50000
-local currentMissedPings = 0
-local v_x = 0
-local v_y = 0
-local accel_x = 0
-local accel_Y = 0
+local takeControl = false
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -76,14 +71,14 @@ local function readVehicleState()
     vehicleState['steer'] = readValue(mem, 0x800b66d6, "int16_t*")
     vehicleState['pos'] = readValue(mem, 0x800b6d69, "int16_t*")
     vehicleState['eClutch'] = readValue(mem, 0x800b6d63, "uint16_t*")
-    vehicleState['fLeftSlip '] =readValue(mem, 0x800b674e,'uint8_t*')
-    vehicleState['fRightSlip'] =readValue(mem, 0x800b6792,'uint8_t*')
-    vehicleState['rLeftSlip'] = readValue(mem, 0x800b67d6,'uint8_t*')
-    vehicleState['rRightSlip']= readValue(mem, 0x800b681a,'uint8_t*')
-    vehicleState['fLWheel'] =readValue(mem, 0x800b6778, 'int8_t*')
-    vehicleState['fRWheel'] =readValue(mem, 0x800b67bc, 'int8_t*')
-    vehicleState['rLWheel'] =readValue(mem, 0x800b6800, 'int8_t*')
-    vehicleState['rRWheel'] =readValue(mem, 0x800b6844, 'int8_t*')
+    vehicleState['fLeftSlip '] = readValue(mem, 0x800b674e, 'uint8_t*')
+    vehicleState['fRightSlip'] = readValue(mem, 0x800b6792, 'uint8_t*')
+    vehicleState['rLeftSlip'] = readValue(mem, 0x800b67d6, 'uint8_t*')
+    vehicleState['rRightSlip'] = readValue(mem, 0x800b681a, 'uint8_t*')
+    vehicleState['fLWheel'] = readValue(mem, 0x800b6778, 'int8_t*')
+    vehicleState['fRWheel'] = readValue(mem, 0x800b67bc, 'int8_t*')
+    vehicleState['rLWheel'] = readValue(mem, 0x800b6800, 'int8_t*')
+    vehicleState['rRWheel'] = readValue(mem, 0x800b6844, 'int8_t*')
     vehicleState['vColl'] = readCollission()
     return vehicleState
 end
@@ -106,26 +101,6 @@ function grabGameData()
     local gameState = readGameState()
     local vehicleState = readVehicleState()
     local posVect = readVehiclePositon()
-    
-
-    -- will offload the track position calculations to Python
-    --[[
-    if gameState['raceState'] < 6 then
-        vehicleState = readVehicleState()
-        lap = readValue(mem, 0x800b6700, 'int8_t*')
-        if lap == 0 and gameState['raceState'] == 1 then
-            CurrentPos = 0
-            obs['trackID'] = CurrentPos
-        else
-            local x = readValue(mem, 0x800b6704, 'int32_t*')
-            local y = readValue(mem, 0x800b6708, 'int32_t*')
-            CurrentPos = closestPoints(Xc, Yc, x, y) + (lap - 1) * TrackMaxID
-            obs['trackID'] = CurrentPos
-        end
-    else
-        obs['trackID'] = 0
-    end
-    ]]--
 
     obs['SS'] = screen
     obs['GS'] = gameState
@@ -151,15 +126,14 @@ function netTCP(netChanged, netStatus, port)
         else
             client:close()
         end
-    -- main loop    
+        -- main loop
     elseif netStatus then
         local readVal = client:readU32() -- receive a 1 or 2 had a bug till U32 not U16 14.10!
         local ready = false
         -- 1 is the main loop for frame capture
-        if readVal == 1 then
+        if readVal == 1 and takeControl then
             ready = true
-            currentMissedPings = 0
-        -- 2 is for loading a savestate    
+            -- 2 is for loading a savestate
         elseif readVal == 8 + 64 then -- MR2 at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
@@ -178,64 +152,40 @@ function netTCP(netChanged, netStatus, port)
             local file = Support.File.open("mr2_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 0 + 64 + 10 then         -- MR2 at HS
+        elseif readVal == 0 + 64 + 10 then -- MR2 at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
-            local file = Support.File.open("mr2_0_0_0_0_b.slice", "READ")
+            local file = Support.File.open("mr2_0_0_0_0_cont.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        elseif readVal == 16 + 64 then         -- Supra at HS
+        elseif readVal == 16 + 64 then -- Supra at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
             print("lapt_time ", lapTime)
             local file = Support.File.open("sup_0_0_0_0.slice", "READ")
             PCSX.loadSaveState(file)
             file:close()
-        -- elseif readVal == 1 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("arc5.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 3 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("mr2_400.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 4 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("sim5.slice", "READ")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        -- elseif readVal == 5 then
-        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-        --     print(lapTime)
-        --     local file = Support.File.open("sim6.slice", "READ")
-        --     print("loaded sim6.slice")
-        --     PCSX.loadSaveState(file)
-        --     file:close()
-        else
-            currentMissedPings = currentMissedPings + 1
-        end
-
-        if currentMissedPings > maxLostPings then
-            currentMissedPings = 0
-            reconnectTry = true
-            print("Retry to connect to server")
-            ready = false
-            client:close()
         end
         -- keep track of the number of frames rendered
         frames = frames + 1
-
+        local tmp = readGameState()
+        if tmp['raceState'] == 1 then
+            setValue(mem, 0x800b6d61, 2, 'int16_t*')
+            takeControl = false
+        elseif tmp['raceState'] == 2 and not takeControl then
+            print("agent has control")
+            setValue(mem, 0x800b6d61, 0, 'int16_t*')
+            takeControl = true
+        end
+        print("read", ready, "      race state is...", tmp['raceState'], "      take control...", takeControl)
         -- if this is the nth frame and we have previously received a 1
-        if (frames % frames_needed) == 0 and ready then
-            grabGameData() -- take screenshot, encode it with protobuf and get ready to send it
-            client:write("P") -- send "P" for the python server to know we are ready
-            client:writeU32(#GlobalData) -- send the size of the chunk of data
-            client:write(GlobalData) -- send the actual chunk of data
-            client:write("D")            -- send "P" for the python server to know we are ready
+        if (frames % frames_needed) == 0 and takeControl then
+            grabGameData()                   -- take screenshot, encode it with protobuf and get ready to send it
+            if takeControl then
+                client:write("P")            -- send "P" for the python server to know we are ready
+                client:writeU32(#GlobalData) -- send the size of the chunk of data
+                client:write(GlobalData)     -- send the actual chunk of data
+                client:write("D")            -- send "P" for the python server to know we are ready
+            end
         end
     end
 end
