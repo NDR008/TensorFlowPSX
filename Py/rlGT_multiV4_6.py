@@ -116,6 +116,14 @@ elif MODEL_MODE == 3:
                              fLWheel, fRWheel, rLWheel, rRWheel, #4
                              images))
     NUMBER_1D_PARAMS = 20
+    
+elif MODEL_MODE == 4:
+    obs_space =spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, #6
+                             coll1, coll2, coll3, coll4, #4
+                             rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, #4
+                             fLWheel, fRWheel, rLWheel, rRWheel, #4
+                             images))
+    NUMBER_1D_PARAMS = 18    
 
 if CONTROL_MODE == 0:
     act_space = spaces.Box(low=-1.0, high=1.0, shape=(3, ))
@@ -219,6 +227,15 @@ class VanillaCNN(Module):
             # "Normalise" parameters [0,1]
             rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip/255.0, rRightSlip/255.0, fLeftSlip/255.0, fRightSlip/255.0, fLWheel/4.0, fRWheel/4.0, rLWheel/4.0, rRWheel/4.0
         
+        elif MODEL_MODE == 4:
+            if self.q_net:    
+                eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2, act = x
+            else:
+                eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, images, act1, act2 = x           
+            
+            # "Normalise" parameters [0,1]
+            eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel = eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip/255.0, rRightSlip/255.0, fLeftSlip/255.0, fRightSlip/255.0, fLWheel/4.0, fRWheel/4.0, rLWheel/4.0, rRWheel/4.0
+        
         #print(">>>>>>>>>>>>>>>>>>>>", images.shape)    
         images = images.to(torch.float32)/255.0
 
@@ -258,6 +275,12 @@ class VanillaCNN(Module):
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2, act), -1) # concat
             else:
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2), -1) # concat               
+        elif MODEL_MODE == 4:
+            if self.q_net:
+                x = torch.cat((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2, act), -1) # concat
+            else:
+                x = torch.cat((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, fLColl, fRColl, rRColl, rLColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2), -1) # concat               
+
                 
         x = self.mlp(x)
         return x
@@ -364,7 +387,9 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
     
     elif MODEL_MODE == 3:# rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, cola8, colb9, colc10, cold11, rLeftSlip12, rRightSlip13, fLeftSlip14, fRightSlip15, fLWheel16, fRWheel17, rLWheel18, rRWheel19, images[latest]
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], obs[17], obs[18], obs[19], (obs[20][-1]).astype(np.uint8))           
-                  
+
+    elif MODEL_MODE == 4:# rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, cola8, colb9, colc10, cold11, rLeftSlip12, rRightSlip13, fLeftSlip14, fRightSlip15, fLWheel16, fRWheel17, rLWheel18, rRWheel19, images[latest]
+            obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], obs[17], (obs[18][-1]).astype(np.uint8))                             
 
     rew_mod = rew
     terminated_mod = terminated
@@ -580,14 +605,13 @@ class MyMemory(TorchMemory):
             truncated = self.data[23][idx_now]
             info = self.data[24][idx_now]        
             
-        elif MODEL_MODE == 3:
+        elif MODEL_MODE == 4:
             last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
                         self.data[5][idx_last], self.data[6][idx_last], self.data[7][idx_last], 
                         self.data[8][idx_last], self.data[9][idx_last], self.data[10][idx_last],
                         self.data[11][idx_last], self.data[12][idx_last], self.data[13][idx_last], 
                         self.data[14][idx_last], self.data[15][idx_last], self.data[16][idx_last], 
                         self.data[17][idx_last], self.data[18][idx_last], self.data[19][idx_last], 
-                        self.data[20][idx_last], self.data[21][idx_last],
                         imgs_last_obs, *last_act_buf)
             
             new_act = self.data[1][idx_now]
@@ -599,14 +623,14 @@ class MyMemory(TorchMemory):
                         self.data[11][idx_now], self.data[12][idx_now], self.data[13][idx_now], 
                         self.data[14][idx_now], self.data[15][idx_now], self.data[16][idx_now], 
                         self.data[17][idx_now], self.data[18][idx_now], self.data[19][idx_now], 
-                        self.data[20][idx_now], self.data[21][idx_now],
                         imgs_new_obs, *new_act_buf)
             
-            terminated = self.data[25][idx_now]
-            truncated = self.data[26][idx_now]
-            info = self.data[27][idx_now]        
+            terminated = self.data[23][idx_now]
+            truncated = self.data[24][idx_now]
+            info = self.data[25][idx_now]        
             
         return last_obs, new_act, rew, new_obs, terminated, truncated, info
+
 
     def load_imgs(self, item):
         if MODEL_MODE == 0:
@@ -619,6 +643,8 @@ class MyMemory(TorchMemory):
             res = self.data[19][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 3:
             res = self.data[22][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+        elif MODEL_MODE == 4:
+            res = self.data[20][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         return np.stack(res).astype(np.uint8)
 
     def load_acts(self, item):
