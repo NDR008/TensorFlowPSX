@@ -7,6 +7,7 @@ local obs = {}
 local client = nil
 local reconnectTry = false
 local takeControl = false
+local ready = false
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -128,20 +129,20 @@ function netTCP(netChanged, netStatus, port)
         end
         -- main loop
     elseif netStatus then
-        local ready = false
         local readVal = client:readU32() -- receive a 1 or 2 had a bug till U32 not U16 14.10!
         -- 1 is the main loop for frame capture
+        local tmp = readGameState()
+        if tmp['raceState'] == 1 then
+            setValue(mem, 0x800b6d61, 2, 'int16_t*')
+            takeControl = false
+        elseif tmp['raceState'] == 2 and not takeControl then
+            print("agent has control")
+            setValue(mem, 0x800b6d61, 0, 'int16_t*')
+            takeControl = true
+        end
+        print(ready, takeControl)
         if readVal == 1 then
             ready = true
-            local tmp = readGameState()
-            if tmp['raceState'] == 1 then
-                setValue(mem, 0x800b6d61, 2, 'int16_t*')
-                takeControl = false
-            elseif tmp['raceState'] == 2 and not takeControl then
-                print("agent has control")
-                setValue(mem, 0x800b6d61, 0, 'int16_t*')
-                takeControl = true
-            end
             -- 2 is for loading a savestate
         elseif readVal == 8 + 64 then -- MR2 at Drag
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
@@ -185,7 +186,7 @@ function netTCP(netChanged, netStatus, port)
         -- print("read", ready, "      race state is...", tmp['raceState'], "      take control...", takeControl)
         -- if this is the nth frame and we have previously received a 1
         if (frames % frames_needed) == 0 and ready and takeControl then
-            grabGameData()                   -- take screenshot, encode it with protobuf and get ready to send it
+            grabGameData()               -- take screenshot, encode it with protobuf and get ready to send it
             client:write("P")            -- send "P" for the python server to know we are ready
             client:writeU32(#GlobalData) -- send the size of the chunk of data
             client:write(GlobalData)     -- send the actual chunk of data
