@@ -184,7 +184,7 @@ function netTCP(netChanged, netStatus, port)
 
         -- print("read", ready, "      race state is...", tmp['raceState'], "      take control...", takeControl)
         -- if this is the nth frame and we have previously received a 1
-        if (frames % frames_needed) == 0 and ready then
+        if (frames % frames_needed) == 0 and ready and takeControl then
             grabGameData()                   -- take screenshot, encode it with protobuf and get ready to send it
             client:write("P")            -- send "P" for the python server to know we are ready
             client:writeU32(#GlobalData) -- send the size of the chunk of data
