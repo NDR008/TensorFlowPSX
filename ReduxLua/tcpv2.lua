@@ -6,8 +6,8 @@ local frames_needed = 1
 local obs = {}
 local client = nil
 local reconnectTry = false
-local takeControl = false
 local ready = false
+local takeControl = false
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -131,10 +131,11 @@ function netTCP(netChanged, netStatus, port)
     elseif netStatus then
         local readVal = client:readU32() -- receive a 1 or 2 had a bug till U32 not U16 14.10!
         -- 1 is the main loop for frame capture
+        
         local tmp = readGameState()
         if tmp['raceState'] == 1 then
-            setValue(mem, 0x800b6d61, 2, 'int16_t*')
-            takeControl = false
+                setValue(mem, 0x800b6d61, 2, 'int16_t*')
+                takeControl = false
         elseif tmp['raceState'] == 2 and not takeControl then
             print("agent has control")
             setValue(mem, 0x800b6d61, 0, 'int16_t*')
