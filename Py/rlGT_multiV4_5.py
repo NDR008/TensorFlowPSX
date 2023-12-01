@@ -1,3 +1,4 @@
+import os
 import numpy as np  
 # Training parameters:
 
@@ -39,6 +40,10 @@ RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "4.5_AutoStart
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
+
+os.environ['NUMEXPR_MAX_THREADS'] = '14'
+os.environ['NUMEXPR_NUM_THREADS'] = '14'
+import numexpr as ne
 
 import gymnasium.spaces as spaces
 import torch
