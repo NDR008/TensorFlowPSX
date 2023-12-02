@@ -22,7 +22,7 @@ from collections import deque
 from threading import Thread
 #from rewardGT import RewardFunction
 #from rewardGTV4_2 import RewardFunction
-from rewardGTV4_5 import RewardFunction
+from rewardGTV4_55 import RewardFunction
 from time import sleep
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
@@ -159,7 +159,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, 
                                  images))
         
-        elif self.modelMode == 1.5:
+        elif self.modelMode == 1:
             return spaces.Tuple((eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, 
                                  images))        
         
@@ -171,13 +171,6 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
         
         elif self.modelMode == 3:
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, 
-                                 fLColl, fRColl, rRColl, rLColl, 
-                                 rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
-                                 fLWheel, fRWheel, rLWheel, rRWheel, 
-                                 images))
-            
-        elif self.modelMode == 4:
-            return spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, 
                                  fLColl, fRColl, rRColl, rLColl, 
                                  rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
                                  fLWheel, fRWheel, rLWheel, rRWheel, 
@@ -224,7 +217,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                    fLWheel, fRWheel, rLWheel, rRWheel, 
                    displayHistory]
             
-        elif self.modelMode == 3 or self.modelMode == 4:
+        elif self.modelMode == 3:
             #print(displayHistory.shape)
             # Extra work to convert back the collision int into 4 bits
             tmpColl = bin(self.vColl[0])
@@ -234,19 +227,13 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             pars = np.array([zero,zero,zero,zero], dtype='uint8')
             for i in range(len(tmpColl)):
                 pars[i] = np.array(int(tmpColl[-(i+1)]), dtype='uint8')
+                
+            obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, 
+                   pars[0], pars[1], pars[2], pars[3], 
+                   rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
+                   fLWheel, fRWheel, rLWheel, rRWheel, 
+                   displayHistory]            
             
-            if self.modelMode == 3:                            
-                obs = [rState, eClutch, eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, 
-                    pars[0], pars[1], pars[2], pars[3], 
-                    rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
-                    fLWheel, fRWheel, rLWheel, rRWheel, 
-                    displayHistory]            
-            elif self.modelMode == 4:                        
-                obs = [eSpeed, eBoost, eGear, self.vSpeed, vSteer, self.vDir, 
-                    pars[0], pars[1], pars[2], pars[3], 
-                    rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, 
-                    fLWheel, fRWheel, rLWheel, rRWheel, 
-                    displayHistory]     
         return obs    
     
     # Mandatory method

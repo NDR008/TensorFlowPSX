@@ -168,7 +168,7 @@ function netTCP(netChanged, netStatus, port)
             file:close()
         elseif readVal == 0 + 64 + 10 then -- MR2 at HS
             lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-            --PCSX.SIO0.slots[1].pads[1].setAnalogMode(true)
+            PCSX.SIO0.slots[1].pads[1].setAnalogMode(true)
             print("lapt_time ", lapTime)
             local file = Support.File.open("mr2_0_0_0_0_cont.slice", "READ")
             PCSX.loadSaveState(file)
