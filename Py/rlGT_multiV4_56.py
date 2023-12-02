@@ -13,7 +13,7 @@ LR_ACT = 1e-2 #1e-3
 LR_CRIT = 1e-2 #1-3
 LR_ENTR = 1e-3
 
-MEMORY_SIZE = 5e6 #1e6
+MEMORY_SIZE = 2e6 #1e6
 ACT_BUF_LEN = 2
 maxEpLength = 3500
 BATCH_SIZE = 1024 * 2
