@@ -7,11 +7,11 @@ worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
 imgHist = 4
-LEARN_ENTROPY_COEF = True
+LEARN_ENTROPY_COEF = True # if True, SAC v2 is used, else, SAC v1 is used
 ENTROPCOEFF = 0.4 #0.2
-LR_ACT = 1e-2 #1e-3
-LR_CRIT = 1e-2 #1-3
-LR_ENTR = 1e-3
+LR_ACT = 1e-2 #1e-3 # learning rate for the actor
+LR_CRIT = 1e-2 #1-3 # learning rate for the critic
+LR_ENTR = 1e-3 # entropy autotuning coefficient (SAC v2)
 
 MEMORY_SIZE = 2e6 #1e6
 ACT_BUF_LEN = 2
