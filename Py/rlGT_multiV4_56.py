@@ -910,7 +910,7 @@ def main(args):
     sample_compressor = get_local_buffer_sample_imgs
     max_samples_per_episode = 10000000000
     # RTGYM Env
-    from myRTClass_tmrl_V4_5 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+    from myRTClass_tmrl_V4_57 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
     
     my_config = DEFAULT_CONFIG_DICT
     my_config["interface"] = MyGranTurismoRTGYM
