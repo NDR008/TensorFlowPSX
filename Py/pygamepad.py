@@ -106,16 +106,6 @@ def disAccelnotBrakeDiscSteer2(gamepad, control):  # control2.5
         gamepad.directional_pad(direction = 0x8) # nothing
     gamepad.update()  
     
-    
-def contAccelContSteer(gamepad, control): # control5
-    accelBrake = min(control[0],1)
-    accelBrake = max(accelBrake, -1)
-    gamepad.right_joystick_float(x_value_float=0, y_value_float=accelBrake)
-        
-    steer = min(control[2],1)
-    steer = max(steer, -1)
-    gamepad.left_joystick_float(x_value_float=steer, y_value_float=0)
-    gamepad.update()
 
 # cont accelOnly   
 def contAccelOnly(gamepad, control): # control6
