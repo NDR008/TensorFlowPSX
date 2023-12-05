@@ -253,7 +253,8 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             c = None
             
         choice = choiceA + choiceB + 64 # hack to avoid missed ping as a load
-        if self.controlChoice == 1.5:
+        print("self.controlChoice", self.controlChoice)
+        if self.controlChoice > 1 and self.controlChoice < 2:
             choice = choice + 10
         self.rewardFunction.reset()         
         self.server.reloadSave(choice) # loads the save state

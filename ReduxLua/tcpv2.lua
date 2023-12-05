@@ -141,7 +141,6 @@ function netTCP(netChanged, netStatus, port)
             setValue(mem, 0x800b6d61, 0, 'int16_t*')
             takeControl = true
         end
-        -- print(ready, takeControl)
         if readVal == 1 then
             ready = true
             -- 2 is for loading a savestate

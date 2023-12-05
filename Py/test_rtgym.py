@@ -1,4 +1,4 @@
-from myRTClass_tmrl_V4_4 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+from myRTClass_tmrl_V4_5 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
 import gymnasium
 from time import sleep
