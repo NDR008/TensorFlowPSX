@@ -8,9 +8,9 @@ trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
 imgHist = 4
 LEARN_ENTROPY_COEF = True # if True, SAC v2 is used, else, SAC v1 is used
-ENTROPCOEFF = 0.3 #0.2
-LR_ACT = 5e-3 #1e-3 # learning rate for the actor
-LR_CRIT = 5e-3 #1-3 # learning rate for the critic
+ENTROPCOEFF = 0.2 #0.2
+LR_ACT = 1e-3 #1e-3 # learning rate for the actor
+LR_CRIT = 1e-3 #1-3 # learning rate for the critic
 LR_ENTR = 1e-3 # entropy autotuning coefficient (SAC v2)
 
 MEMORY_SIZE = 3e6 #1e6
@@ -19,14 +19,14 @@ maxEpLength = 3500
 BATCH_SIZE = 1024 * 1
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
-steps = 0  # number of training steps per round 1000
+steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 500 # 2000 #steps 1000
 update_model_interval = 500  # 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
-start_training = 2000 #2e5 # waits for... 1000
+start_training = 0 #2e5 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
-CONTROL_MODE = 1.5
+CONTROL_MODE = 1.6
 CARCHOICE = 0
 
 if CARCHOICE == 1:
