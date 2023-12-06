@@ -806,11 +806,11 @@ class MyTrainingAgent(TrainingAgent):
                  model_cls=MyActorCriticModule,  # an actor-critic module, encapsulating our ActorModule
                  gamma=0.99,  # discount factor
                  polyak=0.995,  # exponential averaging factor for the target critic
-                 alpha=ENTROPCOEFF,  # fixed (SAC v1) or initial (SAC v2) value of the entropy coefficient
-                 lr_actor=  LR_ACT,  # learning rate for the actor
-                 lr_critic= LR_CRIT,  # learning rate for the critic
-                 lr_entropy=LR_ENTR,  # entropy autotuning coefficient (SAC v2)
-                 learn_entropy_coef=LEARN_ENTROPY_COEF,  # if True, SAC v2 is used, else, SAC v1 is used
+                 alpha=0.2,  # fixed (SAC v1) or initial (SAC v2) value of the entropy coefficient
+                 lr_actor=  1e-3,  # learning rate for the actor
+                 lr_critic= 1e-3,  # learning rate for the critic
+                 lr_entropy=1e-3,  # entropy autotuning coefficient (SAC v2)
+                 learn_entropy_coef=True,  # if True, SAC v2 is used, else, SAC v1 is used
                  target_entropy=None):  # if None, the target entropy for SAC v2 is set automatically
         super().__init__(observation_space=observation_space,
                          action_space=action_space,
