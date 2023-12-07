@@ -20,9 +20,10 @@ import numpy as np
 import logging
 from collections import deque
 from threading import Thread
-from rewardGT import RewardFunction
+#from rewardGT import RewardFunction
 #from rewardGTV4_2 import RewardFunction
 #from rewardGTV4_5 import RewardFunction
+from rewardGTV4_58 import RewardFunction
 from time import sleep
 
 class MyGranTurismoRTGYM(RealTimeGymInterface):
@@ -159,7 +160,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             return spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, 
                                  images))
         
-        elif self.modelMode == 1:
+        elif self.modelMode == 1.5:
             return spaces.Tuple((eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, 
                                  images))        
         
