@@ -1,47 +1,49 @@
-import numpy as np
-
+import os
+import numpy as np  
 # Training parameters:
+
 CRC_DEBUG = False
 worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 64 #assuming 64 x 64
 imgHist = 4
-
+LEARN_ENTROPY_COEF = True # if True, SAC v2 is used, else, SAC v1 is used
 ENTROPCOEFF = 0.2 #0.2
+LR_ACT = 1e-3 #1e-3 # learning rate for the actor
+LR_CRIT = 1e-3 #1-3 # learning rate for the critic
+LR_ENTR = 1e-3 # entropy autotuning coefficient (SAC v2)
 
-MEMORY_SIZE = 1e6 #1e6
+MEMORY_SIZE = 1e5 #1e6
 ACT_BUF_LEN = 2
 maxEpLength = 3500
-BATCH_SIZE = 1024 * 2
+BATCH_SIZE = 1024 * 1
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
 steps = 1000  # number of training steps per round 1000
-update_buffer_interval = 500 #2000 #steps 1000
+update_buffer_interval = 500 # 2000 #steps 1000
 update_model_interval = 500  # 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
 start_training = 0 #2e5 # waits for... 1000
 device = trainer_device
-MODEL_MODE = 2
+MODEL_MODE = 3
 CONTROL_MODE = 2
 CARCHOICE = 0
 
 if CARCHOICE == 1:
-    car = "_Supra_mode_"
+    car = "Supra_mode_"
 else:
-    car = "_MR2_mode_"
+    car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_3W_Rew4.4(6.12.23)"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AutoStart"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
 
-
-import os
 os.environ['NUMEXPR_MAX_THREADS'] = '14'
 os.environ['NUMEXPR_NUM_THREADS'] = '14'
-import numexpr as ne 
+import numexpr as ne
 
 import gymnasium.spaces as spaces
 import torch
@@ -100,6 +102,12 @@ elif MODEL_MODE == 1:
     obs_space = spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
                               images))
     NUMBER_1D_PARAMS = 9
+    
+elif MODEL_MODE == 1.5:
+    obs_space = spaces.Tuple((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
+                              images))
+    NUMBER_1D_PARAMS = 7   
+    
 elif MODEL_MODE == 2:
     obs_space =spaces.Tuple((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, #9
                              rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, #4
@@ -190,6 +198,13 @@ class VanillaCNN(Module):
             else:
                 rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2 = x         
             rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl = rState/5, eClutch/3.0, eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0
+
+        elif MODEL_MODE == 1.5:
+            if self.q_net:    
+                eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2, act = x
+            else:
+                eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, images, act1, act2 = x         
+            eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl = eSpeed/10000.0, eBoost/10000.0, eGear/6.0, vSpeed/500.0, vSteer/1024.0, vDir, vColl/12.0
             
         elif MODEL_MODE == 2:
             if self.q_net:    
@@ -233,6 +248,11 @@ class VanillaCNN(Module):
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2, act), -1) # concat
             else:
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat
+        elif MODEL_MODE == 1.5:
+            if self.q_net:
+                x = torch.cat((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2, act), -1) # concat
+            else:
+                x = torch.cat((eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, x, act1, act2), -1) # concat                
         elif MODEL_MODE == 2:
             if self.q_net:
                 x = torch.cat((rState, eClutch, eSpeed, eBoost, eGear, vSpeed, vSteer, vDir, vColl, rLeftSlip, rRightSlip, fLeftSlip, fRightSlip, fLWheel, fRWheel, rLWheel, rRWheel, x, act1, act2, act), -1) # concat
@@ -340,6 +360,9 @@ def get_local_buffer_sample_imgs(prev_act, obs, rew, terminated, truncated, info
        
     elif MODEL_MODE == 1: #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, images[latest]
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], (obs[9][-1]).astype(np.uint8))
+    
+    elif MODEL_MODE == 1.5: #eSpeed0, eBoost1, eGear2, vSpeed3, vSteer4, vDir5, vColl6, images[latest]
+        obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], (obs[7][-1]).astype(np.uint8))
     
     elif MODEL_MODE == 2:  #rState0, eClutch1, eSpeed2, eBoost3, eGear4, vSpeed5, vSteer6, vDir7, vColl8, rLeftSlip9, rRightSlip10, fLeftSlip11, fRightSlip12, fLWheel13, fRWheel14, rLWheel15, rRWheel16, images[latest] 
         obs_mod = (obs[0], obs[1], obs[2], obs[3], obs[4], obs[5], obs[6], obs[7], obs[8], obs[9], obs[10], obs[11], obs[12], obs[13], obs[14], obs[15], obs[16], (obs[17][-1]).astype(np.uint8))
@@ -477,6 +500,8 @@ class MyMemory(TorchMemory):
             last_eoes = self.data[4][idx_now - self.min_samples:idx_now]  # self.min_samples values
         elif MODEL_MODE == 1:
             last_eoes = self.data[13][idx_now - self.min_samples:idx_now]  # self.min_samples values
+        elif MODEL_MODE == 1.5:
+            last_eoes = self.data[11][idx_now - self.min_samples:idx_now]  # self.min_samples values
         elif MODEL_MODE == 2:
             last_eoes = self.data[21][idx_now - self.min_samples:idx_now]  # self.min_samples values
         elif MODEL_MODE == 3:
@@ -516,7 +541,25 @@ class MyMemory(TorchMemory):
             
             terminated = self.data[14][idx_now]
             truncated = self.data[15][idx_now]
-            info = self.data[16][idx_now]                 
+            info = self.data[16][idx_now]
+            
+        elif MODEL_MODE == 1.5:
+            last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
+                        self.data[5][idx_last], self.data[6][idx_last], self.data[7][idx_last], 
+                        self.data[8][idx_last],
+                        imgs_last_obs, *last_act_buf)
+            
+            new_act = self.data[1][idx_now]
+            rew = np.float32(self.data[11][idx_now])
+            
+            new_obs = (self.data[2][idx_now], self.data[3][idx_now], self.data[4][idx_now], 
+                        self.data[5][idx_now], self.data[6][idx_now], self.data[7][idx_now], 
+                        self.data[8][idx_now], 
+                        imgs_new_obs, *new_act_buf)
+            
+            terminated = self.data[12][idx_now]
+            truncated = self.data[13][idx_now]
+            info = self.data[14][idx_now]                      
         
         elif MODEL_MODE == 2:
             last_obs = (self.data[2][idx_last], self.data[3][idx_last], self.data[4][idx_last], 
@@ -575,6 +618,8 @@ class MyMemory(TorchMemory):
             res = self.data[2][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 1:
             res = self.data[11][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
+        elif MODEL_MODE == 1.5:
+            res = self.data[9][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 2:
             res = self.data[19][(item + self.start_imgs_offset):(item + self.start_imgs_offset + self.imgs_obs + 1)]
         elif MODEL_MODE == 3:
@@ -616,6 +661,35 @@ class MyMemory(TorchMemory):
                 for d in d_values:
                     self.data.append(d)         
 
+            to_trim = int(self.__len__() - self.memory_size)
+            if to_trim > 0:
+                self.trim(to_trim, len(d_values))
+                
+        elif MODEL_MODE==1.5:
+            d0  = [first_data_idx + i for i, _ in enumerate(buffer.memory)]  # indexes
+            d1  = [b[0] for b in buffer.memory]  # actions
+            d2  = [b[1][0] for b in buffer.memory]  # eSpeed
+            d3  = [b[1][1] for b in buffer.memory]  # eBoost
+            d4  = [b[1][2] for b in buffer.memory]  # eGear
+            d5  = [b[1][3] for b in buffer.memory]  # vSpeed
+            d6  = [b[1][4] for b in buffer.memory]  # vSteer
+            d7  = [b[1][5] for b in buffer.memory]  # vDir
+            d8  = [b[1][6] for b in buffer.memory]  # vColl
+            d9  = [b[1][7] for b in buffer.memory]  # image
+            d10 = [b[2] for b in buffer.memory]  # rewards
+            d11 = [b[3] or b[4] for b in buffer.memory]  # done
+            d12 = [b[3] for b in buffer.memory]  # terminated
+            d13 = [b[4] for b in buffer.memory]  # truncated
+            d14 = [b[5] for b in buffer.memory]  # infos
+            
+            d_values = [d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14]
+            if self.__len__() > 0:
+                for i in range(len(d_values)):
+                    self.data[i] += d_values[i]
+            else:
+                for d in d_values:
+                    self.data.append(d)         
+                    
             to_trim = int(self.__len__() - self.memory_size)
             if to_trim > 0:
                 self.trim(to_trim, len(d_values))
@@ -732,9 +806,9 @@ class MyTrainingAgent(TrainingAgent):
                  model_cls=MyActorCriticModule,  # an actor-critic module, encapsulating our ActorModule
                  gamma=0.99,  # discount factor
                  polyak=0.995,  # exponential averaging factor for the target critic
-                 alpha=ENTROPCOEFF,  # fixed (SAC v1) or initial (SAC v2) value of the entropy coefficient
-                 lr_actor=1e-3,  # learning rate for the actor
-                 lr_critic=1e-3,  # learning rate for the critic
+                 alpha=0.2,  # fixed (SAC v1) or initial (SAC v2) value of the entropy coefficient
+                 lr_actor=  1e-3,  # learning rate for the actor
+                 lr_critic= 1e-3,  # learning rate for the critic
                  lr_entropy=1e-3,  # entropy autotuning coefficient (SAC v2)
                  learn_entropy_coef=True,  # if True, SAC v2 is used, else, SAC v1 is used
                  target_entropy=None):  # if None, the target entropy for SAC v2 is set automatically
@@ -836,7 +910,7 @@ def main(args):
     sample_compressor = get_local_buffer_sample_imgs
     max_samples_per_episode = 10000000000
     # RTGYM Env
-    from myRTClass_tmrl_V4_4 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+    from myRTClass_tmrl_V4_5 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
     
     my_config = DEFAULT_CONFIG_DICT
     my_config["interface"] = MyGranTurismoRTGYM
@@ -947,4 +1021,4 @@ if __name__ == "__main__":
     parser.add_argument('--test', action='store_true', help='trainer in test mode')
     arguments = parser.parse_args()
     logging.info(arguments)
-    main(arguments)            
+    main(arguments)
