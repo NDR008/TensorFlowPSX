@@ -34,7 +34,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AutoStart"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AutoStart(2)"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
@@ -910,7 +910,7 @@ def main(args):
     sample_compressor = get_local_buffer_sample_imgs
     max_samples_per_episode = 10000000000
     # RTGYM Env
-    from myRTClass_tmrl_V4_5 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+    from myRTClass_tmrl_V4_58 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
     
     my_config = DEFAULT_CONFIG_DICT
     my_config["interface"] = MyGranTurismoRTGYM
