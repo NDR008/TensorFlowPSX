@@ -64,7 +64,7 @@ def contAccelorBrakeContSteer(gamepad, control):  # control1.5
     gamepad.update()
 
 
-def contAccelContSteer(gamepad, control):  # control1.5
+def contAccelContSteer(gamepad, control):  # control1.6
     accelBrake = min(control[0], 1)
     accelBrake = max(accelBrake, -1)
     accelBrake = accelBrake/2 + 0.5
