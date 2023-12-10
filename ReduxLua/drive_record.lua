@@ -12,9 +12,10 @@ function writeRecord()
     local lap = readValue(mem, 0x800b6700, 'int32_t*')
     local x = readValue(mem, 0x800b6704, 'int32_t*')
     local y = readValue(mem, 0x800b6708, 'int32_t*')
+    local speed = readValue(mem, 0x800b66ec, 'uint16_t*')
     -- local z = readValue(mem, 0x800b670c, 'int32_t*')
     
-    local strDrive = tostring(lap) .. ',' .. tostring(x) .. ',' .. tostring(y) .. '\n'
+    local strDrive = tostring(lap) .. ',' .. tostring(x) .. ',' .. tostring(y) .. ',' .. tostring(speed) .. '\n'
     coordDrive = coordDrive .. strDrive
     print(strDrive)
 end
