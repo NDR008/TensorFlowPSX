@@ -1,8 +1,8 @@
 coordDrive = ''
-indexDrive = 0
 
 function openRecord()
     print("open record")
+    coordDrive = ''
     local file = Support.File.open("drive.csv", "CREATE")
     file:close()
 end
@@ -17,7 +17,8 @@ function writeRecord()
     
     local strDrive = tostring(lap) .. ',' .. tostring(x) .. ',' .. tostring(y) .. ',' .. tostring(speed) .. '\n'
     coordDrive = coordDrive .. strDrive
-    print(strDrive)
+    coordDrive = ''
+    -- print(strDrive)
 end
 
 function closeRecord()
