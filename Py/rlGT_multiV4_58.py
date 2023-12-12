@@ -5,7 +5,7 @@ import numpy as np
 CRC_DEBUG = False
 worker_device = "cpu"
 trainer_device = "cuda"
-imgSize = 64 #assuming 64 x 64
+imgSize = 128 #assuming 64 x 64
 imgHist = 4
 # LEARN_ENTROPY_COEF = True # if True, SAC v2 is used, else, SAC v1 is used
 # LR_ACT = 1e-3 #1e-3 # learning rate for the actor
@@ -25,7 +25,7 @@ update_model_interval = 500  # 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
 start_training = 0 #2e5 # waits for... 1000
 device = trainer_device
-MODEL_MODE = 1
+MODEL_MODE = 3
 CONTROL_MODE = 2
 CARCHOICE = 0
 
@@ -34,7 +34,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AutoStart_[redo]"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AutoStart_[128x128]"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
