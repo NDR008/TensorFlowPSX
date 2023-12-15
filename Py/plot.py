@@ -14,7 +14,7 @@ x_values = df['x']
 y_values = df['y']
 red_values = df['red']
 
-normalized_red_values = red_values / 255.0
+normalized_red_values = red_values / 300.0
 
 plt.scatter(x_values, y_values, c=[[r, 0, 0]
             for r in normalized_red_values], marker='.')
