@@ -5,14 +5,14 @@ import numpy as np
 CRC_DEBUG = False
 worker_device = "cpu"
 trainer_device = "cuda"
-imgSize = 128 #assuming 64 x 64
+imgSize = 64 #assuming 64 x 64
 imgHist = 4
 # LEARN_ENTROPY_COEF = True # if True, SAC v2 is used, else, SAC v1 is used
 # LR_ACT = 1e-3 #1e-3 # learning rate for the actor
 # LR_CRIT = 1e-3 #1-3 # learning rate for the critic
 # LR_ENTR = 1e-3 # entropy autotuning coefficient (SAC v2)
 ALPHA = 0.01  # 0.01
-DISCOUNT_FACTOR = 0.9  # 0.995
+DISCOUNT_FACTOR = 0.995  # 0.995
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
@@ -35,7 +35,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AS_[DF0.9]_1W"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AS_[DF0.9]_1W[2]"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
