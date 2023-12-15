@@ -12,6 +12,7 @@ imgHist = 4
 # LR_CRIT = 1e-3 #1-3 # learning rate for the critic
 # LR_ENTR = 1e-3 # entropy autotuning coefficient (SAC v2)
 ALPHA = 0.01  # 0.01
+DISCOUNT_FACTOR = 1.0  # 0.995
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
@@ -34,7 +35,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AutoStart_[128x128]"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AS_[DF1.0]_1W"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
@@ -969,7 +970,7 @@ def main(args):
         # === Trainer
         training_agent_cls = partial(MyTrainingAgent,
                              model_cls=MyActorCriticModule,
-                             gamma=0.995,
+                             gamma=DISCOUNT_FACTOR,
                              polyak=0.995, 
                              #slow down for stability by stable Q(S2,a2*) [Target network]
                              alpha=ALPHA, #entropy coeff / exploration/random
