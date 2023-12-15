@@ -35,7 +35,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AS_[DF0.9]_1W[2]"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AS_[Recovery]"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
