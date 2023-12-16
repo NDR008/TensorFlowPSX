@@ -66,8 +66,9 @@ def contAccelorBrakeContSteer(gamepad, control):  # control1.5
 
 def contAccelContSteer(gamepad, control):  # control1.6
     accelBrake = min(control[0], 1)
-    accelBrake = max(accelBrake, -1)
-    accelBrake = accelBrake/2 + 0.5
+    #accelBrake = max(accelBrake, -1)
+    #accelBrake = accelBrake/2 + 0.5
+    accelBrake = max(accelBrake, 0)
     gamepad.right_joystick_float(x_value_float=0, y_value_float=accelBrake)
 
     steer = min(control[1], 1)
