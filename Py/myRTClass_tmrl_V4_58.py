@@ -187,9 +187,9 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     # Mandatory method
     def get_default_action(self):
         if self.controlChoice == 0:
-            return np.array([0.0 ,0.0, 0.0], dtype='float32')
+            return np.array([1.0 ,0.0, 0.0], dtype='float32')
         elif self.controlChoice >= 1:
-            return np.array([0.0 ,0.0], dtype='float32')
+            return np.array([1.0 ,0.0], dtype='float32')
     
     
     def getObs(self, reset):
@@ -239,6 +239,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
     
     # Mandatory method
     def reset(self, seed=None, options=None):
+        self.send_control(self.get_default_action())
         print("reset triggered")
         choiceA = 0
         choiceB = 0
