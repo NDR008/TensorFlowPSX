@@ -1,4 +1,4 @@
-coordDrive = ''
+driveRecording = ''
 
 function openRecord()
     print("open record")
@@ -8,7 +8,6 @@ function openRecord()
 end
 
 function writeRecord()
-    -- Front Left
     local lap = readValue(mem, 0x800b6700, 'int32_t*')
     local x = readValue(mem, 0x800b6704, 'int32_t*')
     local y = readValue(mem, 0x800b6708, 'int32_t*')
@@ -16,8 +15,8 @@ function writeRecord()
     -- local z = readValue(mem, 0x800b670c, 'int32_t*')
     
     local strDrive = tostring(lap) .. ',' .. tostring(x) .. ',' .. tostring(y) .. ',' .. tostring(speed) .. '\n'
-    coordDrive = coordDrive .. strDrive
-    coordDrive = ''
+    driveRecording = driveRecording .. strDrive
+    strDrive = ''
     -- print(strDrive)
 end
 
@@ -26,8 +25,9 @@ function closeRecord()
 end
 
 function appendCoordDrive()
+    print("SAVE DRIVE")
     file = Support.File.open("drive.csv", "READWRITE")
-    file:write(coordDrive)
+    file:write(driveRecording)
     file:close()
     print("close record")
 end

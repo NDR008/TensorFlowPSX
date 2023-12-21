@@ -12,7 +12,7 @@ imgHist = 4
 # LR_CRIT = 1e-3 #1-3 # learning rate for the critic
 # LR_ENTR = 1e-3 # entropy autotuning coefficient (SAC v2)
 ALPHA = 0.01  # 0.01
-DISCOUNT_FACTOR = 0.95  # 0.995
+DISCOUNT_FACTOR = 0.995  # 0.995
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
@@ -35,7 +35,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AS"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AS-995"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 

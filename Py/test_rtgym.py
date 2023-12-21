@@ -17,7 +17,7 @@ my_config["wait_on_done"] = False
 
 my_config["interface_kwargs"] = {
   'debugFlag': False, # do not use render() while True
-  'modelMode': 0,
+  'modelMode': 3,
   'controlMode' : 1.6,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
   'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
@@ -51,7 +51,7 @@ while True:
         act = env.action_space.sample()
         obs, rew, terminated, truncated, info = env.step(act)
         #print(rew)
-        #print(obs)
+        print(obs)
         env.render()
     
 

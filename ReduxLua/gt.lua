@@ -6,6 +6,8 @@ setTCP1 = false
 setTCP2 = false
 setTCP3 = false
 dumpTrack = false
+dumpDrive = false
+dumpCar = false
 hi_res = false
 smoke = false
 HeldCollState = 0
@@ -14,6 +16,7 @@ loadfile("memory.lua")()
 loadfile("tcpv2.lua")()
 loadfile("track.lua")()
 loadfile("drive_record.lua")()
+loadfile("car_record.lua")()
 -- loadfile("track_prog.lua")() -- to be deleted
 
 local function reload()
@@ -377,6 +380,17 @@ function pythonStuff()
             end
         else
             if dumpDrive then writeRecord() end
+        end
+
+        carChange, dumpCar = imgui.Checkbox("Record Car", dumpCar)
+        if carChange then
+            if dumpCar then
+                openData()
+            else
+                closeData()
+            end
+        else
+            if dumpCar then writeData() end
         end
     end
 end
