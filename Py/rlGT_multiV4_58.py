@@ -2,6 +2,8 @@ import os
 import numpy as np  
 # Training parameters:
 
+TIMESTEP = 0.2 #0.05
+
 CRC_DEBUG = False
 worker_device = "cpu"
 trainer_device = "cuda"
@@ -35,7 +37,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_AS-995"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_TS_0.02_AS-995"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
@@ -915,8 +917,8 @@ def main(args):
     
     my_config = DEFAULT_CONFIG_DICT
     my_config["interface"] = MyGranTurismoRTGYM
-    my_config["time_step_duration"] = 0.05
-    my_config["start_obs_capture"] = 0.05
+    my_config["time_step_duration"] = TIMESTEP
+    my_config["start_obs_capture"] = TIMESTEP
     my_config["time_step_timeout_factor"] = 1.0
     my_config["ep_max_length"] = maxEpLength
     my_config["act_buf_len"] = ACT_BUF_LEN  
