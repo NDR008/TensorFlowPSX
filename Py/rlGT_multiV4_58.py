@@ -2,7 +2,7 @@ import os
 import numpy as np  
 # Training parameters:
 
-TIMESTEP = 0.05 #0.05
+TIMESTEP = 0.025 #0.05
 
 CRC_DEBUG = False
 worker_device = "cpu"
@@ -19,14 +19,14 @@ DISCOUNT_FACTOR = 0.995  # 0.995
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
 maxEpLength = 3500
-BATCH_SIZE = 1024 * 1
+BATCH_SIZE = 1024 * 2
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
 steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 500 # 2000 #steps 1000
 update_model_interval = 500  # 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
-start_training = 0 #2e5 # waits for... 1000
+start_training = 500 #2e5 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 3
 CONTROL_MODE = 1.6
@@ -37,7 +37,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_TS_0.02_AS-995"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58_0.25ms_2048"
 #RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
 #RUN_NAME = "DEBUG3" 
 
