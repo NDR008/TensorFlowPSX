@@ -2,7 +2,7 @@ import os
 import numpy as np  
 # Training parameters:
 
-TIMESTEP = 0.025 #0.05
+TIMESTEP = 0.035 #0.05
 
 CRC_DEBUG = False
 worker_device = "cpu"
