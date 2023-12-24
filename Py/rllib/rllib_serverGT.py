@@ -232,12 +232,6 @@ if __name__ == "__main__":
                 "model": {"use_lstm": args.use_lstm},
             }
         )
-    elif args.run == "SAC":
-        print("SAC")
-        config.update_from_dict(
-            {
-            }
-        )
     # PPO.
     else:
         # Example of using PPO (does NOT support off-policy actions).

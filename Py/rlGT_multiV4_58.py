@@ -18,7 +18,7 @@ DISCOUNT_FACTOR = 0.995  # 0.995
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 3500
+maxEpLength = 5250 #3500
 BATCH_SIZE = 1024 * 2
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
