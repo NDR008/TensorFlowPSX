@@ -1,1 +1,1 @@
-python Py/rlGT_multiV4_58.py --worker --test
+python Py/rlGT_multiV4_58.py --local --test
