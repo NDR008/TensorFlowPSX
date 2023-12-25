@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-df1 = pd.read_csv('py/mr2.csv')
-df2 = pd.read_csv('py/supra.csv')
+df1 = pd.read_csv('py/car.csv')
+df2 = pd.read_csv('py/car.csv')
 
 num_columns = len(df1.columns)
 
@@ -27,11 +27,11 @@ for j in range(2):
         df = df2
     for i in range(num_columns):
         ax = axes[i, j]
-        ax.plot(df.iloc[:1600,i], label=label[i], color=colors[i])
+        ax.plot(df.iloc[:,i], label=label[i], color=colors[i])
         ax.set_ylabel(label[i])
         ax.legend()
         ax.grid(True)
-        ax.set_xticks(np.arange(0, 1601, 200))
+        #ax.set_xticks(np.arange(0, , 200))
     axes[-1, j].set_xlabel('Game Step')
 
 #plt.tight_layout()

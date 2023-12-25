@@ -28,8 +28,8 @@ update_model_interval = 500  # 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
 start_training = 500 #2e5 # waits for... 1000
 device = trainer_device
-MODEL_MODE = 2
-CONTROL_MODE = 3
+MODEL_MODE = 0
+CONTROL_MODE = 2
 CARCHOICE = 2
 
 if CARCHOICE == 1:
@@ -38,7 +38,7 @@ else:
     car = "MR2_mode_"
 
 RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58"
-#RUN_NAME = _MR2_mode_3_cont_0_3W_Rew4.3_(start_past_weights)
+#RUN_NAME = "MR2_mode_3_cont_1.6_4.58_0.25ms_2048"
 #RUN_NAME = "DEBUG3" 
 
 LOG_STD_MAX = 2
