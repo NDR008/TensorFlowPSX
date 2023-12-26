@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-df1 = pd.read_csv('py/car.csv')
-df2 = pd.read_csv('py/car.csv')
-
+df1 = pd.read_csv('Py/plot/MR2_mode_1_cont_2_4.58_car.csv')
+df2 = pd.read_csv('Py/plot/MR2_mode_1_cont_2_4.58_car.csv')
+doublePlot = False
 num_columns = len(df1.columns)
 
 fig, axes = plt.subplots(nrows=num_columns, ncols=2,
@@ -21,7 +21,7 @@ colors = ['b', 'g', 'r', 'c', 'm']
 
 # Plot each column on a separate subplot
 for j in range(2):
-    if j==0:
+    if j == 0 and doublePlot:
         df = df1
     else:
         df = df2
