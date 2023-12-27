@@ -295,7 +295,7 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
 
     # Optional method
     def wait(self):
-        sleep(50)
+        sleep(10)
         self.send_control(self.get_default_action())
         
     # Optional method

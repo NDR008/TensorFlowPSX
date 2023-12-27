@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file_path = 'Py/CNN_trial1.csv'
+file_path = 'Py/Plot/MR2_mode_3_cont_2_4.58_AS_[128x128]_1W_drive.csv'
 
 column_names = ['laps', 'x', 'y', 'red_values']
 df = pd.read_csv(file_path, header=None, names=column_names)
