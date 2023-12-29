@@ -7,29 +7,29 @@ TIMESTEP = 0.05 #0.05
 CRC_DEBUG = False
 worker_device = "cpu"
 trainer_device = "cuda"
-imgSize = 128 #assuming 64 x 64
+imgSize = 64 #assuming 64 x 64
 imgHist = 4
 # LEARN_ENTROPY_COEF = True # if True, SAC v2 is used, else, SAC v1 is used
 # LR_ACT = 1e-3 #1e-3 # learning rate for the actor
 # LR_CRIT = 1e-3 #1-3 # learning rate for the critic
 # LR_ENTR = 1e-3 # entropy autotuning coefficient (SAC v2)
 ALPHA = 0.01  # 0.01
-DISCOUNT_FACTOR = 0.995  # 0.995
+DISCOUNT_FACTOR = 0.9  # 0.995
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
-maxEpLength = 5250 #3500
+maxEpLength = 3500 #3500
 BATCH_SIZE = 1024 * 1
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
 steps = 1000  # number of training steps per round 1000
-update_buffer_interval = 50000 # 2000 #steps 1000
-update_model_interval = 50000  # 2000 #steps 1000
+update_buffer_interval = 500 # 2000 #steps 1000
+update_model_interval = 500  # 2000 #steps 1000
 max_training_steps_per_env_step = 1.0
 start_training = 500 #2e5 # waits for... 1000
 device = trainer_device
-MODEL_MODE = 3
-CONTROL_MODE = 2
+MODEL_MODE = 2
+CONTROL_MODE = 0
 CARCHOICE = 2
 
 if CARCHOICE == 1:
@@ -37,7 +37,9 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_4.58"
+RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_R4.58"
+#RUN_NAME = "MR2_mode_3_cont_1.5_4.58_AS_[W3_Discount 0.9]"
+
 #RUN_NAME = "MR2_mode_3_cont_1.6_4.58_0.25ms_2048"
 #RUN_NAME = "DEBUG3" 
 
