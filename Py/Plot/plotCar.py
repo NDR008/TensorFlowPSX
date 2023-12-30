@@ -2,8 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-df1 = pd.read_csv('Py/plot/Submaniac_car.csv')
-df2 = pd.read_csv('Py/plot/MR2_mode_3_cont_2_4.58_AS_[128x128]_1W_car.csv')
+df1 = pd.read_csv('Py/plot/submaniac_car.csv')
+df2 = pd.read_csv('Py/plot/Mode2_Control0_car.csv')
 #df2 = df1
 
 doublePlot = True

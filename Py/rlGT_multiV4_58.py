@@ -29,7 +29,7 @@ max_training_steps_per_env_step = 1.0
 start_training = 500 #2e5 # waits for... 1000
 device = trainer_device
 MODEL_MODE = 2
-CONTROL_MODE = 0
+CONTROL_MODE = 1
 CARCHOICE = 2
 
 if CARCHOICE == 1:
