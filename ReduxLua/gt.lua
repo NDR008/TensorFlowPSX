@@ -11,6 +11,7 @@ dumpCar = false
 hi_res = false
 smoke = false
 HeldCollState = 0
+jumpControl = false
 
 loadfile("memory.lua")()
 loadfile("tcpv2.lua")()
@@ -54,9 +55,11 @@ end
 
 saveList1 = {
     -- Car_Dr_Ds-Da-Cpu
-    { "MR2 400m Digital All",          "mr2_1_0_0_0.slice" }, -- Done
+    --{ "MR2 400m Digital All",          "mr2_1_0_0_0.slice" }, -- Done
     { "MR2 HS Digital All",            "mr2_0_0_0_0.slice" },            -- Done
     { "MR2 HS Cont All",      "mr2_0_0_0_0_cont.slice" },           -- Done
+    { "MR2 HS Digital All 2", "mr2_0_0_0_0_2.slice" },                -- Done
+    { "MR2 HS Cont All 2",    "mr2_0_0_0_0_cont_2.slice" },           -- Done
     --{ "MR2 400m Digital All (x2 CPU)", "mr2_1_0_0_1.slice" },
 }
 
@@ -351,6 +354,7 @@ end
 
 function pythonStuff()
     if (imgui.CollapsingHeader("Python", ImGuiTreeNodeFlags_None)) then
+        changeStart, jumpControl = imgui.Checkbox("Start Early", jumpControl)
         toggledTCP1, setTCP1 = imgui.Checkbox("TCP1", setTCP1)
         netTCP(toggledTCP1, setTCP1, 9999)
 
@@ -429,7 +433,7 @@ function DrawImguiFrame()
         imgui.EndTable()
         funkyStuff()
     end
-	imgui.End()
+    imgui.End()
 end
 
 function checkRegion()

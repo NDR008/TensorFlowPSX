@@ -125,6 +125,8 @@ function load(file, analogue)
     local file = Support.File.open(file, "READ")
     PCSX.loadSaveState(file)
     file:close()
+    setValue(mem, 0x800b6358, 1, 'int16_t*')
+    setValue(mem, 0x800b6362, 1, 'int8_t*')
 end
 
 function netTCP(netChanged, netStatus, port)
@@ -144,9 +146,12 @@ function netTCP(netChanged, netStatus, port)
         -- 1 is the main loop for frame capture
         
         local tmp = readGameState()
-        if tmp['raceState'] == 1 then
+        if tmp['raceState'] == 1 and not jumpControl then
                 setValue(mem, 0x800b6d61, 2, 'int16_t*')
                 takeControl = false
+        elseif jumpControl and tmp['raceState'] == 1 then
+            setValue(mem, 0x800b6d61, 0, 'int16_t*')
+            takeControl = true
         elseif tmp['raceState'] == 2 and not takeControl then
             print("agent has control")
             setValue(mem, 0x800b6d61, 0, 'int16_t*')
@@ -155,26 +160,30 @@ function netTCP(netChanged, netStatus, port)
         if readVal == 1 then
             ready = true
             -- 2 is for loading a savestate
-        elseif readVal == 8 + 64 then -- MR2 at Drag
-            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-            firstLap = readValue(mem, 0x800bd9c0, 'uint32_t*')
-            PCSX.SIO0.slots[1].pads[1].setAnalogMode(false)
-            print("total time: ", lapTime, "  first lap: ", firstLap)
-            --local file = Support.File.open("mr2_1_0_0_0.slice", "READ")
-            --PCSX.loadSaveState(file)
-            --file:close()
-        elseif readVal == 24 + 64 then -- Supra at Drag
-            lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
-            firstLap = readValue(mem, 0x800bd9c0, 'uint32_t*')
-            PCSX.SIO0.slots[1].pads[1].setAnalogMode(false)
-            print("total time: ", lapTime, "  first lap: ", firstLap)
-            --local file = Support.File.open("Sup_1_0_0_0.slice", "READ")
-            --PCSX.loadSaveState(file)
-            --file:close()
+        -- elseif readVal == 8 + 64 then -- MR2 at Drag
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     firstLap = readValue(mem, 0x800bd9c0, 'uint32_t*')
+        --     PCSX.SIO0.slots[1].pads[1].setAnalogMode(false)
+        --     print("total time: ", lapTime, "  first lap: ", firstLap)
+        --     --local file = Support.File.open("mr2_1_0_0_0.slice", "READ")
+        --     --PCSX.loadSaveState(file)
+        --     --file:close()
+        -- elseif readVal == 24 + 64 then -- Supra at Drag
+        --     lapTime = readValue(mem, 0x80093bc8, 'uint32_t*')
+        --     firstLap = readValue(mem, 0x800bd9c0, 'uint32_t*')
+        --     PCSX.SIO0.slots[1].pads[1].setAnalogMode(false)
+        --     print("total time: ", lapTime, "  first lap: ", firstLap)
+
         elseif readVal == 0 + 64 then -- MR2 at HS
             load("mr2_0_0_0_0.slice", false)
+        elseif readVal == 0 + 64 + 100 then            -- MR2 at HS
+            load("mr2_0_0_0_0_2.slice", false)
+            takeControl = true
         elseif readVal == 0 + 64 + 10 then -- MR2 at HS
             load("mr2_0_0_0_0_cont.slice", true)
+        elseif readVal == 0 + 64 + 10 + 100 then  -- MR2 at HS
+            load("mr2_0_0_0_0_cont_2.slice", true)
+            takeControl = true
         elseif readVal == 16 + 64 then -- Supra at HS
             load("sup_0_0_0_0.slice", false)
         end
