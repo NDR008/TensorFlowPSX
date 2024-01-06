@@ -5,6 +5,17 @@
 ## Background 
 There are 3 main motivational background factors to this project.
 
+### 0. Running this code
+
+```trainer.bat``` launches the trainer
+```worker.bat``` launches the worker
+```test.bat``` launches the worker and does not automatically start a new episode for a few seconds
+
+Some paths may need editing, one of which is the CSV file path in the reward function.
+
+Requirements: Numpy, Gymnasium, VGamepad, tmrl, rtgym, pytorch-cude (if possible)
+
+
 ### 1. Closing the doubt
 Secret, I did once apply for a simulation engineer at a racing game company long agao. While I did not get the job for viased reasons. I always wonder "could I have made it in the racing game industry had I tried again?" Things did not go that way, and I am happy with my career choices, but never the less, wonder what if I had gone a different way? 
 
