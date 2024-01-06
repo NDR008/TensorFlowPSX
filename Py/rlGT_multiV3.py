@@ -1,3 +1,12 @@
+""" 
+SAC for GT rtgym environment.
+Developed by Nadir Syed (2023)
+Code adapts SAC (Vanilla version) from: 
+https://github.com/trackmania-rl/tmrl/blob/e400412353f8f0a0d9d4293de440b3abc762736f/tmrl/custom/custom_models.py#L494
+and:
+https://github.com/trackmania-rl/tmrl/blob/master/tmrl/tuto/tuto.py
+"""
+
 import numpy as np
 
 # Training parameters:

@@ -1,6 +1,7 @@
 """
 Reward functions for Gran Turismo (PSX)
-Simplified version of : https://github.com/trackmania-rl/tmrl/blob/e3254888ae7e865c56236d72fb03311a41c10310/tmrl/custom/utils/compute_reward.py#L10
+Simplified version of : 
+https://github.com/trackmania-rl/tmrl/blob/e3254888ae7e865c56236d72fb03311a41c10310/tmrl/custom/utils/compute_reward.py#L10
 nadir.syedsammut@gmail.com
 Development started in December 2022
 """
