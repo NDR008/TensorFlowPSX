@@ -13,7 +13,7 @@ There are 3 main motivational background factors to this project.
 
 Some paths may need editing, one of which is the CSV file path in the reward function.
 
-Requirements: Numpy, Gymnasium, VGamepad, tmrl, rtgym, pytorch-cude (if possible)
+Requirements: Numpy, Gymnasium, VGamepad, tmrl, rtgym, pytorch-cude (if possible) and of course PCSX-Redux and an original copy of Gran Turismo
 
 
 ### 1. Closing the doubt
@@ -23,7 +23,7 @@ This left me spending the rest of my duration of the MSc in Computer Science thi
 Few months before starting final project, in early 2022, Sony/Polyphony Digital [published](https://www.nature.com/articles/s41586-021-04357-7) their on Sophy, their AI agent that out-raced most humans on Gran Turismo sport.
 
 ### 2. Childhood Love 
-Since I can ever remember - there were 2 things I loved... cars and racing games. The history and connection I have to cars will take forever to describe, growing up in a disfunctional family, refuge in my father's car, which would one day become my own, is probably one main catalyst to that love. Growing up, I kept dreaming of making a realistic racing game, until PD released Gran Turismo on the original PlayStation. Having witnessed the magnicence of Gran Turismo, I realised (assumed) that to do something better, one would need to specialise on understanding the physics, more than the coding. That is what lead me to focus on studying towards engineering - not for the sake of becoming an engineer, but rather for the sake of making better racing games.  
+Since I can ever remember - there were 2 things I loved... computers and racing games. The history and connection I have to cars will take forever to describe, growing up in a disfunctional family, refuge in my father's car, which would one day become my own, is probably one main catalyst to that love. Growing up, I kept dreaming of making a realistic racing game, until PD released Gran Turismo on the original PlayStation. Having witnessed the magnicence of Gran Turismo, I realised (assumed) that to do something better, one would need to specialise on understanding the physics, more than the coding. That is what lead me to focus on studying towards engineering - not for the sake of becoming an engineer, but rather for the sake of making better racing games.  
 
 Ironically, because I loved cars and in particular - Toyota, I could not miss the chance to work at DENSO - a Toyota group company that is considered the be the [real founder of the Toyota Production System and their success](https://acuresearchbank.acu.edu.au/download/f0f019d090032cf83ced86219d1a845e9027b3d8ba17890e9b58c253d3330394/250205/Anderson_2003_The_enigma_of_Toyotas_competitive_advantage.pdf) by Evelyn Anderson. This journey lead me to working in 3 regions - UK, Germany and Japan, and also lead me to meet my wife, with whome I gratefuly have the most amazing family I could have wished for.  
 
