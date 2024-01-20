@@ -61,6 +61,7 @@ saveList1 = {
     { "MR2 HS Digital All 2", "mr2_0_0_0_0_2.slice" },                -- Done
     { "MR2 HS Cont All 2",    "mr2_0_0_0_0_cont_2.slice" },           -- Done
     { "MR2 Route 5 Digital All 50fps", "mr2_2_0_0_0.slice" },        -- Done
+    { "MR2 Route 5 Digital All 50fps(B)", "mr2_2_0_0_0B.slice" }, -- Done
     --{ "MR2 400m Digital All (x2 CPU)", "mr2_1_0_0_1.slice" },
 }
 
@@ -136,7 +137,7 @@ function raceCondition()
 
         imgui.TableSetColumnIndex(1)
         doSliderInt(mem, 0x800b6d60, 'raceStart', 0, 1, 'uint8_t*')
-        local way = readValue(mem, 0x800b6702, 'int8z_t*')
+        local way = readValue(mem, 0x800b6702, 'int8_t*')
         local str = '? ['
         if way == 0 then
             str = 'Direction: Right ['
