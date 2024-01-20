@@ -1,4 +1,4 @@
-from myRTClass_tmrl_V4_5 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+from myRTClass_tmrl_V4_582 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
 import gymnasium
 from time import sleep
@@ -23,7 +23,7 @@ my_config["interface_kwargs"] = {
   'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : 64,
   'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
-  'trackChoice' : 0, # 0 is HS, 1 is 400m
+  'trackChoice' : 2, # 0 is HS, 1 is 400m
   'rewardMode' : 'complex'
 }
 
@@ -51,8 +51,8 @@ while True:
         act = env.action_space.sample()
         obs, rew, terminated, truncated, info = env.step(act)
         #print(rew)
-        print(obs)
-        env.render()
+        #print(obs)
+        #env.render()
     
 
 # granTurismo = MyGranTurismoRTGYM(debugFlag=True)

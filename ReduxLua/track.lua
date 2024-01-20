@@ -6,7 +6,7 @@ SingleLap = False
 
 function openTrack()
     print("open")
-    local file = Support.File.open("hs.csv", "CREATE")
+    local file = Support.File.open("route5.csv", "CREATE")
     file:close()
 end
 
@@ -18,8 +18,8 @@ function writeTrack()
     local y = readValue(mem, 0x800b6708, 'int32_t*')
     -- local z = readValue(mem, 0x800b670c, 'int32_t*')
 
-    if readValue(mem, 0x800b66ec, 'uint16_t*') > 100 then
-        setValue(mem, 0x800b66ee, 1200, 'uint16_t*')
+    if readValue(mem, 0x800b66ec, 'uint16_t*') > 120 then
+        setValue(mem, 0x800b66ee, 1500, 'uint16_t*')
     end
     
     if SingleLap then
@@ -56,7 +56,7 @@ function closeTrack()
 end
 
 function appendCoord()
-    file = Support.File.open("hs.csv", "READWRITE")
+    file = Support.File.open("route5.csv", "READWRITE")
     file:write(coord)
     file:close()
 end

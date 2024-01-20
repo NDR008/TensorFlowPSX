@@ -21,7 +21,7 @@ def loadData(filename):
     originalTable = []
     import csv
     with open(filename, newline='') as csvfile:
-        data = csv.reader(csvfile, delimiter=',', quotechar='|')
+        data = csv.reader(csvfile, delimiter=',')
         for row in data:
             originalTable.append((int(row[0]), int(row[1])))
             
@@ -58,4 +58,4 @@ def respaceTrackData(filename, spacing=50000):
     newTable = processData(originalTable, spacing)
     saveData(filename, newTable)
     
-respaceTrackData('Py/hs.csv',spacing=700)
+respaceTrackData('Py/route5.csv',spacing=700)
