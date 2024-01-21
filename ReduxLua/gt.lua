@@ -12,6 +12,10 @@ hi_res = false
 smoke = false
 HeldCollState = 0
 jumpControl = false
+lastX = 0
+lastY = 0
+deltaX = 0
+deltaY = 0
 
 loadfile("memory.lua")()
 loadfile("tcpv2.lua")()
@@ -356,6 +360,12 @@ end
 
 function pythonStuff()
     if (imgui.CollapsingHeader("Python", ImGuiTreeNodeFlags_None)) then
+        local x = readValue(mem, 0x800b6704, 'int32_t*')
+        local y = readValue(mem, 0x800b6708, 'int32_t*')
+        deltaX = lastX - x
+        deltaY = lastY - y
+        lastX = x
+        lastY = y
         changeStart, jumpControl = imgui.Checkbox("Start Early", jumpControl)
         toggledTCP1, setTCP1 = imgui.Checkbox("TCP1", setTCP1)
         netTCP(toggledTCP1, setTCP1, 9999)

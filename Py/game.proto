@@ -36,6 +36,7 @@ message Vehicle {
     int32 rLWheel = 14;
     int32 rRWheel = 15;
     int32 vColl = 16;
+    //int32 vAccel = 17;
 }
 
 message Screen {
@@ -51,6 +52,7 @@ message Observation {
     Vehicle VS = 3;
     int32 frame = 4;
     PosVect posVect = 5;
-    int32 trackID = 6;
-    int32 drivingDir = 7;
+    PosVect deltaVect = 6;
+    int32 trackID = 7;
+    int32 drivingDir = 8;
 }

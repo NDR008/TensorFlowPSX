@@ -1,4 +1,4 @@
-from myRTClass_tmrl_V5 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
+from myRTClass_tmrl_V4_583 import MyGranTurismoRTGYM, DEFAULT_CONFIG_DICT
 import numpy as np
 import gymnasium
 from time import sleep
@@ -7,7 +7,7 @@ my_config = DEFAULT_CONFIG_DICT
 my_config["interface"] = MyGranTurismoRTGYM
 my_config["time_step_duration"] = 0.05
 my_config["start_obs_capture"] = 0.05
-my_config["time_step_timeout_factor"] = 0.5
+my_config["time_step_timeout_factor"] = 1.0
 #my_config["ep_max_length"] = 512
 my_config["act_buf_len"] = 2
 my_config["reset_act_buf"] = True
@@ -17,13 +17,13 @@ my_config["wait_on_done"] = False
 
 my_config["interface_kwargs"] = {
   'debugFlag': False, # do not use render() while True
-  'modelMode': 1,
-  'controlMode' : 1,
+  'modelMode': 3,
+  'controlMode' : 1.6,
   #  [42, 42, K], [84, 84, K], [10, 10, K], [240, 320, K] and  [480, 640, K]
-  'imageWidth' : 128, # there is a default Cov layer for PPO with 240 x 320
-  'imageHeight' : 128,
+  'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
+  'imageHeight' : 64,
   'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
-  'trackChoice' : 2, # 0 is HS, 1 is 400m
+  'trackChoice' : 2.5, # 0 is HS, 1 is 400m
   'rewardMode' : 'complex'
 }
 
@@ -38,28 +38,21 @@ truncated = False
 print("observation space:")
 for i in obs_space:
     print(i)
-print('')
 print("observation:")
 for i in obs:
     print("value1:", i, "with shape:", i.shape, i.dtype)
-print('')
 act = env.action_space.sample()
 obs, rew, terminated, truncated, info = env.step(act)
-print(terminated)
 for i in obs:
     print("value2:", i, "with shape:", i.shape, i.dtype)
-print('')
 while True:
     terminated = False
     while not terminated:
         act = env.action_space.sample()
         obs, rew, terminated, truncated, info = env.step(act)
-        #for i in obs:
-        #    print("values:", i, "with shape:", i.shape, i.dtype)
-        #print('')
         #print(rew)
         #print(obs)
-        env.render()
+        #env.render()
     
 
 # granTurismo = MyGranTurismoRTGYM(debugFlag=True)

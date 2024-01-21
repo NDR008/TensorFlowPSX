@@ -8,6 +8,8 @@ local client = nil
 local reconnectTry = false
 local ready = false
 local takeControl = false
+local lastX = 0
+local lastY = 0
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -68,7 +70,7 @@ local function readVehicleState()
     vehicleState['engSpeed'] = readValue(mem, 0x800b66ee, 'uint16_t*')
     vehicleState['engBoost'] = readValue(mem, 0x800b66f8, "uint16_t*")
     vehicleState['engGear'] = readValue(mem, 0x800b66e8, "uint8_t*")
-    vehicleState['speed'] = readValue(mem, 0x800b66ec, 'uint8_t*')
+    vehicleState['speed'] = readValue(mem, 0x800b66ec, "int16_t*")
     vehicleState['steer'] = readValue(mem, 0x800b66d6, "int16_t*")
     vehicleState['pos'] = readValue(mem, 0x800b6d69, "int16_t*")
     vehicleState['eClutch'] = readValue(mem, 0x800b6d63, "uint16_t*")
@@ -81,6 +83,7 @@ local function readVehicleState()
     vehicleState['rLWheel'] = readValue(mem, 0x800b6800, 'int8_t*')
     vehicleState['rRWheel'] = readValue(mem, 0x800b6844, 'int8_t*')
     vehicleState['vColl'] = readCollission()
+    
     return vehicleState
 end
 
@@ -102,12 +105,17 @@ function grabGameData()
     local gameState = readGameState()
     local vehicleState = readVehicleState()
     local posVect = readVehiclePositon()
+    local deltaVect = {}
+    deltaVect['x'] = deltaX
+    deltaVect['y'] = deltaY
 
     obs['SS'] = screen
     obs['GS'] = gameState
     obs['VS'] = vehicleState
     obs['frame'] = frames
     obs['posVect'] = posVect
+    obs['deltaVect'] = deltaVect
+    -- print(deltaX, deltaY)
     local vDir = readValue(mem, 0x800b6e74, 'int16_t*')
     if vDir >= 1 then
         vDir = 1
