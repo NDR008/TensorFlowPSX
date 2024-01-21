@@ -13,7 +13,7 @@ import numpy as np
 
 TIMESTEP = 0.05 #0.05
 
-CRC_DEBUG = True
+CRC_DEBUG = False
 worker_device = "cpu"
 trainer_device = "cuda"
 imgSize = 128 #assuming 64 x 64
@@ -31,10 +31,10 @@ maxEpLength = 3500 #3500
 BATCH_SIZE = 1024 * 1
 EPOCHS = np.inf # maximum number of epochs, usually set this to np.inf
 rounds = 10  # number of rounds per epoch (to print stuff)
-steps = 10  # number of training steps per round 1000
+steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 5000 # 2000 #steps 1000
 update_model_interval = 500  # 2000 #steps 1000
-max_training_steps_per_env_step = 1.0
+max_training_steps_per_env_step = 4.0
 start_training = 0 #2e5 # waits for... 1000
 device = trainer_device
 CONTROL_MODE = 1
