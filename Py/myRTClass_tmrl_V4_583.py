@@ -123,10 +123,15 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
                 
         elif self.trackChoice == 1:
             self.rewardFunction = RewardFunction(filename='J:\git\TensorFlowPSX\Py\dragSpaced.csv')
-            
+
         elif self.trackChoice == 2:
             self.rewardFunction = RewardFunction(
                 filename='J:\git\TensorFlowPSX\Py\\route5Spaced.csv')
+            
+        elif self.trackChoice == 2.5:
+            print("mode2.5")
+            self.rewardFunction = RewardFunction(
+                filename='J:\git\TensorFlowPSX\Py\\route5Spaced.csv', start=10800)
         
     # Mandatory method        
     def get_observation_space(self):
@@ -256,9 +261,10 @@ class MyGranTurismoRTGYM(RealTimeGymInterface):
             
         if self.trackChoice == 1: # 1: Drag, 0: HS
             choiceB = 8 # HS
-        
         elif self.trackChoice == 2:
             choiceB = 9
+        elif self.trackChoice == 2.5:
+            choiceB = 22
         
         if None: # set control modes that have Ds
             a = None

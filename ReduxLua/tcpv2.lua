@@ -190,10 +190,22 @@ function netTCP(netChanged, netStatus, port)
             load("mr2_2_0_0_0_2.slice", false)
             takeControl = true
         elseif readVal == 9 + 64 then             -- MR2 at Route5
-            load("mr2_2_0_0_0.slice", false)
+            load("mr2_2_0_0_0.slice", true)
         elseif readVal == 9 + 64 + 100 then       -- MR2 at Route5
+            load("mr2_2_0_0_0_2.slice", true)
+            takeControl = true
+        --midTrack
+        elseif readVal == 22 + 10 + 64 then       -- MR2 at Route5
+            load("mr2_2_0_0_0B.slice", false)
+        elseif readVal == 22 + 10 + 64 + 100 then -- MR2 at Route5
             load("mr2_2_0_0_0_2.slice", false)
             takeControl = true
+        elseif readVal == 22 + 64 then       -- MR2 at Route5
+            load("mr2_2_0_0_0B.slice", true)
+        elseif readVal == 22 + 64 + 100 then -- MR2 at Route5
+            load("mr2_2_0_0_0_2.slice", true)
+            takeControl = true
+
         elseif readVal == 16 + 64 then -- Supra at HS
             load("sup_0_0_0_0.slice", false)
         end

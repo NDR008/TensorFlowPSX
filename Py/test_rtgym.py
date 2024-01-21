@@ -23,7 +23,7 @@ my_config["interface_kwargs"] = {
   'imageWidth' : 64, # there is a default Cov layer for PPO with 240 x 320
   'imageHeight' : 64,
   'carChoice' : 0, # 0 is MR2, 1 is Supra, 2 is Civic
-  'trackChoice' : 2, # 0 is HS, 1 is 400m
+  'trackChoice' : 2.5, # 0 is HS, 1 is 400m
   'rewardMode' : 'complex'
 }
 

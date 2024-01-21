@@ -50,7 +50,7 @@ RUN_NAME = car + str(MODEL_MODE) + "_cont_" + str(CONTROL_MODE) + "_R4.58"
 #RUN_NAME = "MR2_mode_3_cont_1.5_4.58_AS_[W3_Discount 0.9]"
 TRACKCH = 2
 
-if TRACKCH == 2:
+if TRACKCH >= 2 and TRACKCH <3 :
     RUN_NAME = RUN_NAME +  "_Route5"
 #RUN_NAME = "MR2_mode_3_cont_1.6_4.58_0.25ms_2048"
 #RUN_NAME = "DEBUG3" 

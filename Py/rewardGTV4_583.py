@@ -20,7 +20,8 @@ class RewardFunction:
     def __init__(self,
                  filename='Py/hsSpaced.csv', start=0):
         print(filename)
-        self.cur_idx = start
+        self.start = start
+        self.cur_idx = 0
         self.maxSearch = 300
         self.data = np.genfromtxt(filename, delimiter=",")
         self.datalen = len(self.data)
@@ -30,7 +31,7 @@ class RewardFunction:
         self.episodeNumber = 0
         self.steps = 0
         self.badDirectionSteps = 0
-        self.maxBadDirectionSteps = 100
+        self.maxBadDirectionSteps = 10
         self.firstLoop = True
         # x = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         # with open('logging.csv', 'a', newline='') as file:
@@ -108,7 +109,7 @@ class RewardFunction:
         if self.badDirectionSteps > self.maxBadDirectionSteps:
             terminated = True
         self.reward = self.reward / 1.0
-        print(self.cur_idx)
+        # print(self.cur_idx)
         return self.reward, terminated
 
     def simplexReward(self, vSpeed, vDir):
@@ -159,7 +160,7 @@ class RewardFunction:
         #     writer.writerow([self.episodeNumber, int(self.steps), int(self.totalReward)])
         self.episodeNumber = self.episodeNumber + 1
         self.totalReward = 0.0
-        self.cur_idx = 0
+        self.cur_idx = self.start
         self.steps = 0
         self.badDirectionSteps = 0
         self.firstLoop = True
