@@ -94,7 +94,13 @@ class RewardFunction:
             self.reward = self.reward - 0.02
         elif vSpeed < 15:  # going slow is a bit bad
             self.badDirectionSteps = self.badDirectionSteps + 0.5  # new for v3
-            self.reward = self.reward - 0.02
+            # self.reward = self.reward - 0.02
+        elif vColl > 0:
+            self.reward = 0.5 * self.reward
+            print(vColl, self.reward)
+        #else:
+        #    self.reward = (best_index - self.cur_idx) / self.fudgeFactor
+            
 
         self.cur_idx = best_index
 
@@ -104,7 +110,7 @@ class RewardFunction:
 
         if self.badDirectionSteps > self.maxBadDirectionSteps:
             terminated = True
-        self.reward = self.reward / 1.0
+        self.reward = self.reward / 1.00
         span = 100
         x1, y1 = self.data[self.cur_idx+span][0], self.data[self.cur_idx+span][1]
         x2, y2 = self.data[self.cur_idx +span*2][0], self.data[self.cur_idx+span*2][1]
