@@ -97,7 +97,7 @@ class RewardFunction:
             # self.reward = self.reward - 0.02
         elif vColl > 0:
             self.reward = 0.5 * self.reward
-            print(vColl, self.reward)
+            # print(vColl, self.reward)
         #else:
         #    self.reward = (best_index - self.cur_idx) / self.fudgeFactor
             
@@ -131,6 +131,7 @@ class RewardFunction:
         """
         Resets the reward function for a new episode.
         """
+        print("Last Total Reward was: ", self.totalReward)
         self.episodeNumber = self.episodeNumber + 1
         self.totalReward = 0.0
         self.cur_idx = self.start
