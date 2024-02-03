@@ -46,7 +46,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + "_cont_" + str(CONTROL_MODE) + "_R5.2_HS"
+RUN_NAME = car + "_cont_" + "1.5" + "_R5.2_HS"
 #RUN_NAME = "MR2_mode_3_cont_1.5_4.58_AS_[W3_Discount 0.9]"
 TRACKCH = 0
 
