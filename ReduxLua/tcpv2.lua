@@ -8,8 +8,6 @@ local client = nil
 local reconnectTry = false
 local ready = false
 local takeControl = false
-local lastX = 0
-local lastY = 0
 
 local function read_file_as_string(filename)
     local file = Support.File.open(filename)
@@ -219,11 +217,11 @@ function netTCP(netChanged, netStatus, port)
         end
         -- keep track of the number of frames rendered
         frames = frames + 1
-
+        grabGameData()
         -- print("read", ready, "      race state is...", tmp['raceState'], "      take control...", takeControl)
         -- if this is the nth frame and we have previously received a 1
         if (frames % frames_needed) == 0 and ready and takeControl then
-            grabGameData()               -- take screenshot, encode it with protobuf and get ready to send it
+            -- take screenshot, encode it with protobuf and get ready to send it
             client:write("P")            -- send "P" for the python server to know we are ready
             client:writeU32(#GlobalData) -- send the size of the chunk of data
             client:write(GlobalData)     -- send the actual chunk of data
