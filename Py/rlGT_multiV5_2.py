@@ -23,7 +23,8 @@ imgHist = 4
 # LR_CRIT = 1e-3 #1-3 # learning rate for the critic
 # LR_ENTR = 1e-3 # entropy autotuning coefficient (SAC v2)
 ALPHA = 0.01  # 0.01
-DISCOUNT_FACTOR = 0.995  # 0.995
+DISCOUNT_FACTOR = 0.9  # 0.995
+LEARNENTROP = False
 
 MEMORY_SIZE = 5e5 #1e6
 ACT_BUF_LEN = 2
@@ -35,7 +36,7 @@ steps = 1000  # number of training steps per round 1000
 update_buffer_interval = 500 # 2000 #steps 1000
 update_model_interval = 500  # 2000 #steps 1000
 max_training_steps_per_env_step = 2.0
-start_training = 1E5 #2e5 # waits for... 1000
+start_training = 10 #2e5 # waits for... 1000
 device = trainer_device
 CONTROL_MODE = 1.5
 MODEL_MODE = 1
@@ -46,7 +47,7 @@ if CARCHOICE == 1:
 else:
     car = "MR2_mode_"
 
-RUN_NAME = car + "_cont_" + "1.5" + "_R5.2_HS"
+RUN_NAME = car + "_cont_" + "1.5" + "_R5.2_HS_DF0.9"
 #RUN_NAME = "MR2_mode_3_cont_1.5_4.58_AS_[W3_Discount 0.9]"
 TRACKCH = 0
 
@@ -721,7 +722,7 @@ def main(args):
                              lr_actor=1e-5,
                              lr_critic=5e-5,
                              lr_entropy=3e-4, # only for learn_entrop_coef is True
-                             learn_entropy_coef=False,
+                             learn_entropy_coef=LEARNENTROP,
                              target_entropy=-0.5) # only for learn_entrop_coef is True
         
         memory_cls = partial(MyMemory,
