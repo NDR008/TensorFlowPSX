@@ -57,7 +57,7 @@ class RewardFunction:
         else:
             maxSearch = self.maxSearch
 
-        while True:
+        while vDir == 0:
             # distance of the current index to target pos
             dist = np.linalg.norm(pos - self.data[index])
             if dist <= min_dist:  # if dist is smaller than our minimum found distance so far,
@@ -73,7 +73,7 @@ class RewardFunction:
 
         index = self.cur_idx
         counter = 0
-        while True:
+        while vDir == 1:
             # distance of the current index to target pos
             dist = np.linalg.norm(pos - self.data[index])
             if dist <= min_dist:  # if dist is smaller than our minimum found distance so far,
